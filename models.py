@@ -55,6 +55,9 @@ class LinearVAE(nn.Module):
 
     def decode(self, z):
         # decoding
+        mu = z[:, 0, :]  # the first feature values as mean
+        log_var = z[:, 1, :]  # the other feature values as variance
+        z = self.reparametrize(mu, log_var)
         x_prime = F.relu(self.dec1(z))
         x_prime = torch.sigmoid(self.dec2(x_prime))
         return x_prime
@@ -63,11 +66,15 @@ class LinearVAE(nn.Module):
 class Mapper(nn.Module):
 
     def __init__(self, h_sizes=[16, 16, 16]):
+        super(Mapper, self).__init__()
         self.hidden = nn.ModuleList()
         for k in range(len(h_sizes) - 1):
             self.hidden.append(nn.Linear(h_sizes[k], h_sizes[k + 1]))
 
     def forward(self, x):
-        for layer in self.hidden():
-            x = F.relu(layer(x))
+        for i, layer in enumerate(self.hidden):
+            if i != len(self.hidden) - 1:
+                x = F.relu(layer(x))
+            else:
+                x = layer(x)
         return x

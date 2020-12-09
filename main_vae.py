@@ -14,4 +14,8 @@ optimizer = optim.Adam(vae.parameters())
 if torch.cuda.is_available():
     vae.cuda()
 
-train_vae(net=vae, train_loader=train_loader, epochs=100, optimizer=optimizer, dataset='Fashion_MNIST')
+recon_weight = 1.
+kl_weight = 150.
+
+train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=50, optimizer=optimizer,
+          recon_weight=recon_weight, kl_weight=kl_weight, dataset='Fashion_MNIST')

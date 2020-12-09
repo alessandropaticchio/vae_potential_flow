@@ -10,7 +10,7 @@ batch_size = 1
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
-model_name = 'Fashion_MNIST_VAE_2020-12-02 12:02:42.435081.pt'
+model_name = 'Fashion_MNIST_VAE_2020-12-09 14:52:23.338553.pt'
 model_path = MODELS_ROOT + model_name
 
 vae = LinearVAE()
