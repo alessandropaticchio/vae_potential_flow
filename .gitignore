@@ -3,3 +3,9 @@
 *.xml
 *.iml
 *.pyc
+*.jpg
+*.0
+data/fake_data/potential_pic_data/test_potential.pt
+data/fake_data/rays_pic_data/training_rays.pt
+data/fake_data/rays_pic_data/test_rays.pt
+data/fake_data/potential_pic_data/training_potential.pt

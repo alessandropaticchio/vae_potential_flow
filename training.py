@@ -67,7 +67,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
         train_loss = 0.
         bce_loss = 0.
         kld_loss = 0.
-        for batch_idx, (data, _) in enumerate(train_loader):
+        for batch_idx, data in enumerate(train_loader):
             data = data.to(device)
             optimizer.zero_grad()
 
@@ -91,7 +91,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
         test_loss = test_vae(net, test_loader, recon_weight, kl_weight)
 
         writer.add_scalar('Loss/train', train_loss / len(train_loader.dataset), epoch)
-        writer.add_scalar('Loss/bce_train', bce_loss / len(train_loader.dataset), epoch)
+        writer.add_scalar('Loss/recon_train', bce_loss / len(train_loader.dataset), epoch)
         writer.add_scalar('Loss/kld_train', kld_loss / len(train_loader.dataset), epoch)
         writer.add_scalar('Loss/test', test_loss / len(test_loader.dataset), epoch)
 
@@ -104,7 +104,7 @@ def test_vae(net, test_loader, recon_weight, kl_weight):
     net = net.to(device)
     test_loss = 0
     with torch.no_grad():
-        for data, _ in test_loader:
+        for data in test_loader:
             data = data.to(device)
             recon, mu, log_var = net(data)
 
@@ -118,6 +118,6 @@ def test_vae(net, test_loader, recon_weight, kl_weight):
 
 # return reconstruction error + KL divergence losses
 def loss_function_vae(recon_x, x, mu, log_var, recon_weight, kl_weight):
-    BCE = F.binary_cross_entropy(recon_x, x.view(-1, 784), reduction='sum') * recon_weight
+    BCE = F.mse_loss(recon_x, x, reduction='sum') * recon_weight
     KLD = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp()) * kl_weight
     return BCE + KLD, BCE, KLD
