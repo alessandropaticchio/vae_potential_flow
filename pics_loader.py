@@ -30,11 +30,6 @@ for i in tqdm(range(1, int(MAX_PICS * 0.8)), desc='Rays training...'):
     if downsample == True:
         image = F.interpolate(image, size=(target_size, target_size))
 
-    import matplotlib.pyplot as plt
-    plt.figure()
-    plt.imshow(image.squeeze().permute(1, 2, 0))
-    plt.show()
-
     rays_train_set = torch.cat((rays_train_set, image), 0)
 
 for i in tqdm(range(int(MAX_PICS * 0.8), MAX_PICS), desc='Rays test...'):

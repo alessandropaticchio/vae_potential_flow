@@ -34,5 +34,5 @@ if torch.cuda.is_available():
 recon_weight = 1.
 kl_weight = 1.
 
-train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=50, optimizer=optimizer,
+train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=300, optimizer=optimizer,
           recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset)
