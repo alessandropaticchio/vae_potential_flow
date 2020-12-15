@@ -1,4 +1,4 @@
-from models import PotentialConvVAE, RaysConvVAE
+from models import ConvVAE
 from training import train_vae
 from constants import *
 import torch
@@ -6,7 +6,7 @@ import torch.optim as optim
 
 batch_size = 10
 
-dataset = 'rays'
+dataset = 'potential'
 train_dataset = torch.load(DATA_ROOT + 'fake_data/' + dataset + '_pic_data/training_' + dataset + '.pt')
 test_dataset = torch.load(DATA_ROOT + 'fake_data/' + dataset + '_pic_data/test_' + dataset + '.pt')
 
@@ -17,12 +17,12 @@ if dataset == 'rays':
     image_size = RAYS_IMAGE_SIZE
     hidden_size = RAYS_HIDDEN_SIZE
     latent_size = int(hidden_size / 2)
-    vae = RaysConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size)
+    vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=1)
 else:
     image_size = POTENTIAL_IMAGE_SIZE
     hidden_size = POTENTIAL_HIDDEN_SIZE
     latent_size = int(hidden_size / 2)
-    vae = PotentialConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size)
+    vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=1)
 
 
 lr = 1e-3
@@ -34,5 +34,5 @@ if torch.cuda.is_available():
 recon_weight = 1.
 kl_weight = 1.
 
-train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=300, optimizer=optimizer,
+train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=500, optimizer=optimizer,
           recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset)

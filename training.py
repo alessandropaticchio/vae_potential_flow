@@ -82,11 +82,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
 
             optimizer.step()
 
-            if batch_idx % 100 == 0:
-                print('Train Epoch: {}/{} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                    epoch, epochs, batch_idx * len(data), len(train_loader.dataset),
-                                   100. * batch_idx / len(train_loader), batch_loss.item() / len(data)))
-        print('====> Epoch: {} Average loss: {:.4f}'.format(epoch, train_loss / len(train_loader.dataset)))
+        print('Epoch: {} Average loss: {:.4f}'.format(epoch, train_loss / len(train_loader.dataset)))
 
         test_loss = test_vae(net, test_loader, recon_weight, kl_weight)
 
@@ -111,7 +107,7 @@ def test_vae(net, test_loader, recon_weight, kl_weight):
             # sum up batch loss
             test_loss += loss_function_vae(recon, data, mu, log_var, recon_weight, kl_weight)[0].item()
 
-    print('====> Test set loss: {:.4f}'.format(test_loss))
+    print('====> Test set loss: {:.4f}'.format(test_loss/len(test_loader)))
 
     return test_loss
 

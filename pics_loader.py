@@ -12,10 +12,10 @@ target_size = 100
 
 img_path = DATA_ROOT + "fake_data/"
 
-rays_train_set = torch.empty((1, 3, target_size, target_size))
-rays_test_set = torch.empty((1, 3, target_size, target_size))
-potential_train_set = torch.empty((1, 3, target_size, target_size))
-potential_test_set = torch.empty((1, 3, target_size, target_size))
+rays_train_set = torch.empty((1, 1, target_size, target_size))
+rays_test_set = torch.empty((1, 1, target_size, target_size))
+potential_train_set = torch.empty((1, 1, target_size, target_size))
+potential_test_set = torch.empty((1, 1, target_size, target_size))
 
 for i in tqdm(range(1, int(MAX_PICS * 0.8)), desc='Rays training...'):
     if i <= 9:
@@ -24,8 +24,10 @@ for i in tqdm(range(1, int(MAX_PICS * 0.8)), desc='Rays training...'):
         i = '0' + str(i)
     else:
         i = str(i)
-    image = Image.open(img_path + 'rays_pic_data/rays_' + i + '.jpg')
+    # Loading pic and passing from 3 channels to just 1
+    image = Image.open(img_path + 'rays_pic_data/rays_' + i + '.jpg').convert('L')
     image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
+
 
     if downsample == True:
         image = F.interpolate(image, size=(target_size, target_size))
@@ -39,7 +41,8 @@ for i in tqdm(range(int(MAX_PICS * 0.8), MAX_PICS), desc='Rays test...'):
         i = '0' + str(i)
     else:
         i = str(i)
-    image = Image.open(img_path + 'rays_pic_data/rays_' + i + '.jpg')
+    # Loading pic and passing from 3 channels to just 1
+    image = Image.open(img_path + 'rays_pic_data/rays_' + i + '.jpg').convert('L')
     image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
 
     if downsample == True:
@@ -54,7 +57,8 @@ for i in tqdm(range(1, int(MAX_PICS * 0.8)), desc='Potential training...'):
         i = '0' + str(i)
     else:
         i = str(i)
-    image = Image.open(img_path + 'potential_pic_data/potential_' + i + '.jpg')
+    # Loading pic and passing from 3 channels to just 1
+    image = Image.open(img_path + 'potential_pic_data/potential_' + i + '.jpg').convert('L')
     image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
     # Dropping alpha channel
     image = image[:, :3, :, :]
@@ -71,7 +75,8 @@ for i in tqdm(range(int(MAX_PICS * 0.8), MAX_PICS), desc='Potential test...'):
         i = '0' + str(i)
     else:
         i = str(i)
-    image = Image.open(img_path + 'potential_pic_data/potential_' + i + '.jpg')
+    # Loading pic and passing from 3 channels to just 1
+    image = Image.open(img_path + 'potential_pic_data/potential_' + i + '.jpg').convert('L')
     image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
     # Dropping alpha channel
     image = image[:, :3, :, :]
