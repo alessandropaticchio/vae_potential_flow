@@ -5,7 +5,7 @@ from utils import PicsDataset
 from tqdm import tqdm
 import torch.nn.functional as F
 
-MAX_PICS = 1000
+MAX_PICS = 10
 
 downsample = True
 target_size = 100
@@ -60,8 +60,6 @@ for i in tqdm(range(1, int(MAX_PICS * 0.8)), desc='Potential training...'):
     # Loading pic and passing from 3 channels to just 1
     image = Image.open(img_path + 'potential_pic_data/potential_' + i + '.jpg').convert('L')
     image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
-    # Dropping alpha channel
-    image = image[:, :3, :, :]
 
     if downsample == True:
         image = F.interpolate(image, size=(target_size, target_size))
@@ -78,8 +76,6 @@ for i in tqdm(range(int(MAX_PICS * 0.8), MAX_PICS), desc='Potential test...'):
     # Loading pic and passing from 3 channels to just 1
     image = Image.open(img_path + 'potential_pic_data/potential_' + i + '.jpg').convert('L')
     image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
-    # Dropping alpha channel
-    image = image[:, :3, :, :]
 
     if downsample == True:
         image = F.interpolate(image, size=(target_size, target_size))
