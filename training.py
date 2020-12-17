@@ -3,6 +3,7 @@ from datetime import datetime
 from torch.nn import MSELoss
 import torch
 import torch.nn.functional as F
+import numpy as np
 from torch.utils.tensorboard import SummaryWriter
 
 
@@ -86,10 +87,10 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
 
         test_loss = test_vae(net, test_loader, recon_weight, kl_weight)
 
-        writer.add_scalar('Loss/train', train_loss / len(train_loader.dataset), epoch)
-        writer.add_scalar('Loss/recon_train', bce_loss / len(train_loader.dataset), epoch)
-        writer.add_scalar('Loss/kld_train', kld_loss / len(train_loader.dataset), epoch)
-        writer.add_scalar('Loss/test', test_loss / len(test_loader.dataset), epoch)
+        writer.add_scalar('Loss/log_train', np.log(train_loss / len(train_loader.dataset)), epoch)
+        writer.add_scalar('Loss/log_recon_train', np.log(bce_loss / len(train_loader.dataset)), epoch)
+        writer.add_scalar('Loss/log_kld_train', np.log(kld_loss / len(train_loader.dataset)), epoch)
+        writer.add_scalar('Loss/log_test', np.log(test_loss / len(test_loader.dataset)), epoch)
 
     # Save the model at current date and time
     torch.save(net.state_dict(), MODELS_ROOT + dataset + '_VAE_' + now + '.pt')

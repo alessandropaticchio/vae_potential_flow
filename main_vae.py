@@ -6,7 +6,7 @@ import torch.optim as optim
 
 batch_size = 10
 
-dataset = 'potential'
+dataset = 'rays'
 train_dataset = torch.load(DATA_ROOT + 'fake_data/' + dataset + '_pic_data/training_' + dataset + '.pt')
 test_dataset = torch.load(DATA_ROOT + 'fake_data/' + dataset + '_pic_data/test_' + dataset + '.pt')
 
@@ -34,5 +34,5 @@ if torch.cuda.is_available():
 recon_weight = 1.
 kl_weight = 1.
 
-train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=200, optimizer=optimizer,
+train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=100, optimizer=optimizer,
           recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset)

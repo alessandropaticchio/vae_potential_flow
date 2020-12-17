@@ -5,10 +5,10 @@ from utils import PicsDataset
 from tqdm import tqdm
 import torch.nn.functional as F
 
-MAX_PICS = 10
+MAX_PICS = 1000
 
 downsample = True
-target_size = 100
+target_size = 128
 
 img_path = DATA_ROOT + "fake_data/"
 
@@ -83,7 +83,7 @@ for i in tqdm(range(int(MAX_PICS * 0.8), MAX_PICS), desc='Potential test...'):
     potential_test_set = torch.cat((potential_test_set, image), 0)
 
 #  First tensor is meaningless
-rays_train_set = rays_test_set[1:]
+rays_train_set = rays_train_set[1:]
 rays_test_set = rays_test_set[1:]
 potential_train_set = potential_train_set[1:]
 potential_test_set = potential_test_set[1:]

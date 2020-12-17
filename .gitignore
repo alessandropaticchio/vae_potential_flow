@@ -11,4 +11,4 @@ data/fake_data/rays_pic_data/test_rays.pt
 data/fake_data/potential_pic_data/training_potential.pt
 *.0
 *.0
-models/*
+models/
