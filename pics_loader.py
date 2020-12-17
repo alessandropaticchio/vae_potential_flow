@@ -8,14 +8,13 @@ import torch.nn.functional as F
 MAX_PICS = 1000
 
 downsample = True
-target_size = 128
 
 img_path = DATA_ROOT + "fake_data/"
 
-rays_train_set = torch.empty((1, 1, target_size, target_size))
-rays_test_set = torch.empty((1, 1, target_size, target_size))
-potential_train_set = torch.empty((1, 1, target_size, target_size))
-potential_test_set = torch.empty((1, 1, target_size, target_size))
+rays_train_set = torch.empty((1, 1, RAYS_IMAGE_SIZE, RAYS_IMAGE_SIZE))
+rays_test_set = torch.empty((1, 1, RAYS_IMAGE_SIZE, RAYS_IMAGE_SIZE))
+potential_train_set = torch.empty((1, 1, POTENTIAL_HIDDEN_SIZE, POTENTIAL_HIDDEN_SIZE))
+potential_test_set = torch.empty((1, 1, POTENTIAL_HIDDEN_SIZE, POTENTIAL_HIDDEN_SIZE))
 
 for i in tqdm(range(1, int(MAX_PICS * 0.8)), desc='Rays training...'):
     if i <= 9:
@@ -30,7 +29,7 @@ for i in tqdm(range(1, int(MAX_PICS * 0.8)), desc='Rays training...'):
 
 
     if downsample == True:
-        image = F.interpolate(image, size=(target_size, target_size))
+        image = F.interpolate(image, size=(RAYS_IMAGE_SIZE, RAYS_IMAGE_SIZE))
 
     rays_train_set = torch.cat((rays_train_set, image), 0)
 
@@ -46,7 +45,7 @@ for i in tqdm(range(int(MAX_PICS * 0.8), MAX_PICS), desc='Rays test...'):
     image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
 
     if downsample == True:
-        image = F.interpolate(image, size=(target_size, target_size))
+        image = F.interpolate(image, size=(RAYS_IMAGE_SIZE, RAYS_IMAGE_SIZE))
 
     rays_test_set = torch.cat((rays_test_set, image), 0)
 
@@ -62,7 +61,7 @@ for i in tqdm(range(1, int(MAX_PICS * 0.8)), desc='Potential training...'):
     image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
 
     if downsample == True:
-        image = F.interpolate(image, size=(target_size, target_size))
+        image = F.interpolate(image, size=(POTENTIAL_IMAGE_SIZE, POTENTIAL_IMAGE_SIZE))
 
     potential_train_set = torch.cat((potential_train_set, image), 0)
 
@@ -78,7 +77,7 @@ for i in tqdm(range(int(MAX_PICS * 0.8), MAX_PICS), desc='Potential test...'):
     image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
 
     if downsample == True:
-        image = F.interpolate(image, size=(target_size, target_size))
+        image = F.interpolate(image, size=(POTENTIAL_IMAGE_SIZE, POTENTIAL_IMAGE_SIZE))
 
     potential_test_set = torch.cat((potential_test_set, image), 0)
 
