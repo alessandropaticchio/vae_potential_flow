@@ -7,13 +7,13 @@ import itertools
 
 batch_size = 1
 
-dataset = 'potential'
-train_dataset = torch.load(DATA_ROOT + 'fake_data/' + dataset + '_pic_data/training_' + dataset + '.pt')
-test_dataset = torch.load(DATA_ROOT + 'fake_data/' + dataset + '_pic_data/test_' + dataset + '.pt')
+dataset = 'rays'
+train_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/training_' + dataset + '.pt')
+test_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/test_' + dataset + '.pt')
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
-model_name = 'potential_VAE_2020-12-17 14:44:46.980919.pt'
+model_name = 'rays_VAE_2020-12-18 14:08:12.677929.pt'
 model_path = MODELS_ROOT + model_name
 
 if dataset == 'rays':

@@ -6,9 +6,9 @@ import torch.optim as optim
 
 batch_size = 10
 
-dataset = 'potential'
-train_dataset = torch.load(DATA_ROOT + 'fake_data/' + dataset + '_pic_data/training_' + dataset + '.pt')
-test_dataset = torch.load(DATA_ROOT + 'fake_data/' + dataset + '_pic_data/test_' + dataset + '.pt')
+dataset = 'rays'
+train_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/training_' + dataset + '.pt')
+test_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/test_' + dataset + '.pt')
 
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
@@ -17,12 +17,12 @@ if dataset == 'rays':
     image_size = RAYS_IMAGE_SIZE
     hidden_size = RAYS_HIDDEN_SIZE
     latent_size = int(hidden_size / 2)
-    vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=1)
 else:
     image_size = POTENTIAL_IMAGE_SIZE
     hidden_size = POTENTIAL_HIDDEN_SIZE
     latent_size = int(hidden_size / 2)
-    vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=1)
+
+vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=1)
 
 
 lr = 1e-3

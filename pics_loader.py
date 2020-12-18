@@ -9,7 +9,7 @@ MAX_PICS = 1000
 
 downsample = True
 
-img_path = DATA_ROOT + "fake_data/"
+img_path = DATA_ROOT + "real_data/"
 
 rays_train_set = torch.empty((1, 1, RAYS_IMAGE_SIZE, RAYS_IMAGE_SIZE))
 rays_test_set = torch.empty((1, 1, RAYS_IMAGE_SIZE, RAYS_IMAGE_SIZE))
@@ -92,7 +92,7 @@ rays_test_set = PicsDataset(x=rays_test_set)
 potential_train_set = PicsDataset(x=potential_train_set)
 potential_test_set = PicsDataset(x=potential_test_set)
 
-torch.save(rays_train_set, DATA_ROOT + '/fake_data/rays_pic_data/training_rays.pt')
-torch.save(rays_test_set, DATA_ROOT + '/fake_data/rays_pic_data/test_rays.pt')
-torch.save(potential_train_set, DATA_ROOT + '/fake_data/potential_pic_data/training_potential.pt')
-torch.save(potential_test_set, DATA_ROOT + '/fake_data/potential_pic_data/test_potential.pt')
+torch.save(rays_train_set, img_path + 'rays_pic_data/training_rays.pt')
+torch.save(rays_test_set, img_path + 'rays_pic_data/test_rays.pt')
+torch.save(potential_train_set, img_path + 'potential_pic_data/training_potential.pt')
+torch.save(potential_test_set, img_path + 'potential_pic_data/test_potential.pt')

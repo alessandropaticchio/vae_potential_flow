@@ -52,12 +52,9 @@ class ConvVAE(nn.Module):
         return eps.mul(std).add_(mean)
 
     def forward(self, x):
-        x = self.encode(x)
+        mean, log_var = self.encode(x)
 
-        #  Flattening
-        x = x.view(x.size(0), -1)
-
-        x, mean, log_var = self.decode(x)
+        x = self.decode(mean, log_var)
 
         return x, mean, log_var
 
@@ -77,11 +74,15 @@ class ConvVAE(nn.Module):
         x = self.conv5(x)
         x = self.relu5(x)
 
-        return x
+        # Flattening
+        x = x.view(x.size(0), -1)
 
-    def decode(self, z):
-        log_var = self.encoder_logvar(z)
-        mean = self.encoder_mean(z)
+        log_var = self.encoder_logvar(x)
+        mean = self.encoder_mean(x)
+
+        return log_var, mean
+
+    def decode(self, log_var, mean):
         z = self.reparametrize(log_var, mean)
         x = self.fc(z)
 
@@ -105,7 +106,7 @@ class ConvVAE(nn.Module):
 
         x_prime = self.output(x)
 
-        return x_prime, mean, log_var
+        return x_prime
 
 
 class NewConvVAE(nn.Module):
