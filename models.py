@@ -9,33 +9,39 @@ class ConvVAE(nn.Module):
         self.hidden_size = hidden_size
         self.latent_size = latent_size
 
-        self.conv1 = nn.Conv2d(image_channels, out_channels=32, kernel_size=3, stride=3)
+        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=16, kernel_size=1, stride=1)
         self.relu1 = nn.ReLU()
 
-        self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=3)
+        self.conv2 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=3)
         self.relu2 = nn.ReLU()
 
-        self.conv3 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, stride=3)
+        self.conv3 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=3)
         self.relu3 = nn.ReLU()
 
-        self.conv4 = nn.Conv2d(in_channels=128, out_channels=256, kernel_size=3, stride=3)
+        self.conv4 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, stride=3)
         self.relu4 = nn.ReLU()
+
+        self.conv5 = nn.Conv2d(in_channels=128, out_channels=256, kernel_size=3, stride=3)
+        self.relu5 = nn.ReLU()
 
         self.encoder_mean = nn.Linear(hidden_size, latent_size)
         self.encoder_logvar = nn.Linear(hidden_size, latent_size)
         self.fc = nn.Linear(latent_size, hidden_size)
 
-        self.deconv1 = nn.ConvTranspose2d(hidden_size, out_channels=128, kernel_size=2, stride=3)
+        self.deconv1 = nn.ConvTranspose2d(hidden_size, out_channels=64, kernel_size=1, stride=1)
         self.relu5 = nn.ReLU()
 
-        self.deconv2 = nn.ConvTranspose2d(128, out_channels=64, kernel_size=3, stride=3)
+        self.deconv2 = nn.ConvTranspose2d(64, out_channels=128, kernel_size=2, stride=3)
         self.relu6 = nn.ReLU()
 
-        self.deconv3 = nn.ConvTranspose2d(64, out_channels=32, kernel_size=5, stride=4)
+        self.deconv3 = nn.ConvTranspose2d(128, out_channels=64, kernel_size=3, stride=3)
         self.relu7 = nn.ReLU()
 
-        self.deconv4 = nn.ConvTranspose2d(32, out_channels=image_channels, kernel_size=4, stride=4)
+        self.deconv4 = nn.ConvTranspose2d(64, out_channels=32, kernel_size=5, stride=4)
         self.relu8 = nn.ReLU()
+
+        self.deconv5 = nn.ConvTranspose2d(32, out_channels=image_channels, kernel_size=4, stride=4)
+        self.relu9 = nn.ReLU()
 
         self.output = nn.Sigmoid()
 
@@ -68,6 +74,9 @@ class ConvVAE(nn.Module):
         x = self.conv4(x)
         x = self.relu4(x)
 
+        x = self.conv5(x)
+        x = self.relu5(x)
+
         return x
 
     def decode(self, z):
@@ -90,6 +99,9 @@ class ConvVAE(nn.Module):
 
         x = self.deconv4(x)
         x = self.relu8(x)
+
+        x = self.deconv5(x)
+        x = self.relu9(x)
 
         x_prime = self.output(x)
 

@@ -7,13 +7,13 @@ import itertools
 
 batch_size = 1
 
-dataset = 'rays'
+dataset = 'potential'
 train_dataset = torch.load(DATA_ROOT + 'fake_data/' + dataset + '_pic_data/training_' + dataset + '.pt')
 test_dataset = torch.load(DATA_ROOT + 'fake_data/' + dataset + '_pic_data/test_' + dataset + '.pt')
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
-model_name = 'rays_VAE_2020-12-17 13:41:45.750847.pt'
+model_name = 'potential_VAE_2020-12-17 14:44:46.980919.pt'
 model_path = MODELS_ROOT + model_name
 
 if dataset == 'rays':
@@ -38,12 +38,14 @@ rand_sample = next(itertools.islice(train_loader, rand_sample_idx, None))
 rand_sample_prime = vae(rand_sample[0].reshape(1, 1, image_size, image_size))[0]
 
 plt.figure()
-plt.title('Original vs Reconstruction')
 
 plt.subplot(1, 2, 1)
+plt.title('Original')
 plt.imshow(rand_sample[0].view(image_size, image_size, 1), cmap='gray')
 
 plt.subplot(1, 2, 2)
+plt.title('Reconstruction')
 plt.imshow(rand_sample_prime.squeeze().detach(), cmap='gray')
+
 
 plt.show()
