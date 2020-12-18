@@ -13,8 +13,8 @@ img_path = DATA_ROOT + "fake_data/"
 
 rays_train_set = torch.empty((1, 1, RAYS_IMAGE_SIZE, RAYS_IMAGE_SIZE))
 rays_test_set = torch.empty((1, 1, RAYS_IMAGE_SIZE, RAYS_IMAGE_SIZE))
-potential_train_set = torch.empty((1, 1, POTENTIAL_HIDDEN_SIZE, POTENTIAL_HIDDEN_SIZE))
-potential_test_set = torch.empty((1, 1, POTENTIAL_HIDDEN_SIZE, POTENTIAL_HIDDEN_SIZE))
+potential_train_set = torch.empty((1, 1, POTENTIAL_IMAGE_SIZE, POTENTIAL_IMAGE_SIZE))
+potential_test_set = torch.empty((1, 1, POTENTIAL_IMAGE_SIZE, POTENTIAL_IMAGE_SIZE))
 
 for i in tqdm(range(1, int(MAX_PICS * 0.8)), desc='Rays training...'):
     if i <= 9:
