@@ -7,13 +7,13 @@ import itertools
 
 batch_size = 1
 
-dataset = 'rays'
+dataset = 'potential'
 train_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/training_' + dataset + '.pt')
 test_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/test_' + dataset + '.pt')
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
-model_name = 'rays_VAE_2020-12-18 14:08:12.677929.pt'
+model_name = 'potential_VAE_2020-12-22 10:38:48.819091.pt'
 model_path = MODELS_ROOT + model_name
 
 if dataset == 'rays':
@@ -32,20 +32,22 @@ else:
 vae.load_state_dict(torch.load(model_path))
 vae.eval()
 
-rand_sample_idx = random.randint(0, 100)
+rand_sample_idx = random.randint(0, 500)
 rand_sample = next(itertools.islice(train_loader, rand_sample_idx, None))
 
-rand_sample_prime = vae(rand_sample[0].reshape(1, 1, image_size, image_size))[0]
+rand_sample_prime = vae(rand_sample[0].reshape(1, image_channels, image_size, image_size))[0]
 
 plt.figure()
 
 plt.subplot(1, 2, 1)
 plt.title('Original')
-plt.imshow(rand_sample[0].view(image_size, image_size, 1), cmap='gray')
+plt.imshow(rand_sample.squeeze(), cmap='gray')
 
 plt.subplot(1, 2, 2)
 plt.title('Reconstruction')
-plt.imshow(rand_sample_prime.squeeze().detach(), cmap='gray')
+plt.imshow(rand_sample_prime.squeeze().detach().numpy(), cmap='gray')
 
+for i in range(100):
+    print(sum(rand_sample_prime[0][0][i]))
 
 plt.show()

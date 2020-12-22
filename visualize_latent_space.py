@@ -10,7 +10,7 @@ dataset = 'rays'
 train_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/training_' + dataset + '.pt')
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 
-model_name = 'rays_VAE_2020-12-18 14:08:12.677929.pt'
+model_name = 'rays_VAE_2020-12-21 11:16:48.097754.pt'
 model_path = MODELS_ROOT + model_name
 
 if dataset == 'rays':
