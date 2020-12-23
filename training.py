@@ -26,7 +26,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
 
             batch_loss.backward()
 
-            #  Gradients plotting
+            #  Gradients norm plotting
             for name, param in net.named_parameters():
                 writer.add_scalar(name, np.linalg.norm(param.grad.data.cpu()),
                                   (batch_idx + 1) + (batch_idx + 1) * (epoch + 1))

@@ -31,7 +31,7 @@ lr = 1e-3
 optimizer = optim.SGD(vae.parameters(), lr=lr)
 
 recon_weight = 1.
-kl_weight = 0.
+kl_weight = 1.
 
-train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=800, optimizer=optimizer,
+train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=50, optimizer=optimizer,
           recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset)
