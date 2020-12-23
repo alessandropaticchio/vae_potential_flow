@@ -1,7 +1,6 @@
 from PIL import Image
 from torchvision.transforms import ToTensor
 from constants import *
-from utils import PicsDataset
 from tqdm import tqdm
 import torch.nn.functional as F
 
@@ -24,7 +23,7 @@ for i in tqdm(range(1, int(MAX_PICS * 0.8)), desc='Rays training...'):
     else:
         i = str(i)
     # Loading pic and passing from 3 channels to just 1
-    image = Image.open(img_path + 'rays_pic_data/rays_' + i + '.jpg').convert('L')
+    image = Image.open(img_path + 'rays_pic_data/rays_' + i + '.jpg')
     image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
 
     if downsample:
@@ -40,7 +39,7 @@ for i in tqdm(range(int(MAX_PICS * 0.8), MAX_PICS), desc='Rays test...'):
     else:
         i = str(i)
     # Loading pic and passing from 3 channels to just 1
-    image = Image.open(img_path + 'rays_pic_data/rays_' + i + '.jpg').convert('L')
+    image = Image.open(img_path + 'rays_pic_data/rays_' + i + '.jpg')
     image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
 
     if downsample:
@@ -56,8 +55,9 @@ for i in tqdm(range(1, int(MAX_PICS * 0.8)), desc='Potential training...'):
     else:
         i = str(i)
     # Loading pic and passing from 3 channels to just 1
-    image = Image.open(img_path + 'potential_pic_data/potential_' + i + '.jpg').convert('L')
+    image = Image.open(img_path + 'potential_pic_data/potential_' + i + '.jpg')
     image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
+    image = image[:, :3, :, :]
 
     if downsample:
         image = F.interpolate(image, size=(POTENTIAL_IMAGE_SIZE, POTENTIAL_IMAGE_SIZE))
@@ -72,8 +72,9 @@ for i in tqdm(range(int(MAX_PICS * 0.8), MAX_PICS), desc='Potential test...'):
     else:
         i = str(i)
     # Loading pic and passing from 3 channels to just 1
-    image = Image.open(img_path + 'potential_pic_data/potential_' + i + '.jpg').convert('L')
+    image = Image.open(img_path + 'potential_pic_data/potential_' + i + '.jpg')
     image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
+    image = image[:, :3, :, :]
 
     if downsample:
         image = F.interpolate(image, size=(POTENTIAL_IMAGE_SIZE, POTENTIAL_IMAGE_SIZE))
