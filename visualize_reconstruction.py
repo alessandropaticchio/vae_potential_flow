@@ -1,4 +1,4 @@
-from models import ConvVAE, ConvPlainAE
+from models import ConvVAE, DeConvVAE, ConvPlainAE
 from constants import *
 import matplotlib.pyplot as plt
 import random
@@ -7,13 +7,14 @@ import itertools
 
 batch_size = 1
 
-dataset = 'potential'
+dataset = 'rays'
 train_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/training_' + dataset + '.pt')
 test_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/test_' + dataset + '.pt')
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
-model_name = 'Mapper_2020-12-23 18:22:18.775705.pt'
+
+model_name = 'rays_VAE_2020-12-23 17:26:52.391873.pt'
 model_path = MODELS_ROOT + model_name
 
 if dataset == 'rays':
@@ -43,7 +44,7 @@ plt.figure()
 
 plt.subplot(1, 2, 1)
 plt.title('Original')
-plt.imshow(rand_sample.squeeze(), cmap='gray')
+plt.imshow(rand_sample.squeeze().permute(1, 2, 0))
 
 plt.subplot(1, 2, 2)
 plt.title('Reconstruction')
@@ -51,5 +52,7 @@ plt.imshow(rand_sample_prime.squeeze().detach().numpy(), cmap='gray')
 
 '''for i in range(100):
     print(sum(rand_sample_prime[0][0][i]))'''
+
+# plt.imshow(rand_sample_prime.squeeze().permute(1, 2, 0).detach().numpy())
 
 plt.show()
