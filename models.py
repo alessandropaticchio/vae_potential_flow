@@ -215,3 +215,43 @@ class NewConvVAE(nn.Module):
         x_prime = self.output(x)
 
         return x_prime, mean, log_var
+
+
+class ConvPlainAE(nn.Module):
+    def __init__(self, image_dim, hidden_size, latent_size, image_channels=3):
+        super(ConvPlainAE, self).__init__()
+        self.image_channels = image_channels
+        self.image_dim = image_dim
+        self.hidden_size = hidden_size
+        self.latent_size = latent_size
+
+        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=32, kernel_size=1, stride=1)
+        self.relu1 = nn.ReLU()
+
+        self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
+
+        self.conv2 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=1, stride=1, padding=0)
+        self.relu2 = nn.ReLU()
+
+        self.upsample1 = nn.Upsample(scale_factor=2)
+
+        self.conv3 = nn.Conv2d(in_channels=32, out_channels=image_channels, kernel_size=3, stride=3, padding=100)
+
+        self.output = nn.Sigmoid()
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.relu1(x)
+
+        x = self.maxpool1(x)
+
+        x = self.conv2(x)
+        x = self.relu2(x)
+
+        x = self.upsample1(x)
+
+        x = self.conv3(x)
+
+        x_prime = self.output(x)
+
+        return x_prime

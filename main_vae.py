@@ -1,5 +1,5 @@
-from models import ConvVAE
-from training import train_vae
+from models import ConvVAE, ConvPlainAE
+from training import train_vae, train
 from constants import *
 from utils import PicsDataset
 import torch
@@ -29,7 +29,9 @@ else:
     potential_train_set = PicsDataset(train_dataset)
     potential_test_set = PicsDataset(test_dataset)
 
-vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
+vae = ConvPlainAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
+
+# vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
 
 lr = 1e-3
 optimizer = optim.Adam(vae.parameters(), lr=lr)
@@ -37,8 +39,12 @@ optimizer = optim.Adam(vae.parameters(), lr=lr)
 if torch.cuda.is_available():
     vae.cuda()
 
-recon_weight = 1.
+train(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=100, optimizer=optimizer)
+
+'''recon_weight = 1.
 kl_weight = 1.
 
 train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=100, optimizer=optimizer,
-          recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset)
+          recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset)'''
+
+
