@@ -4,10 +4,11 @@ import matplotlib.pyplot as plt
 import random
 import torch
 import itertools
+from vae_resnet import VAE
 
 batch_size = 1
 
-dataset = 'rays'
+dataset = 'potential'
 train_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/training_' + dataset + '.pt')
 test_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/test_' + dataset + '.pt')
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
@@ -29,11 +30,15 @@ else:
     hidden_size = POTENTIAL_HIDDEN_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
     latent_size = int(hidden_size / 2)
-    #vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
-    vae = ConvPlainAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
+    # vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
+    vae = ConvPlainAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size,
+                      image_channels=image_channels)
 
-vae.load_state_dict(torch.load(model_path))
-vae.eval()
+PATH = '/Users/dsantamb/Documents/Davide/vae_potential_flow/lightning_logs/version_28/checkpoints/epoch=19-step=1999.ckpt'
+
+pretrained_model = VAE.load_from_checkpoint(PATH)
+
+pretrained_model.eval()
 
 rand_sample_idx = random.randint(0, 500)
 rand_sample = next(itertools.islice(train_loader, rand_sample_idx, None))
@@ -48,11 +53,11 @@ plt.imshow(rand_sample.squeeze().permute(1, 2, 0))
 
 plt.subplot(1, 2, 2)
 plt.title('Reconstruction')
-plt.imshow(rand_sample_prime.squeeze().detach().numpy(), cmap='gray')
+# lt.imshow(rand_sample_prime.squeeze().detach().numpy(), cmap='gray')
 
 '''for i in range(100):
     print(sum(rand_sample_prime[0][0][i]))'''
 
-# plt.imshow(rand_sample_prime.squeeze().permute(1, 2, 0).detach().numpy())
+plt.imshow(rand_sample_prime.squeeze().permute(1, 2, 0).detach().numpy())
 
 plt.show()
