@@ -6,7 +6,7 @@ import torch.optim as optim
 
 batch_size = 8
 
-dataset = 'rays'
+dataset = 'potential'
 train_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/training_' + dataset + '.pt')
 test_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/test_' + dataset + '.pt')
 
@@ -40,5 +40,5 @@ kl_weight = 1.
 '''
 
 
-train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=50, optimizer=optimizer,
-          recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset)
+#train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=50, optimizer=optimizer,
+#          recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset)

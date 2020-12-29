@@ -1,5 +1,6 @@
 from constants import *
 from datetime import datetime
+from torch.nn import MSELoss
 import torch
 import torch.nn.functional as F
 import numpy as np
@@ -75,9 +76,9 @@ def loss_function_vae(recon_x, x, mu, log_var, recon_weight, kl_weight):
     return recon + KLD, recon, KLD
 
 
-def train(net, train_loader, test_loader, epochs, optimizer):
+def train(net, train_loader, test_loader, epochs, optimizer, dataset):
     now = str(datetime.now())
-    writer = SummaryWriter('runs/{}'.format('Mapper_' + now))
+    writer = SummaryWriter('runs/{}'.format('AE_' + dataset + '_' + now))
     net = net.to(device)
     net.train()
     mse_loss = MSELoss()
@@ -106,7 +107,7 @@ def train(net, train_loader, test_loader, epochs, optimizer):
         writer.add_scalar('Loss/test', test_loss, epoch)
 
     # Save the model at current date and time
-    torch.save(net.state_dict(), MODELS_ROOT + 'Mapper_' + now + '.pt')
+    torch.save(net.state_dict(), MODELS_ROOT + 'AE_' + dataset + '_' + '.pt')
 
 
 def test(net, test_loader):

@@ -179,7 +179,7 @@ class ConvPlainAE(nn.Module):
 
         self.upsample1 = nn.Upsample(scale_factor=2)
 
-        self.conv3 = nn.Conv2d(in_channels=32, out_channels=image_channels, kernel_size=3, stride=3, padding=100)
+        self.conv3 = nn.Conv2d(in_channels=32, out_channels=image_channels, kernel_size=3, stride=3, padding=20)
 
         self.output = nn.Sigmoid()
 
