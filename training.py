@@ -80,7 +80,7 @@ def train_ae(net, train_loader, test_loader, epochs, optimizer, dataset):
     now = str(datetime.now())
     writer = SummaryWriter('runs/{}'.format('AE_' + dataset + '_' + now))
     net = net.to(device)
-    net.train_ae()
+    net.train()
     mse_loss = MSELoss()
     for epoch in range(epochs):
         train_loss = 0.
