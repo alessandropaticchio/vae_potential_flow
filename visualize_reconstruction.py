@@ -14,7 +14,7 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=bat
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
 
-model_name = 'AE_2020-12-29 14:07:59.421736.pt'
+model_name = 'potential_VAE_2020-12-29 14:40:17.246061.pt'
 model_path = MODELS_ROOT + model_name
 
 if dataset == 'rays':
@@ -22,15 +22,15 @@ if dataset == 'rays':
     hidden_size = RAYS_HIDDEN_SIZE
     image_channels = RAYS_IMAGE_CHANNELS
     latent_size = int(hidden_size / 2)
-    #vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
-    vae = ConvPlainAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
+    vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
+    #vae = ConvPlainAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
 else:
     image_size = POTENTIAL_IMAGE_SIZE
     hidden_size = POTENTIAL_HIDDEN_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
     latent_size = int(hidden_size / 2)
-    #vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
-    vae = ConvPlainAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
+    vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
+    #vae = ConvPlainAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
 
 vae.load_state_dict(torch.load(model_path))
 vae.eval()
@@ -49,10 +49,5 @@ plt.imshow(rand_sample.squeeze().permute(1, 2, 0))
 plt.subplot(1, 2, 2)
 plt.title('Reconstruction')
 plt.imshow(rand_sample_prime.squeeze().detach().permute(1, 2, 0).numpy(), cmap='gray')
-
-'''for i in range(100):
-    print(sum(rand_sample_prime[0][0][i]))'''
-
-# plt.imshow(rand_sample_prime.squeeze().permute(1, 2, 0).detach().numpy())
 
 plt.show()

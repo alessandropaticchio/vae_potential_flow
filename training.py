@@ -11,7 +11,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
     now = str(datetime.now())
     writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + now))
     net = net.to(device)
-    net.train_ae()
+    net.train()
     for epoch in range(epochs):
         train_loss = 0.
         recon_loss = 0.

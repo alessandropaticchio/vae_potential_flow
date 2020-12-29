@@ -19,12 +19,12 @@ class ConvVAE(nn.Module):
         self.encoder_logvar = nn.Linear(hidden_size, latent_size)
         self.fc = nn.Linear(latent_size, hidden_size)
 
-        self.conv5 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=1, stride=1, padding=0)
-        self.relu5 = nn.ReLU()
+        self.conv2 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=1, stride=1, padding=0)
+        self.relu2 = nn.ReLU()
 
         self.upsample1 = nn.Upsample(scale_factor=2)
 
-        self.conv6 = nn.Conv2d(in_channels=32, out_channels=image_channels, kernel_size=3, stride=3, padding=20)
+        self.conv3 = nn.Conv2d(in_channels=32, out_channels=image_channels, kernel_size=1, stride=1, padding=0)
 
         self.output = nn.Sigmoid()
 
@@ -61,11 +61,11 @@ class ConvVAE(nn.Module):
         # Unflattening
         x = x.view(x.size(0), 32, 10, 10)
 
-        x = self.conv5(x)
-        x = self.relu5(x)
+        x = self.conv2(x)
+        x = self.relu2(x)
         x = self.upsample1(x)
 
-        x = self.conv6(x)
+        x = self.conv3(x)
 
         x_prime = self.output(x)
 
@@ -179,7 +179,7 @@ class ConvPlainAE(nn.Module):
 
         self.upsample1 = nn.Upsample(scale_factor=2)
 
-        self.conv3 = nn.Conv2d(in_channels=32, out_channels=image_channels, kernel_size=3, stride=3, padding=20)
+        self.conv3 = nn.Conv2d(in_channels=32, out_channels=image_channels, kernel_size=1, stride=1, padding=0)
 
         self.output = nn.Sigmoid()
 
@@ -199,4 +199,3 @@ class ConvPlainAE(nn.Module):
         x_prime = self.output(x)
 
         return x_prime
-
