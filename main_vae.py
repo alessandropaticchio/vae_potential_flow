@@ -10,7 +10,7 @@ dataset = 'potential'
 train_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/training_' + dataset + '.pt')
 test_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/test_' + dataset + '.pt')
 
-train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size,
+train_loader = torch.utils.data.DataLoader(dataset=train_dataset[1, :, :, :].unsqueeze(0), batch_size=batch_size,
                                            shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
@@ -32,7 +32,7 @@ vae = ConvPlainAE(image_dim=image_size, hidden_size=hidden_size, latent_size=lat
 lr = 1e-3
 optimizer = optim.SGD(vae.parameters(), lr=lr)
 
-train_ae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=100, optimizer=optimizer)
+train_ae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=100, optimizer=optimizer, dataset=dataset)
 
 '''recon_weight = 1.
 kl_weight = 1.
