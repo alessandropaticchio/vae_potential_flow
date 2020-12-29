@@ -12,6 +12,8 @@ dataset = 'potential'
 train_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/training_' + dataset + '.pt')
 test_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/test_' + dataset + '.pt')
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
+train_loader = torch.utils.data.DataLoader(dataset=train_dataset[1, :, :, :].unsqueeze(0), batch_size=batch_size,
+                                               shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
 
@@ -34,7 +36,7 @@ else:
     vae = ConvPlainAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size,
                       image_channels=image_channels)
 
-PATH = '/Users/dsantamb/Documents/Davide/vae_potential_flow/lightning_logs/version_28/checkpoints/epoch=19-step=1999.ckpt'
+PATH = '/Users/dsantamb/Documents/Davide/vae_potential_flow/lightning_logs/version_35/checkpoints/epoch=99-step=99.ckpt'
 
 pretrained_model = VAE.load_from_checkpoint(PATH)
 

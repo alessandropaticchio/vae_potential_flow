@@ -6,6 +6,8 @@ from pl_bolts.models.autoencoders.components import (
     resnet18_decoder,
     resnet18_encoder,
 )
+from pl_bolts.datamodules import CIFAR10DataModule
+from image_plotting_callback import ImageSampler
 from argparse import ArgumentParser
 from constants import *
 
@@ -34,7 +36,8 @@ class VAE(pl.LightningModule):
         self.log_scale = nn.Parameter(torch.Tensor([0.0]))
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=1e-4)
+        return torch.optim.Adam(self.parameters(), lr=1e-2)
+        # return torch.optim.SGD(self.parameters(), lr=1e-4, momentum=0.9)
 
     def gaussian_likelihood(self, x_hat, logscale, x):
         scale = torch.exp(logscale)
@@ -63,6 +66,7 @@ class VAE(pl.LightningModule):
         return kl
 
     def training_step(self, batch, batch_idx):
+        # x, _ = batch
         x = batch
 
         # encode x to get the mu and variance parameters
@@ -101,7 +105,13 @@ class VAE(pl.LightningModule):
 def train():
     parser = ArgumentParser()
     parser.add_argument('--gpus', type=int, default=None)
+    parser.add_argument('--dataset', type=str, default='cifar10')
     args = parser.parse_args()
+
+    if args.dataset == 'cifar10':
+        dataset_test = CIFAR10DataModule('.')
+    if args.dataset == 'imagenet':
+        dataset_test = ImagenetDataModule('.')
 
     batch_size = 8
 
@@ -109,7 +119,9 @@ def train():
     train_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/training_' + dataset + '.pt')
     test_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/test_' + dataset + '.pt')
 
-    train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
+    # train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
+    train_loader = torch.utils.data.DataLoader(dataset=train_dataset[1, :, :, :].unsqueeze(0), batch_size=batch_size,
+                                               shuffle=True)
     test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
     if dataset == 'rays':
@@ -123,9 +135,11 @@ def train():
         latent_size = int(hidden_size / 2)
         image_channels = POTENTIAL_IMAGE_CHANNELS
 
-    vae = VAE(input_height=image_size)
+    sampler = ImageSampler()
 
-    trainer = pl.Trainer(gpus=args.gpus, max_epochs=20)
+    vae = VAE(input_height=image_size)
+    # trainer = pl.Trainer(gpus=args.gpus, max_epochs=20, callbacks=[sampler])
+    trainer = pl.Trainer(gpus=args.gpus, max_epochs=100)
     trainer.fit(vae, train_loader)
 
 
