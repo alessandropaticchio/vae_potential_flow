@@ -107,7 +107,7 @@ def train_ae(net, train_loader, test_loader, epochs, optimizer, dataset):
         writer.add_scalar('Loss/test', test_loss, epoch)
 
     # Save the model at current date and time
-    torch.save(net.state_dict(), MODELS_ROOT + 'AE_' + dataset + '_' + '.pt')
+    torch.save(net.state_dict(), MODELS_ROOT + 'AE_' + dataset + '_' + now + '.pt')
 
 
 def test_ae(net, test_loader):
