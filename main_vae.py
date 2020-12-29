@@ -1,4 +1,4 @@
-from training import train_vae, train
+from training import train_vae, train_ae
 from models import ConvVAE, DeConvVAE, ConvPlainAE
 from constants import *
 import torch
@@ -32,7 +32,7 @@ vae = ConvPlainAE(image_dim=image_size, hidden_size=hidden_size, latent_size=lat
 lr = 1e-3
 optimizer = optim.SGD(vae.parameters(), lr=lr)
 
-train(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=100, optimizer=optimizer)
+train_ae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=100, optimizer=optimizer)
 
 '''recon_weight = 1.
 kl_weight = 1.

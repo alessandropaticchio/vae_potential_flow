@@ -11,7 +11,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
     now = str(datetime.now())
     writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + now))
     net = net.to(device)
-    net.train()
+    net.train_ae()
     for epoch in range(epochs):
         train_loss = 0.
         recon_loss = 0.
@@ -76,11 +76,11 @@ def loss_function_vae(recon_x, x, mu, log_var, recon_weight, kl_weight):
     return recon + KLD, recon, KLD
 
 
-def train(net, train_loader, test_loader, epochs, optimizer, dataset):
+def train_ae(net, train_loader, test_loader, epochs, optimizer, dataset):
     now = str(datetime.now())
     writer = SummaryWriter('runs/{}'.format('AE_' + dataset + '_' + now))
     net = net.to(device)
-    net.train()
+    net.train_ae()
     mse_loss = MSELoss()
     for epoch in range(epochs):
         train_loss = 0.
@@ -101,7 +101,7 @@ def train(net, train_loader, test_loader, epochs, optimizer, dataset):
                                    100. * batch_idx / len(train_loader), loss.item() / len(data)))
 
         print('====> Epoch: {} Average loss: {:.4f}'.format(epoch, train_loss / len(train_loader.dataset)))
-        test_loss = test(net, test_loader)
+        test_loss = test_ae(net, test_loader)
 
         writer.add_scalar('Loss/train', train_loss, epoch)
         writer.add_scalar('Loss/test', test_loss, epoch)
@@ -110,7 +110,7 @@ def train(net, train_loader, test_loader, epochs, optimizer, dataset):
     torch.save(net.state_dict(), MODELS_ROOT + 'AE_' + dataset + '_' + '.pt')
 
 
-def test(net, test_loader):
+def test_ae(net, test_loader):
     net.eval()
     net = net.to(device)
     test_loss = 0
