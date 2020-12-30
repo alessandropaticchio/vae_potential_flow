@@ -14,7 +14,7 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=bat
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
 
-model_name = 'potential_VAE_2020-12-30 09:39:22.982281.pt'
+model_name = 'MNIST_VAE_2020-12-30 14:19:03.541989.pt'
 model_path = MODELS_ROOT + model_name
 
 if dataset == 'rays':
@@ -23,7 +23,7 @@ if dataset == 'rays':
     image_channels = RAYS_IMAGE_CHANNELS
     latent_size = int(hidden_size / 2)
     vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
-    # vae = ConvPlainAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
+    #vae = ConvPlainAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
 else:
     image_size = POTENTIAL_IMAGE_SIZE
     hidden_size = POTENTIAL_HIDDEN_SIZE
