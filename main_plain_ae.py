@@ -25,13 +25,10 @@ else:
     latent_size = int(hidden_size / 2)
     image_channels = POTENTIAL_IMAGE_CHANNELS
 
-vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
+vae = ConvPlainAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
 
 lr = 1e-3
-optimizer = optim.SGD(vae.parameters(), lr=lr)
+optimizer = optim.Adam(vae.parameters(), lr=lr)
 
-recon_weight = 1.
-kl_weight = 1.
+train_ae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=100, optimizer=optimizer, dataset=dataset)
 
-train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=50, optimizer=optimizer,
-          recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset)

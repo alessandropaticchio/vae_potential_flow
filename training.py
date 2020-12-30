@@ -63,7 +63,7 @@ def test_vae(net, test_loader, recon_weight, kl_weight):
             # sum up batch loss
             test_loss += loss_function_vae(recon, data, mu, log_var, recon_weight, kl_weight)[0].item()
 
-    print('====> Test set loss: {:.4f}'.format(test_loss / len(test_loader.dataset)))
+    print('Test set loss: {:.4f}'.format(test_loss / len(test_loader.dataset)))
 
     return test_loss
 
@@ -95,12 +95,7 @@ def train_ae(net, train_loader, test_loader, epochs, optimizer, dataset):
             train_loss += loss.item()
             optimizer.step()
 
-            if batch_idx % 100 == 0:
-                print('Train Epoch: {}/{} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                    epoch, epochs, batch_idx * len(data), len(train_loader.dataset),
-                                   100. * batch_idx / len(train_loader), loss.item() / len(data)))
-
-        print('====> Epoch: {} Average loss: {:.4f}'.format(epoch, train_loss / len(train_loader.dataset)))
+        print('Epoch: {} Average loss: {:.4f}'.format(epoch, train_loss / len(train_loader.dataset)))
         test_loss = test_ae(net, test_loader)
 
         writer.add_scalar('Loss/train', train_loss, epoch)
@@ -122,5 +117,5 @@ def test_ae(net, test_loader):
 
             test_loss += mse_loss(output, data).item()
 
-    print('====> Test set loss: {:.4f}'.format(test_loss))
+    print('Test set loss: {:.4f}'.format(test_loss))
     return test_loss
