@@ -38,7 +38,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
 
             optimizer.step()
 
-        print('Epoch: {} Average loss: {:.4f}'.format(epoch + 1, train_loss / len(train_loader.dataset)))
+        print('Epoch: {} Average loss: {:.8f}'.format(epoch + 1, train_loss / len(train_loader.dataset)))
 
         test_loss = test_vae(net, test_loader, recon_weight, kl_weight)
 
@@ -63,7 +63,7 @@ def test_vae(net, test_loader, recon_weight, kl_weight):
             # sum up batch loss
             test_loss += loss_function_vae(recon, data, mu, log_var, recon_weight, kl_weight)[0].item()
 
-    print('Test set loss: {:.4f}'.format(test_loss / len(test_loader.dataset)))
+    print('Test set loss: {:.8f}'.format(test_loss / len(test_loader.dataset)))
 
     return test_loss
 
@@ -95,11 +95,11 @@ def train_ae(net, train_loader, test_loader, epochs, optimizer, dataset):
             train_loss += loss.item()
             optimizer.step()
 
-        print('Epoch: {} Average loss: {:.4f}'.format(epoch, train_loss / len(train_loader.dataset)))
+        print('Epoch: {} Average loss: {:.8f}'.format(epoch, train_loss / len(train_loader.dataset)))
         test_loss = test_ae(net, test_loader)
 
-        writer.add_scalar('Loss/train', train_loss, epoch)
-        writer.add_scalar('Loss/test', test_loss, epoch)
+        writer.add_scalar('Loss/log_train', np.log(train_loss / len(train_loader.dataset)), epoch)
+        writer.add_scalar('Loss/log_test', np.log(test_loss / len(test_loader.dataset)), epoch)
 
     # Save the model at current date and time
     torch.save(net.state_dict(), MODELS_ROOT + 'AE_' + dataset + '_' + now + '.pt')
@@ -117,5 +117,51 @@ def test_ae(net, test_loader):
 
             test_loss += mse_loss(output, data).item()
 
-    print('Test set loss: {:.4f}'.format(test_loss))
+    print('Test set loss: {:.8f}'.format(test_loss))
+    return test_loss
+
+def train_mapper(net, train_loader, test_loader, epochs, optimizer):
+    now = str(datetime.now())
+    writer = SummaryWriter('runs/{}'.format('Mapper_' + now))
+    net = net.to(device)
+    net.train()
+    mse_loss = MSELoss()
+    for epoch in range(epochs):
+        train_loss = 0.
+        for batch_idx, (data, target) in enumerate(train_loader):
+            data = data.to(device)
+            target = target.to(device)
+            optimizer.zero_grad()
+
+            output = net(data)
+            loss = mse_loss(output, target)
+
+            loss.backward()
+            train_loss += loss.item()
+            optimizer.step()
+
+        print('Epoch: {} Average loss: {:.8f}'.format(epoch, train_loss / len(train_loader.dataset)))
+        test_loss = test_mapper(net, test_loader)
+
+        writer.add_scalar('Loss/log_train', np.log(train_loss / len(train_loader.dataset)), epoch)
+        writer.add_scalar('Loss/log_test', np.log(test_loss / len(test_loader.dataset)), epoch)
+
+    # Save the model at current date and time
+    torch.save(net.state_dict(), MODELS_ROOT + 'Mapper_' + now + '.pt')
+
+
+def test_mapper(net, test_loader):
+    net.eval()
+    net = net.to(device)
+    test_loss = 0
+    mse_loss = MSELoss()
+    with torch.no_grad():
+        for data, target in test_loader:
+            data = data.to(device)
+            target = target.to(device)
+            output = net(data)
+
+            test_loss += mse_loss(output, target).item()
+
+    print('Test set loss: {:.8f}'.format(test_loss))
     return test_loss

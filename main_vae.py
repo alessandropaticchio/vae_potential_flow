@@ -6,7 +6,7 @@ import torch.optim as optim
 
 batch_size = 8
 
-dataset = 'potential'
+dataset = 'rays'
 train_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/training_' + dataset + '.pt')
 test_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/test_' + dataset + '.pt')
 
@@ -21,8 +21,6 @@ if dataset == 'rays':
     image_channels = RAYS_IMAGE_CHANNELS
 else:
     image_size = POTENTIAL_IMAGE_SIZE
-    hidden_size = POTENTIAL_HIDDEN_SIZE
-    latent_size = int(hidden_size / 2)
     image_channels = POTENTIAL_IMAGE_CHANNELS
 
 vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
