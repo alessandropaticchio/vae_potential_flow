@@ -8,7 +8,7 @@ import itertools
 batch_size = 1
 
 dataset = 'rays'
-model_name = 'AE_rays_2021-01-02 12:10:27.985388.pt'
+model_name = 'AE_rays_2021-01-04 14:00:13.355296_backup.pt'
 model_path = MODELS_ROOT + model_name
 
 
@@ -27,14 +27,13 @@ else:
 
 # ae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
 ae = ConvPlainAE(image_dim=image_size, image_channels=image_channels)
+ae.load_state_dict(torch.load(model_path))
+ae.eval()
 
 train_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset_root + 'training_' + dataset + '.pt')
 test_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset_root + 'test_' + dataset + '.pt')
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
-
-ae.load_state_dict(torch.load(model_path))
-ae.eval()
 
 rand_sample_idx = random.randint(0, 500)
 rand_sample = next(itertools.islice(train_loader, rand_sample_idx, None))

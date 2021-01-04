@@ -20,7 +20,7 @@ else:
 train_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset_root + 'training_' + dataset + '.pt')
 test_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset_root + 'test_' + dataset + '.pt')
 
-train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size,
+train_loader = torch.utils.data.DataLoader(dataset=train_dataset[1, :, :, :].unsqueeze(0), batch_size=batch_size,
                                            shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
@@ -29,4 +29,4 @@ vae = ConvPlainAE(image_dim=image_size, image_channels=image_channels)
 lr = 1e-3
 optimizer = optim.Adam(vae.parameters(), lr=lr)
 
-train_ae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=300, optimizer=optimizer, dataset=dataset)
+train_ae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=600, optimizer=optimizer, dataset=dataset)

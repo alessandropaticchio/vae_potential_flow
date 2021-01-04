@@ -3,9 +3,9 @@ from constants import *
 import random
 import matplotlib.pyplot as plt
 
-potential_model_name = 'AE_potential_2021-01-02 17:43:39.774670.pt'
-rays_model_name = 'AE_rays_2021-01-04 11:50:24.176853.pt'
-mapper_model_name = 'Mapper_2021-01-04 12:23:54.121672.pt'
+potential_model_name = 'AE_potential_2021-01-04 13:23:13.345772.pt'
+rays_model_name = 'AE_rays_2021-01-04 13:15:21.083189.pt'
+mapper_model_name = 'Mapper_2021-01-04 13:34:56.491703.pt'
 potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
 mapper_model_path = MODELS_ROOT + mapper_model_name

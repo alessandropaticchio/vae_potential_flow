@@ -3,8 +3,8 @@ from models import ConvPlainAE
 from utils import EncodedDataset
 import torch
 
-potential_model_name = 'AE_potential_2021-01-02 17:43:39.774670.pt'
-rays_model_name = 'AE_rays_2021-01-04 11:50:24.176853.pt'
+potential_model_name = 'AE_potential_2021-01-04 13:23:13.345772.pt'
+rays_model_name = 'AE_rays_2021-01-04 13:15:21.083189.pt'
 potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
 

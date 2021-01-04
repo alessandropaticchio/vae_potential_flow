@@ -1,6 +1,6 @@
 from constants import *
 from models import Mapper, ConvMapper
-from training import train_mapper, train_conv_mapper
+from training import train_mapper
 import torch.optim as optim
 
 mapper_type = 'conv'

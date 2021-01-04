@@ -98,6 +98,11 @@ def train_ae(net, train_loader, test_loader, epochs, optimizer, dataset):
         print('Epoch: {} Average loss: {:.8f}'.format(epoch, train_loss / len(train_loader.dataset)))
         test_loss = test_ae(net, test_loader)
 
+        #  Backup save
+        if epoch % 150 == 0 and epoch != 0:
+            # Save the model at current date and time
+            torch.save(net.state_dict(), MODELS_ROOT + 'AE_' + dataset + '_' + now + '_backup.pt')
+
         writer.add_scalar('Loss/log_train', np.log(train_loss / len(train_loader.dataset)), epoch)
         writer.add_scalar('Loss/log_test', np.log(test_loss / len(test_loader.dataset)), epoch)
 
@@ -119,6 +124,7 @@ def test_ae(net, test_loader):
 
     print('Test set loss: {:.8f}'.format(test_loss))
     return test_loss
+
 
 def train_mapper(net, train_loader, test_loader, epochs, optimizer):
     now = str(datetime.now())

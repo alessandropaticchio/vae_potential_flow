@@ -129,7 +129,6 @@ class Mapper(nn.Module):
         for k in range(len(h_sizes) - 1):
             self.hidden.append(nn.Linear(h_sizes[k], h_sizes[k + 1]))
 
-
     def forward(self, x):
         for i, layer in enumerate(self.hidden):
             if i != len(self.hidden) - 1:
@@ -144,14 +143,34 @@ class ConvMapper(nn.Module):
     def __init__(self, n_layers, potential_encoded_size, rays_encoded_size):
         super(ConvMapper, self).__init__()
         scale_factor = rays_encoded_size / potential_encoded_size
-        self.hidden = nn.ModuleList()
+
+        self.conv1 = nn.Conv2d(in_channels=8, out_channels=8, kernel_size=1, stride=1, padding=0)
+        self.relu1 = nn.ReLU()
+
+        self.conv2 = nn.Conv2d(in_channels=8, out_channels=8, kernel_size=1, stride=1, padding=0)
+        self.relu2 = nn.ReLU()
+
+        self.conv3 = nn.Conv2d(in_channels=8, out_channels=8, kernel_size=1, stride=1, padding=0)
+        self.relu3 = nn.ReLU()
+
         self.upsample = nn.Upsample(scale_factor=scale_factor)
-        for k in range(n_layers - 1):
-            self.hidden.append(nn.Conv2d(in_channels=8, out_channels=8, kernel_size=1, stride=1, padding=0))
+
+        self.conv4 = nn.Conv2d(in_channels=8, out_channels=8, kernel_size=1, stride=1, padding=0)
+        self.relu4 = nn.ReLU()
 
     def forward(self, x):
-        for i, layer in enumerate(self.hidden):
-            if i == len(self.hidden) - 2:
-                x = self.upsample(x)
-            x = F.relu(layer(x))
+        x = self.conv1(x)
+        x = self.relu1(x)
+
+        x = self.conv2(x)
+        x = self.relu2(x)
+
+        x = self.conv3(x)
+        x = self.relu3(x)
+
+        x = self.upsample(x)
+
+        x = self.conv4(x)
+        x = self.relu4(x)
+
         return x
