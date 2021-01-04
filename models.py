@@ -129,10 +129,29 @@ class Mapper(nn.Module):
         for k in range(len(h_sizes) - 1):
             self.hidden.append(nn.Linear(h_sizes[k], h_sizes[k + 1]))
 
+
     def forward(self, x):
         for i, layer in enumerate(self.hidden):
             if i != len(self.hidden) - 1:
                 x = F.relu(layer(x))
             else:
                 x = layer(x)
+        return x
+
+
+class ConvMapper(nn.Module):
+
+    def __init__(self, n_layers, potential_encoded_size, rays_encoded_size):
+        super(ConvMapper, self).__init__()
+        scale_factor = rays_encoded_size / potential_encoded_size
+        self.hidden = nn.ModuleList()
+        self.upsample = nn.Upsample(scale_factor=scale_factor)
+        for k in range(n_layers - 1):
+            self.hidden.append(nn.Conv2d(in_channels=8, out_channels=8, kernel_size=1, stride=1, padding=0))
+
+    def forward(self, x):
+        for i, layer in enumerate(self.hidden):
+            if i == len(self.hidden) - 2:
+                x = self.upsample(x)
+            x = F.relu(layer(x))
         return x
