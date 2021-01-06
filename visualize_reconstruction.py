@@ -8,7 +8,7 @@ import itertools
 batch_size = 1
 
 dataset = 'rays'
-model_name = 'AE_rays_2021-01-04 14:00:13.355296_backup.pt'
+model_name = 'AE_rays_2021-01-05 18:48:05.829239.pt'
 model_path = MODELS_ROOT + model_name
 
 

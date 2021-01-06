@@ -26,6 +26,7 @@ vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_
 vae.load_state_dict(torch.load(model_path))
 vae.eval()
 
+
 encodings = []
 
 max_samples = 500

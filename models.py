@@ -79,11 +79,13 @@ class ConvPlainAE(nn.Module):
         self.image_channels = image_channels
         self.image_dim = image_dim
 
+        # Encoder
         self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=8, kernel_size=1, stride=1)
         self.relu1 = nn.ReLU()
 
         self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
 
+        # Decoder
         self.conv2 = nn.Conv2d(in_channels=8, out_channels=8, kernel_size=1, stride=1, padding=0)
         self.relu2 = nn.ReLU()
 
@@ -140,23 +142,22 @@ class Mapper(nn.Module):
 
 class ConvMapper(nn.Module):
 
-    def __init__(self, n_layers, potential_encoded_size, rays_encoded_size):
+    def __init__(self, potential_encoded_size, rays_encoded_size):
         super(ConvMapper, self).__init__()
         scale_factor = rays_encoded_size / potential_encoded_size
 
-        self.conv1 = nn.Conv2d(in_channels=8, out_channels=8, kernel_size=1, stride=1, padding=0)
+        self.conv1 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=1, stride=1, padding=0)
         self.relu1 = nn.ReLU()
 
-        self.conv2 = nn.Conv2d(in_channels=8, out_channels=8, kernel_size=1, stride=1, padding=0)
+        self.conv2 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, stride=1, padding=1)
         self.relu2 = nn.ReLU()
 
-        self.conv3 = nn.Conv2d(in_channels=8, out_channels=8, kernel_size=1, stride=1, padding=0)
+        self.conv3 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, stride=1, padding=1)
         self.relu3 = nn.ReLU()
 
         self.upsample = nn.Upsample(scale_factor=scale_factor)
 
-        self.conv4 = nn.Conv2d(in_channels=8, out_channels=8, kernel_size=1, stride=1, padding=0)
-        self.relu4 = nn.ReLU()
+        self.conv4 = nn.Conv2d(in_channels=16, out_channels=8, kernel_size=1, stride=1, padding=0)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -171,6 +172,5 @@ class ConvMapper(nn.Module):
         x = self.upsample(x)
 
         x = self.conv4(x)
-        x = self.relu4(x)
 
         return x

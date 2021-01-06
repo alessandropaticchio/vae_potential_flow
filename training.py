@@ -149,6 +149,11 @@ def train_mapper(net, train_loader, test_loader, epochs, optimizer):
         print('Epoch: {} Average loss: {:.8f}'.format(epoch, train_loss / len(train_loader.dataset)))
         test_loss = test_mapper(net, test_loader)
 
+        #  Backup save
+        if epoch % 50 == 0 and epoch != 0:
+            # Save the model at current date and time
+            torch.save(net.state_dict(), MODELS_ROOT + 'Mapper_' + now + '_backup.pt')
+
         writer.add_scalar('Loss/log_train', np.log(train_loss / len(train_loader.dataset)), epoch)
         writer.add_scalar('Loss/log_test', np.log(test_loss / len(test_loader.dataset)), epoch)
 
