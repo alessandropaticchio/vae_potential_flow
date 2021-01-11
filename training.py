@@ -118,6 +118,7 @@ def test_vae(net, test_loader, recon_weight, kl_weight):
 
 # return reconstruction error + KL divergence losses
 def loss_function_vae(recon_x, x, mu, log_var, recon_weight, kl_weight):
-    BCE = F.binary_cross_entropy(recon_x, x.view(-1, 784), reduction='sum') * recon_weight
+    # BCE = F.binary_cross_entropy(recon_x, x.view(-1, 784), reduction='sum') * recon_weight
+    BCE = F.binary_cross_entropy(recon_x, x, reduction='sum') * recon_weight
     KLD = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp()) * kl_weight
     return BCE + KLD, BCE, KLD

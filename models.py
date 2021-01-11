@@ -120,7 +120,7 @@ class ConvVAE(nn.Module):
         x = self.fc(z)
 
         # Unflattening
-        x = x.view(x.size(0), 32, 10, 10)
+        x = x.view(x.size(0), 32, 14, 14)
 
         x = self.conv2(x)
         x = self.relu2(x)
