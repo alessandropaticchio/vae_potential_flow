@@ -6,7 +6,7 @@ import torch.optim as optim
 
 batch_size = 128
 
-dataset = 'rays'
+dataset = 'potential'
 
 if dataset == 'rays':
     image_size = RAYS_IMAGE_SIZE

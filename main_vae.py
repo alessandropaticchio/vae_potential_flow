@@ -1,5 +1,5 @@
 from training import train_vae, train_ae
-from models import ConvVAE, DeConvVAE, ConvPlainAE
+from models import ConvVAE, ConvPlainAE
 from constants import *
 import torch
 import torch.optim as optim
@@ -17,11 +17,12 @@ test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch
 if dataset == 'rays':
     image_size = RAYS_IMAGE_SIZE
     hidden_size = RAYS_HIDDEN_SIZE
-    latent_size = int(hidden_size / 2)
     image_channels = RAYS_IMAGE_CHANNELS
 else:
     image_size = POTENTIAL_IMAGE_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
+    hidden_size = POTENTIAL_HIDDEN_SIZE
+latent_size = int(hidden_size / 2)
 
 vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
 

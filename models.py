@@ -217,6 +217,8 @@ class ConvWholeMapper(nn.Module):
 
         x_prime = self.decode(x_map)
 
+        x_prime = self.decode(x)
+
         return x_prime
 
     def encode(self, x):
