@@ -1,6 +1,6 @@
 from constants import *
 from models import ConvPlainAE
-from utils import EncodedDataset
+from utils import MyDataset
 import torch
 
 potential_model_name = 'AE_potential_2021-01-05 15:44:23.618717.pt'
@@ -74,8 +74,8 @@ encoded_train_set_y = encoded_train_set_y[1:]
 encoded_test_set_X = encoded_test_set_X[1:]
 encoded_test_set_y = encoded_test_set_y[1:]
 
-encoded_test_set = EncodedDataset(x=encoded_test_set_X, y=encoded_test_set_y)
-encoded_train_set = EncodedDataset(x=encoded_train_set_X, y=encoded_train_set_y)
+encoded_test_set = MyDataset(x=encoded_test_set_X, y=encoded_test_set_y)
+encoded_train_set = MyDataset(x=encoded_train_set_X, y=encoded_train_set_y)
 
 torch.save(encoded_train_set, DATA_ROOT + '/plain_mapped/training.pt')
 torch.save(encoded_test_set, DATA_ROOT + '/plain_mapped/test.pt')

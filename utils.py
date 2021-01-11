@@ -1,7 +1,7 @@
 from torch.utils.data import Dataset
 
 
-class EncodedDataset(Dataset):
+class MyDataset(Dataset):
     def __init__(self, x, y):
         self.X = x
         self.y = y

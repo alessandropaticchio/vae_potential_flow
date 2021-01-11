@@ -24,7 +24,7 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=bat
                                            shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
-vae = ConvPlainAE(image_dim=image_size, image_channels=image_channels)
+vae = ConvPlainAE(image_channels=image_channels)
 
 lr = 1e-3
 optimizer = optim.Adam(vae.parameters(), lr=lr)

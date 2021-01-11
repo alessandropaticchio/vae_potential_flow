@@ -4,10 +4,9 @@ import torch
 
 
 class ConvVAE(nn.Module):
-    def __init__(self, image_dim, hidden_size, latent_size, image_channels=3):
+    def __init__(self, hidden_size, latent_size, image_channels=3):
         super(ConvVAE, self).__init__()
         self.image_channels = image_channels
-        self.image_dim = image_dim
         self.hidden_size = hidden_size
         self.latent_size = latent_size
 
@@ -74,10 +73,9 @@ class ConvVAE(nn.Module):
 
 
 class ConvPlainAE(nn.Module):
-    def __init__(self, image_dim, image_channels=3):
+    def __init__(self, image_channels=3):
         super(ConvPlainAE, self).__init__()
         self.image_channels = image_channels
-        self.image_dim = image_dim
 
         # Encoder
         self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=8, kernel_size=1, stride=1)
@@ -149,10 +147,10 @@ class ConvMapper(nn.Module):
         self.conv1 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=1, stride=1, padding=0)
         self.relu1 = nn.ReLU()
 
-        self.conv2 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=1, stride=1, padding=0)
         self.relu2 = nn.ReLU()
 
-        self.conv3 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, stride=1, padding=1)
+        self.conv3 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=1, stride=1, padding=0)
         self.relu3 = nn.ReLU()
 
         self.upsample = nn.Upsample(scale_factor=scale_factor)
@@ -172,5 +170,87 @@ class ConvMapper(nn.Module):
         x = self.upsample(x)
 
         x = self.conv4(x)
+
+        return x
+
+
+class ConvWholeMapper(nn.Module):
+    def __init__(self, potential_encoded_size, rays_encoded_size, image_channels=3):
+        super(ConvWholeMapper, self).__init__()
+        self.image_channels = image_channels
+        scale_factor = rays_encoded_size / potential_encoded_size
+
+        # Encoder
+        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=8, kernel_size=1, stride=1)
+        self.relu1 = nn.ReLU()
+
+        self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
+
+        # Mapping
+        self.conv1_map = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=1, stride=1, padding=0)
+        self.relu1_map = nn.ReLU()
+
+        self.conv2_map = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=1, stride=1, padding=0)
+        self.relu2_map = nn.ReLU()
+
+        self.conv3_map = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=1, stride=1, padding=0)
+        self.relu3_map = nn.ReLU()
+
+        self.upsample_map = nn.Upsample(scale_factor=scale_factor)
+
+        self.conv4_map = nn.Conv2d(in_channels=16, out_channels=8, kernel_size=1, stride=1, padding=0)
+
+        # Decoder
+        self.conv2 = nn.Conv2d(in_channels=8, out_channels=8, kernel_size=1, stride=1, padding=0)
+        self.relu2 = nn.ReLU()
+
+        self.upsample1 = nn.Upsample(scale_factor=2)
+
+        self.conv3 = nn.Conv2d(in_channels=8, out_channels=image_channels, kernel_size=3, stride=1, padding=1)
+
+        self.output = nn.Sigmoid()
+
+    def forward(self, x):
+        x = self.encode(x)
+
+        x_map = self.map(x)
+
+        x_prime = self.decode(x_map)
+
+        return x_prime
+
+    def encode(self, x):
+        x = self.conv1(x)
+        x = self.relu1(x)
+
+        x = self.maxpool1(x)
+
+        return x
+
+    def decode(self, x):
+        x = self.conv2(x)
+        x = self.relu2(x)
+
+        x = self.upsample1(x)
+
+        x = self.conv3(x)
+
+        x_prime = self.output(x)
+
+        return x_prime
+
+    def map(self, x):
+        x = self.conv1_map(x)
+        x = self.relu1_map(x)
+
+        x = self.conv2_map(x)
+        x = self.relu2_map(x)
+
+        x = self.conv3_map(x)
+        x = self.relu3_map(x)
+
+        x = self.upsample_map(x)
+
+        x = self.conv4_map(x)
 
         return x

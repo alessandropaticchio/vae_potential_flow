@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 potential_model_name = 'AE_potential_2021-01-05 15:44:23.618717.pt'
 rays_model_name = 'AE_rays_2021-01-05 18:48:05.829239.pt'
-mapper_model_name = 'Mapper_2021-01-06 10:00:11.248370.pt'
+mapper_model_name = 'Mapper_2021-01-07 09:32:57.292369_backup.pt'
 potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
 mapper_model_path = MODELS_ROOT + mapper_model_name
@@ -17,11 +17,11 @@ potential_test_dataset = torch.load(DATA_ROOT + 'real_data/' + POTENTIAL_ROOT + 
 rays_train_dataset = torch.load(DATA_ROOT + 'real_data/' + RAYS_ROOT + 'training_' + 'rays' + '.pt')
 rays_test_dataset = torch.load(DATA_ROOT + 'real_data/' + RAYS_ROOT + 'test_' + 'rays' + '.pt')
 
-potential_ae = ConvPlainAE(image_dim=POTENTIAL_IMAGE_SIZE, image_channels=POTENTIAL_IMAGE_CHANNELS)
+potential_ae = ConvPlainAE(image_channels=POTENTIAL_IMAGE_CHANNELS)
 potential_ae.load_state_dict(torch.load(potential_model_path))
 potential_ae.eval()
 
-rays_ae = ConvPlainAE(image_dim=RAYS_IMAGE_SIZE, image_channels=RAYS_IMAGE_CHANNELS)
+rays_ae = ConvPlainAE(image_channels=RAYS_IMAGE_CHANNELS)
 rays_ae.load_state_dict(torch.load(rays_model_path))
 rays_ae.eval()
 
