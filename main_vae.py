@@ -12,7 +12,7 @@ test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch
 
 if vae_type == 'conv':
     hidden_size = 32
-    vae = ConvVAE(image_dim=28, hidden_size=hidden_size, latent_size=hidden_size/2, image_channels=3)
+    vae = ConvVAE(image_dim=28, hidden_size=hidden_size, latent_size=int(hidden_size/2), image_channels=1)
 else:
     vae = LinearVAE()
     
