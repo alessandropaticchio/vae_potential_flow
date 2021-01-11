@@ -174,3 +174,88 @@ class ConvMapper(nn.Module):
         x = self.conv4(x)
 
         return x
+
+
+class PotentialMapperRaysNN(nn.Module):
+
+    def __init__(self, image_channels_potential, image_channels_rays, potential_encoded_size, rays_encoded_size):
+        super(PotentialMapperRaysNN, self).__init__()
+        scale_factor = rays_encoded_size / potential_encoded_size
+
+        self.image_channels_potential = image_channels_potential
+        self.image_channels_rays = image_channels_rays
+
+        # Encoder
+        self.conv1 = nn.Conv2d(in_channels=image_channels_potential, out_channels=8, kernel_size=1, stride=1)
+        self.relu1 = nn.ReLU()
+
+        self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
+
+        # Mapper
+        self.conv4 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=1, stride=1, padding=0)
+        self.relu4 = nn.ReLU()
+
+        self.conv5 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, stride=1, padding=1)
+        self.relu5 = nn.ReLU()
+
+        self.conv6 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, stride=1, padding=1)
+        self.relu6 = nn.ReLU()
+
+        self.upsample1 = nn.Upsample(scale_factor=scale_factor)
+
+        self.conv7 = nn.Conv2d(in_channels=16, out_channels=8, kernel_size=1, stride=1, padding=0)
+
+        # Decoder
+        self.conv2 = nn.Conv2d(in_channels=8, out_channels=8, kernel_size=1, stride=1, padding=0)
+        self.relu2 = nn.ReLU()
+
+        self.upsample2 = nn.Upsample(scale_factor=2)
+
+        self.conv3 = nn.Conv2d(in_channels=8, out_channels=image_channels_rays, kernel_size=3, stride=1, padding=1)
+
+        self.output = nn.Sigmoid()
+
+    def forward(self, x):
+        x = self.encode(x)
+
+        x = self.mapper(x)
+
+        x_prime = self.decode(x)
+
+        return x_prime
+
+    def encode(self, x):
+        x = self.conv1(x)
+        x = self.relu1(x)
+
+        x = self.maxpool1(x)
+
+        return x
+
+    def decode(self, x):
+        x = self.conv2(x)
+        x = self.relu2(x)
+
+        x = self.upsample2(x)
+
+        x = self.conv3(x)
+
+        x_prime = self.output(x)
+
+        return x_prime
+
+    def mapper(self, x):
+        x = self.conv4(x)
+        x = self.relu4(x)
+
+        x = self.conv5(x)
+        x = self.relu5(x)
+
+        x = self.conv6(x)
+        x = self.relu6(x)
+
+        x = self.upsample1(x)
+
+        x = self.conv7(x)
+
+        return x

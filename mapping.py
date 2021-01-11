@@ -3,8 +3,8 @@ from models import ConvPlainAE
 from utils import EncodedDataset
 import torch
 
-potential_model_name = 'AE_potential_2021-01-05 15:44:23.618717.pt'
-rays_model_name = 'AE_rays_2021-01-05 18:48:05.829239.pt'
+potential_model_name = 'AE_potential_2021-01-08 17:34:36.296097.pt'
+rays_model_name = 'AE_rays_2021-01-08 17:13:55.022048.pt'
 potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
 
@@ -24,15 +24,15 @@ rays_train_dataset = torch.load(DATA_ROOT + 'real_data/' + RAYS_ROOT + 'training
 rays_test_dataset = torch.load(DATA_ROOT + 'real_data/' + RAYS_ROOT + 'test_' + 'rays' + '.pt')
 
 if mapper_type == 'conv':
-    encoded_train_set_X = torch.empty(1, POTENTIAL_ENCODED_IMAGE_SIZE[0],
-                                      POTENTIAL_ENCODED_IMAGE_SIZE[1], POTENTIAL_ENCODED_IMAGE_SIZE[2])
-    encoded_train_set_y = torch.empty(1, RAYS_ENCODED_IMAGE_SIZE[0],
-                                      RAYS_ENCODED_IMAGE_SIZE[1], RAYS_ENCODED_IMAGE_SIZE[2])
+    encoded_train_set_X = torch.empty(1, POTENTIAL_IMAGE_CHANNELS,
+                                      POTENTIAL_IMAGE_SIZE, POTENTIAL_IMAGE_SIZE)
+    encoded_train_set_y = torch.empty(1, RAYS_IMAGE_CHANNELS,
+                                      RAYS_IMAGE_SIZE, RAYS_IMAGE_SIZE)
 
-    encoded_test_set_X = torch.empty(1, POTENTIAL_ENCODED_IMAGE_SIZE[0],
-                                     POTENTIAL_ENCODED_IMAGE_SIZE[1], POTENTIAL_ENCODED_IMAGE_SIZE[2])
-    encoded_test_set_y = torch.empty(1, RAYS_ENCODED_IMAGE_SIZE[0],
-                                     RAYS_ENCODED_IMAGE_SIZE[1], RAYS_ENCODED_IMAGE_SIZE[2])
+    encoded_test_set_X = torch.empty(1, POTENTIAL_IMAGE_CHANNELS,
+                                      POTENTIAL_IMAGE_SIZE, POTENTIAL_IMAGE_SIZE)
+    encoded_test_set_y = torch.empty(1, RAYS_IMAGE_CHANNELS,
+                                      RAYS_IMAGE_SIZE, RAYS_IMAGE_SIZE)
 else:
     encoded_train_set_X = torch.empty(1, POTENTIAL_ENCODED_SIZE)
     encoded_train_set_y = torch.empty(1, RAYS_ENCODED_SIZE)
@@ -51,8 +51,8 @@ for i, sample in enumerate(potential_train_dataset):
         potential_sample_encoded = potential_sample_encoded.view(potential_sample_encoded.size(0), -1)
         rays_sample_encoded = rays_sample_encoded.view(rays_sample_encoded.size(0), -1)
 
-    encoded_train_set_X = torch.cat((encoded_train_set_X, potential_sample_encoded), 0)
-    encoded_train_set_y = torch.cat((encoded_train_set_y, rays_sample_encoded), 0)
+    encoded_train_set_X = torch.cat((encoded_train_set_X, sample.unsqueeze(0)), 0)
+    encoded_train_set_y = torch.cat((encoded_train_set_y, rays_train_dataset[i].unsqueeze(0)), 0)
 
 # Test set generation
 for i, sample in enumerate(potential_test_dataset):
@@ -65,8 +65,8 @@ for i, sample in enumerate(potential_test_dataset):
         potential_sample_encoded = potential_sample_encoded.view(potential_sample_encoded.size(0), -1)
         rays_sample_encoded = rays_sample_encoded.view(rays_sample_encoded.size(0), -1)
 
-    encoded_test_set_X = torch.cat((encoded_test_set_X, potential_sample_encoded), 0)
-    encoded_test_set_y = torch.cat((encoded_test_set_y, rays_sample_encoded), 0)
+    encoded_test_set_X = torch.cat((encoded_test_set_X, sample.unsqueeze(0)), 0)
+    encoded_test_set_y = torch.cat((encoded_test_set_y, rays_train_dataset[i].unsqueeze(0)), 0)
 
 #  First tensor is meaningless
 encoded_train_set_X = encoded_train_set_X[1:]
@@ -77,5 +77,5 @@ encoded_test_set_y = encoded_test_set_y[1:]
 encoded_test_set = EncodedDataset(x=encoded_test_set_X, y=encoded_test_set_y)
 encoded_train_set = EncodedDataset(x=encoded_train_set_X, y=encoded_train_set_y)
 
-torch.save(encoded_train_set, DATA_ROOT + '/plain_mapped/training.pt')
-torch.save(encoded_test_set, DATA_ROOT + '/plain_mapped/test.pt')
+torch.save(encoded_train_set, DATA_ROOT + '/mapped/training.pt')
+torch.save(encoded_test_set, DATA_ROOT + '/mapped/test.pt')
