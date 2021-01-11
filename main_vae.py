@@ -1,14 +1,21 @@
 from fashion_mnist_downloader import train_dataset, test_dataset
-from models import LinearVAE
+from models import LinearVAE, ConvVAE
 from training import train_vae
 import torch
 import torch.optim as optim
+
+vae_type = 'conv'
 
 batch_size = 100
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
-vae = LinearVAE()
+if vae_type == 'conv':
+    hidden_size = 32
+    vae = ConvVAE(image_dim=28, hidden_size=hidden_size, latent_size=hidden_size/2, image_channels=3)
+else:
+    vae = LinearVAE()
+    
 optimizer = optim.Adam(vae.parameters())
 
 if torch.cuda.is_available():

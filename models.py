@@ -148,3 +148,40 @@ class Mapper(nn.Module):
             else:
                 x = layer(x)
         return x
+
+
+class ConvMapper(nn.Module):
+
+    def __init__(self, potential_encoded_size, rays_encoded_size):
+        super(ConvMapper, self).__init__()
+        scale_factor = rays_encoded_size / potential_encoded_size
+
+        self.conv1 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=1, stride=1, padding=0)
+        self.relu1 = nn.ReLU()
+
+        self.conv2 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, stride=1, padding=1)
+        self.relu2 = nn.ReLU()
+
+        self.conv3 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, stride=1, padding=1)
+        self.relu3 = nn.ReLU()
+
+        self.upsample = nn.Upsample(scale_factor=scale_factor)
+
+        self.conv4 = nn.Conv2d(in_channels=16, out_channels=8, kernel_size=1, stride=1, padding=0)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.relu1(x)
+
+        x = self.conv2(x)
+        x = self.relu2(x)
+
+        x = self.conv3(x)
+        x = self.relu3(x)
+
+        x = self.upsample(x)
+
+        x = self.conv4(x)
+
+        return x
+
