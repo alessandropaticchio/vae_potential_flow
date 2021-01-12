@@ -7,6 +7,7 @@ from fashion_mnist_downloader import train_dataset as fashion_mnist_train_datase
 from utils import EncodedDataset
 import torch
 
+mapper_type = 'lin'
 
 mnist_model_name = 'MNIST_VAE_2020-12-07 09:50:15.947882.pt'
 fashion_mnist_model_name = 'Fashion_MNIST_VAE_2020-12-07 10:02:43.350691.pt'
@@ -28,11 +29,18 @@ fashion_mnist_test_targets = fashion_mnist_test_dataset.targets
 
 targets = range(0, 9)
 
-encoded_train_set_X = torch.empty((1, 1, 32))
-encoded_train_set_y = torch.empty((1, 1, 32))
+if mapper_type == 'conv':
+    encoded_train_set_X = torch.empty((1, 1, 32))
+    encoded_train_set_y = torch.empty((1, 1, 32))
 
-encoded_test_set_X = torch.empty((1, 1, 32))
-encoded_test_set_y = torch.empty((1, 1, 32))
+    encoded_test_set_X = torch.empty((1, 1, 32))
+    encoded_test_set_y = torch.empty((1, 1, 32))
+else:
+    encoded_train_set_X = torch.empty((1, 1, 32))
+    encoded_train_set_y = torch.empty((1, 1, 32))
+
+    encoded_test_set_X = torch.empty((1, 1, 32))
+    encoded_test_set_y = torch.empty((1, 1, 32))
 
 for target in targets:
     mnist_train_indeces = (mnist_train_targets == target).nonzero().flatten().tolist()

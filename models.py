@@ -71,7 +71,7 @@ class ConvVAE(nn.Module):
         self.hidden_size = hidden_size
         self.latent_size = latent_size
 
-        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=32, kernel_size=1, stride=1)
+        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=16, kernel_size=1, stride=1)
         self.relu1 = nn.ReLU()
 
         self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
@@ -80,12 +80,12 @@ class ConvVAE(nn.Module):
         self.encoder_logvar = nn.Linear(hidden_size, latent_size)
         self.fc = nn.Linear(latent_size, hidden_size)
 
-        self.conv2 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=1, stride=1, padding=0)
+        self.conv2 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=1, stride=1, padding=0)
         self.relu2 = nn.ReLU()
 
         self.upsample1 = nn.Upsample(scale_factor=2)
 
-        self.conv3 = nn.Conv2d(in_channels=32, out_channels=image_channels, kernel_size=3, stride=1, padding=1)
+        self.conv3 = nn.Conv2d(in_channels=16, out_channels=image_channels, kernel_size=3, stride=1, padding=1)
 
         self.output = nn.Sigmoid()
 
@@ -120,7 +120,7 @@ class ConvVAE(nn.Module):
         x = self.fc(z)
 
         # Unflattening
-        x = x.view(x.size(0), 32, 14, 14)
+        x = x.view(x.size(0), 16, 14, 14)
 
         x = self.conv2(x)
         x = self.relu2(x)

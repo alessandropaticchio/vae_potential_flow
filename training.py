@@ -4,6 +4,7 @@ from torch.nn import MSELoss
 import torch
 import torch.nn.functional as F
 from torch.utils.tensorboard import SummaryWriter
+import numpy as np
 
 
 def train_mapper(net, train_loader, test_loader, epochs, optimizer):
@@ -122,3 +123,72 @@ def loss_function_vae(recon_x, x, mu, log_var, recon_weight, kl_weight):
     BCE = F.binary_cross_entropy(recon_x, x, reduction='sum') * recon_weight
     KLD = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp()) * kl_weight
     return BCE + KLD, BCE, KLD
+
+
+def train_cvae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., dataset='MNIST'):
+    now = str(datetime.now())
+    writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + now))
+    net = net.to(device)
+    net.train()
+    for epoch in range(epochs):
+        train_loss = 0.
+        recon_loss = 0.
+        kld_loss = 0.
+        for batch_idx, (data, _) in enumerate(train_loader):
+            data = data.to(device)
+            optimizer.zero_grad()
+
+            recon_batch, mu, log_var = net(data)
+            batch_loss, batch_recon_loss, batch_kld_loss = loss_function_cvae(recon_batch, data, mu, log_var,
+                                                                             recon_weight,
+                                                                             kl_weight)
+
+            batch_loss.backward()
+
+            #  Gradients norm plotting
+            for name, param in net.named_parameters():
+                writer.add_scalar(name, np.linalg.norm(param.grad.data.cpu()),
+                                  (batch_idx + 1) + (batch_idx + 1) * (epoch + 1))
+
+            train_loss += batch_loss.item()
+            recon_loss += batch_recon_loss.item()
+            kld_loss += batch_kld_loss.item()
+
+            optimizer.step()
+
+        print('Epoch: {} Average loss: {:.8f}'.format(epoch + 1, train_loss / len(train_loader.dataset)))
+
+        test_loss = test_cvae(net, test_loader, recon_weight, kl_weight)
+
+        writer.add_scalar('Loss/log_train', np.log(train_loss / len(train_loader.dataset)), epoch)
+        writer.add_scalar('Loss/log_recon_train', np.log(recon_loss / len(train_loader.dataset)), epoch)
+        writer.add_scalar('Loss/log_kld_train', np.log(kld_loss / len(train_loader.dataset)), epoch)
+        writer.add_scalar('Loss/log_test', np.log(test_loss / len(test_loader.dataset)), epoch)
+
+    # Save the model at current date and time
+    torch.save(net.state_dict(), MODELS_ROOT + dataset + '_VAE_' + now + '.pt')
+
+
+def test_cvae(net, test_loader, recon_weight, kl_weight):
+    net.eval()
+    net = net.to(device)
+    test_loss = 0
+    with torch.no_grad():
+        for data in test_loader:
+            data = data.to(device)
+            recon, mu, log_var = net(data)
+
+            # sum up batch loss
+            test_loss += loss_function_cvae(recon, data, mu, log_var, recon_weight, kl_weight)[0].item()
+
+    print('Test set loss: {:.8f}'.format(test_loss / len(test_loader.dataset)))
+
+    return test_loss
+
+
+# return reconstruction error + KL divergence losses
+def loss_function_cvae(recon_x, x, mu, log_var, recon_weight, kl_weight):
+    recon = F.mse_loss(recon_x, x, reduction='sum') * recon_weight
+    # recon = F.binary_cross_entropy(recon_x, x, reduction='sum') * recon_weight
+    KLD = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp()) * kl_weight
+    return recon + KLD, recon, KLD
