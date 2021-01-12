@@ -95,9 +95,9 @@ class ConvVAE(nn.Module):
         return mean + eps * std
 
     def forward(self, x):
-        mean, log_var = self.encode(x)
+        x, mean, log_var = self.encode(x)
 
-        x = self.decode(mean=mean, log_var=log_var)
+        x = self.decode(x)
 
         return x, mean, log_var
 
@@ -113,11 +113,12 @@ class ConvVAE(nn.Module):
         mean = self.encoder_mean(x)
         log_var = self.encoder_logvar(x)
 
-        return mean, log_var
-
-    def decode(self, mean, log_var):
         z = self.reparametrize(mean=mean, log_var=log_var)
         x = self.fc(z)
+
+        return x, mean, log_var
+
+    def decode(self, x):
 
         # Unflattening
         x = x.view(x.size(0), 16, 14, 14)
@@ -156,18 +157,18 @@ class ConvMapper(nn.Module):
         super(ConvMapper, self).__init__()
         scale_factor = rays_encoded_size / potential_encoded_size
 
-        self.conv1 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=1, stride=1, padding=0)
+        self.conv1 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=1, stride=1, padding=0)
         self.relu1 = nn.ReLU()
 
-        self.conv2 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3, stride=1, padding=1)
         self.relu2 = nn.ReLU()
 
-        self.conv3 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, stride=1, padding=1)
+        self.conv3 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3, stride=1, padding=1)
         self.relu3 = nn.ReLU()
 
         self.upsample = nn.Upsample(scale_factor=scale_factor)
 
-        self.conv4 = nn.Conv2d(in_channels=16, out_channels=8, kernel_size=1, stride=1, padding=0)
+        self.conv4 = nn.Conv2d(in_channels=32, out_channels=16, kernel_size=1, stride=1, padding=0)
 
     def forward(self, x):
         x = self.conv1(x)
