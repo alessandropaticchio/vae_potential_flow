@@ -1,9 +1,9 @@
 from models import LinearVAE, ConvVAE
-from training import train_vae, train_cvae
+from training import train_vae
 import torch
 import torch.optim as optim
 
-vae_type = 'lin'
+vae_type = 'conv'
 dataset = 'MNIST'
 
 if dataset == 'MNIST':
@@ -31,4 +31,4 @@ recon_weight = 1.
 kl_weight = 1.
 
 train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=50, optimizer=optimizer,
-          recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset)
+          recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset, nn_type=vae_type)
