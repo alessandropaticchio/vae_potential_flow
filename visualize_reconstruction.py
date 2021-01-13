@@ -21,7 +21,7 @@ model_name = 'MNIST_VAE_2021-01-11 22:54:43.183412.pt'
 model_path = MODELS_ROOT + model_name
 
 if vae_type == 'conv':
-    hidden_size = 3136
+    hidden_size = 1568
     vae = ConvVAE(image_dim=28, hidden_size=hidden_size, latent_size=int(hidden_size / 2), image_channels=1)
 else:
     vae = LinearVAE()
