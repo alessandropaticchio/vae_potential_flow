@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import torch
 
 vae_type = 'conv'
-dataset = 'Fashion_MNIST'
+dataset = 'MNIST'
 subset = True
 
 if subset:
@@ -15,7 +15,7 @@ else:
 batch_size = 1
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 
-model_name = 'Fashion_MNIST_VAE_2021-01-16 15:59:52.537353.pt'
+model_name = 'Fashion_MNIST_VAE_2021-01-17 15:25:48.940916.pt'
 model_path = MODELS_ROOT + model_name
 
 if vae_type == 'conv':

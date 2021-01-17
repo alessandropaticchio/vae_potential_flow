@@ -1,9 +1,10 @@
 from constants import *
 from datetime import datetime
 from torch.nn import MSELoss
+from torch.utils.tensorboard import SummaryWriter
 import torch
 import torch.nn.functional as F
-from torch.utils.tensorboard import SummaryWriter
+import numpy as np
 
 
 def train_mapper(net, train_loader, test_loader, epochs, optimizer):
@@ -61,19 +62,20 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
     net.train()
     for epoch in range(epochs):
         train_loss = 0.
-        bce_loss = 0.
+        recon_loss = 0.
         kld_loss = 0.
         for batch_idx, (data, _) in enumerate(train_loader):
             data = data.to(device)
             optimizer.zero_grad()
 
             recon_batch, mu, log_var = net(data)
-            batch_loss, batch_bce_loss, batch_kld_loss = loss_function_vae(recon_batch, data, mu, log_var, recon_weight,
-                                                                           kl_weight, nn_type)
+            batch_loss, batch_recon_loss, batch_kld_loss = loss_function_vae(recon_batch, data, mu, log_var,
+                                                                             recon_weight,
+                                                                             kl_weight, nn_type)
 
             batch_loss.backward()
             train_loss += batch_loss.item()
-            bce_loss += batch_bce_loss.item()
+            recon_loss += batch_recon_loss.item()
             kld_loss += batch_kld_loss.item()
 
             optimizer.step()
@@ -82,10 +84,10 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
 
         test_loss = test_vae(net, test_loader, recon_weight, kl_weight, nn_type)
 
-        writer.add_scalar('Loss/train', train_loss / len(train_loader.dataset), epoch)
-        writer.add_scalar('Loss/bce_train', bce_loss / len(train_loader.dataset), epoch)
-        writer.add_scalar('Loss/kld_train', kld_loss / len(train_loader.dataset), epoch)
-        writer.add_scalar('Loss/test', test_loss / len(test_loader.dataset), epoch)
+        writer.add_scalar('LogLoss/train', np.log(train_loss / len(train_loader.dataset)), epoch)
+        writer.add_scalar('LogLoss/recon_train', np.log(recon_loss / len(train_loader.dataset)), epoch)
+        writer.add_scalar('LogLoss/kld_train', np.log(kld_loss / len(train_loader.dataset)), epoch)
+        writer.add_scalar('LogLoss/test', np.log(test_loss / len(test_loader.dataset)), epoch)
 
     # Save the model at current date and time
     torch.save(net.state_dict(), MODELS_ROOT + dataset + '_VAE_' + now + '.pt')
@@ -111,8 +113,8 @@ def test_vae(net, test_loader, recon_weight, kl_weight, nn_type):
 # return reconstruction error + KL divergence losses
 def loss_function_vae(recon_x, x, mu, log_var, recon_weight, kl_weight, nn_type):
     if nn_type == 'conv':
-        BCE = F.binary_cross_entropy(recon_x, x, reduction='sum') * recon_weight
+        recon_loss = F.mse_loss(recon_x, x, reduction='sum') * recon_weight
     else:
-        BCE = F.binary_cross_entropy(recon_x, x.view(-1, 784), reduction='sum') * recon_weight
+        recon_loss = F.mse_loss(recon_x, x.view(-1, 784), reduction='sum') * recon_weight
     KLD = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp()) * kl_weight
-    return BCE + KLD, BCE, KLD
+    return recon_loss + KLD, recon_loss, KLD

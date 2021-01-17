@@ -18,8 +18,8 @@ else:
     from fashion_mnist_downloader import train_dataset as fashion_mnist_train_dataset, \
         test_dataset as fashion_mnist_test_dataset
 
-mnist_model_name = 'MNIST_VAE_2021-01-16 15:43:45.546348.pt'
-fashion_mnist_model_name = 'Fashion_MNIST_VAE_2021-01-16 15:59:52.537353.pt'
+mnist_model_name = 'MNIST_VAE_2021-01-17 15:35:37.058141.pt'
+fashion_mnist_model_name = 'Fashion_MNIST_VAE_2021-01-17 15:25:48.940916.pt'
 mnist_model_path = MODELS_ROOT + mnist_model_name
 fashion_mnist_model_path = MODELS_ROOT + fashion_mnist_model_name
 
@@ -48,11 +48,11 @@ fashion_mnist_test_targets = fashion_mnist_test_dataset.targets
 targets = range(0, 10)
 
 if mapper_type == 'conv':
-    encoded_train_set_X = torch.empty((1, 1568))
-    encoded_train_set_y = torch.empty((1, 1568))
+    encoded_train_set_X = torch.empty((1, HIDDEN_SIZE))
+    encoded_train_set_y = torch.empty((1, HIDDEN_SIZE))
 
-    encoded_test_set_X = torch.empty((1, 1568))
-    encoded_test_set_y = torch.empty((1, 1568))
+    encoded_test_set_X = torch.empty((1, HIDDEN_SIZE))
+    encoded_test_set_y = torch.empty((1, HIDDEN_SIZE))
 else:
     encoded_train_set_X = torch.empty((1, 1, 32))
     encoded_train_set_y = torch.empty((1, 1, 32))

@@ -13,9 +13,9 @@ else:
     from mnist_downloader import train_dataset as mnist_train_dataset
 
 
-mnist_model_name = 'MNIST_VAE_2021-01-16 15:43:45.546348.pt'
-fashion_mnist_model_name = 'Fashion_MNIST_VAE_2021-01-16 15:59:52.537353.pt'
-mapper_model_name = 'Mapper_2021-01-17 10:00:46.999054.pt'
+mnist_model_name = 'MNIST_VAE_2021-01-17 15:35:37.058141.pt'
+fashion_mnist_model_name = 'Fashion_MNIST_VAE_2021-01-17 15:25:48.940916.pt'
+mapper_model_name = 'Mapper_2021-01-17 15:41:34.428313.pt'
 mnist_model_path = MODELS_ROOT + mnist_model_name
 fashion_mnist_model_path = MODELS_ROOT + fashion_mnist_model_name
 mapper_model_path = MODELS_ROOT + mapper_model_name
@@ -37,7 +37,7 @@ fashion_mnist_vae.eval()
 if mapper_type == 'conv':
     mapper = ConvMapper(mnist_encoded_size=14, fashion_mnist_encoded_size=14)
 else:
-    mapper = Mapper(h_sizes=[1568, 1568, 1568, 1568])
+    mapper = Mapper(h_sizes=[HIDDEN_SIZE, HIDDEN_SIZE, HIDDEN_SIZE])
 mapper.load_state_dict(torch.load(mapper_model_path))
 mapper.eval()
 
@@ -53,16 +53,19 @@ for i in range(1, 20):
         mnist_encoded_mean, mnist_encoded_log_var = mnist_vae.encode(mnist_sample)
         mnist_encoded = torch.cat((mnist_encoded_mean, mnist_encoded_log_var), 1)
         mapping = mapper(mnist_encoded)
-        mapping_mean, mapping_log_var = mapping[:, :784], mapping[:, 784:]
+        mapping_mean, mapping_log_var = mapping[:, :int(HIDDEN_SIZE/2)], mapping[:, int(HIDDEN_SIZE/2):]
     else:
         mnist_encoded = mnist_vae.encode(mnist_sample).reshape(1, 1, 32)
         mapping = mapper(mnist_encoded).reshape(1, 2, 16)
     fashion_mnist_decoded = fashion_mnist_vae.decode(mean=mapping_mean, log_var=mapping_log_var)
 
     plt.figure()
+    plt.subplot(1, 2, 1)
+    plt.title('MNIST Original')
     plt.imshow(mnist_sample[0].reshape(28, 28).detach().numpy())
 
-    plt.figure()
+    plt.subplot(1, 2, 2)
+    plt.title('Fashion MNIST Reconstruction')
     plt.imshow(fashion_mnist_decoded.reshape(28, 28).detach().numpy())
 
 

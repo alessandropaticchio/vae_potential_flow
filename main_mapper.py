@@ -23,11 +23,10 @@ test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch
 if mapper_type == 'conv':
     mapper = ConvMapper(mnist_encoded_size=14, fashion_mnist_encoded_size=14)
 else:
-    mapper = Mapper(h_sizes=[1568, 1568, 1568, 1568])
+    mapper = Mapper(h_sizes=[HIDDEN_SIZE, HIDDEN_SIZE, HIDDEN_SIZE])
 
 lr = 1e-3
 optimizer = optim.Adam(mapper.parameters(), lr=lr)
 
-mapper.load_state_dict(torch.load('/Users/alessandro.paticchio/Desktop/vae_potential_flow/models/Mapper_2021-01-17 09:55:18.164844.pt'))
 
-train_mapper(net=mapper, train_loader=train_loader, test_loader=test_loader, epochs=300, optimizer=optimizer)
+train_mapper(net=mapper, train_loader=train_loader, test_loader=test_loader, epochs=100, optimizer=optimizer)
