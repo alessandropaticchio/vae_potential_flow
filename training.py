@@ -26,16 +26,11 @@ def train_mapper(net, train_loader, test_loader, epochs, optimizer):
             train_loss += loss.item()
             optimizer.step()
 
-            if batch_idx % 100 == 0:
-                print('Train Epoch: {}/{} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                    epoch, epochs, batch_idx * len(data), len(train_loader.dataset),
-                                   100. * batch_idx / len(train_loader), loss.item() / len(data)))
-
-        print('====> Epoch: {} Average loss: {:.4f}'.format(epoch, train_loss / len(train_loader.dataset)))
+        print('Epoch: {} Average loss: {:.8f}'.format(epoch, train_loss / len(train_loader.dataset)))
         test_loss = test_mapper(net, test_loader)
 
-        writer.add_scalar('Loss/train', train_loss, epoch)
-        writer.add_scalar('Loss/test', test_loss, epoch)
+        writer.add_scalar('Loss/train', train_loss / len(train_loader.dataset), epoch)
+        writer.add_scalar('Loss/test', test_loss / len(train_loader.dataset), epoch)
 
     # Save the model at current date and time
     torch.save(net.state_dict(), MODELS_ROOT + 'Mapper_' + now + '.pt')
@@ -54,11 +49,12 @@ def test_mapper(net, test_loader):
 
             test_loss += mse_loss(output, target).item()
 
-    print('====> Test set loss: {:.4f}'.format(test_loss))
+    print('====> Test set loss: {:.8f}'.format(test_loss / len(test_loader.dataset)))
     return test_loss
 
 
-def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., dataset='MNIST', nn_type='conv'):
+def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., dataset='MNIST',
+              nn_type='conv'):
     now = str(datetime.now())
     writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + now))
     net = net.to(device)
@@ -82,13 +78,9 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
 
             optimizer.step()
 
-            if batch_idx % 100 == 0:
-                print('Train Epoch: {}/{} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                    epoch, epochs, batch_idx * len(data), len(train_loader.dataset),
-                                   100. * batch_idx / len(train_loader), batch_loss.item() / len(data)))
-        print('====> Epoch: {} Average loss: {:.4f}'.format(epoch, train_loss / len(train_loader.dataset)))
+        print('Epoch: {} Average loss: {:.8f}'.format(epoch, train_loss / len(train_loader.dataset)))
 
-        test_loss = test_vae(net, test_loader, recon_weight, kl_weight)
+        test_loss = test_vae(net, test_loader, recon_weight, kl_weight, nn_type)
 
         writer.add_scalar('Loss/train', train_loss / len(train_loader.dataset), epoch)
         writer.add_scalar('Loss/bce_train', bce_loss / len(train_loader.dataset), epoch)
@@ -99,7 +91,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
     torch.save(net.state_dict(), MODELS_ROOT + dataset + '_VAE_' + now + '.pt')
 
 
-def test_vae(net, test_loader, recon_weight, kl_weight):
+def test_vae(net, test_loader, recon_weight, kl_weight, nn_type):
     net.eval()
     net = net.to(device)
     test_loss = 0
@@ -109,9 +101,9 @@ def test_vae(net, test_loader, recon_weight, kl_weight):
             recon, mu, log_var = net(data)
 
             # sum up batch loss
-            test_loss += loss_function_vae(recon, data, mu, log_var, recon_weight, kl_weight)[0].item()
+            test_loss += loss_function_vae(recon, data, mu, log_var, recon_weight, kl_weight, nn_type)[0].item()
 
-    print('====> Test set loss: {:.4f}'.format(test_loss))
+    print('Test set loss: {:.8f}'.format(test_loss / len(test_loader.dataset)))
 
     return test_loss
 
@@ -124,4 +116,3 @@ def loss_function_vae(recon_x, x, mu, log_var, recon_weight, kl_weight, nn_type)
         BCE = F.binary_cross_entropy(recon_x, x.view(-1, 784), reduction='sum') * recon_weight
     KLD = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp()) * kl_weight
     return BCE + KLD, BCE, KLD
-

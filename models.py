@@ -62,7 +62,7 @@ class LinearVAE(nn.Module):
         x_prime = torch.sigmoid(self.dec2(x_prime))
         return x_prime
 
-    
+
 class ConvVAE(nn.Module):
     def __init__(self, image_dim, hidden_size, latent_size, image_channels=3):
         super(ConvVAE, self).__init__()
@@ -95,9 +95,9 @@ class ConvVAE(nn.Module):
         return mean + eps * std
 
     def forward(self, x):
-        x, mean, log_var = self.encode(x)
+        mean, log_var = self.encode(x)
 
-        x = self.decode(x)
+        x = self.decode(mean=mean, log_var=log_var)
 
         return x, mean, log_var
 
@@ -113,12 +113,11 @@ class ConvVAE(nn.Module):
         mean = self.encoder_mean(x)
         log_var = self.encoder_logvar(x)
 
+        return mean, log_var
+
+    def decode(self, mean, log_var):
         z = self.reparametrize(mean=mean, log_var=log_var)
         x = self.fc(z)
-
-        return x, mean, log_var
-
-    def decode(self, x):
 
         # Unflattening
         x = x.view(x.size(0), 8, 14, 14)
@@ -153,22 +152,22 @@ class Mapper(nn.Module):
 
 class ConvMapper(nn.Module):
 
-    def __init__(self, potential_encoded_size, rays_encoded_size):
+    def __init__(self, mnist_encoded_size, fashion_mnist_encoded_size):
         super(ConvMapper, self).__init__()
-        scale_factor = rays_encoded_size / potential_encoded_size
+        scale_factor = fashion_mnist_encoded_size / mnist_encoded_size
 
-        self.conv1 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=1, stride=1, padding=0)
+        self.conv1 = nn.Conv2d(in_channels=8, out_channels=32, kernel_size=1, stride=1, padding=0)
         self.relu1 = nn.ReLU()
 
-        self.conv2 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3, stride=1, padding=1)
         self.relu2 = nn.ReLU()
 
-        self.conv3 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, stride=1, padding=1)
+        self.conv3 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3, stride=1, padding=1)
         self.relu3 = nn.ReLU()
 
         self.upsample = nn.Upsample(scale_factor=scale_factor)
 
-        self.conv4 = nn.Conv2d(in_channels=16, out_channels=8, kernel_size=1, stride=1, padding=0)
+        self.conv4 = nn.Conv2d(in_channels=32, out_channels=8, kernel_size=1, stride=1, padding=0)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -185,4 +184,3 @@ class ConvMapper(nn.Module):
         x = self.conv4(x)
 
         return x
-

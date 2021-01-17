@@ -3,3 +3,8 @@
 *.xml
 *.iml
 *.pyc
+*.jpg
+*.0
+*.0
+/models
+/data

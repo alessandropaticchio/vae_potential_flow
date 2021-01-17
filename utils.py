@@ -1,16 +1,13 @@
 from torch.utils.data import Dataset
-import torchvision
-import numpy as np
 
-class EncodedDataset(Dataset):
+
+class MyDataset(Dataset):
     def __init__(self, x, y):
-        self.X = x
-        self.y = y
-
-
+        self.data = x
+        self.targets = y
 
     def __len__(self):
-        return len(self.X)
+        return len(self.data)
 
     def __getitem__(self, idx):
-        return (self.X[idx], self.y[idx])
+        return self.data[idx], self.targets[idx]

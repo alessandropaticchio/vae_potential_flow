@@ -1,15 +1,21 @@
 from models import LinearVAE, ConvVAE
 from training import train_vae
+from constants import *
 import torch
 import torch.optim as optim
 
 vae_type = 'conv'
-dataset = 'MNIST'
+dataset = 'Fashion_MNIST'
+subset = True
 
-if dataset == 'MNIST':
-    from mnist_downloader import train_dataset, test_dataset
+if subset:
+    train_dataset = torch.load(DATA_ROOT + 'subsets/' + dataset + '/training.pt')
+    test_dataset = torch.load(DATA_ROOT + 'subsets/' + dataset + '/test.pt')
 else:
-    from fashion_mnist_downloader import train_dataset, test_dataset
+    if dataset == 'MNIST':
+        from mnist_downloader import train_dataset, test_dataset
+    else:
+        from fashion_mnist_downloader import train_dataset, test_dataset
 
 
 batch_size = 100
@@ -30,5 +36,5 @@ if torch.cuda.is_available():
 recon_weight = 1.
 kl_weight = 1.
 
-train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=50, optimizer=optimizer,
+train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=200, optimizer=optimizer,
           recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset, nn_type=vae_type)

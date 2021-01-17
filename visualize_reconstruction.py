@@ -7,17 +7,22 @@ import itertools
 
 vae_type = 'conv'
 dataset = 'MNIST'
+subset = True
 
-if dataset == 'MNIST':
-    from mnist_downloader import train_dataset, test_dataset
+if subset:
+    train_dataset = torch.load(DATA_ROOT + 'subsets/' + dataset + '/training.pt')
+    test_dataset = torch.load(DATA_ROOT + 'subsets/' + dataset + '/test.pt')
 else:
-    from fashion_mnist_downloader import train_dataset, test_dataset
+    if dataset == 'MNIST':
+        from mnist_downloader import train_dataset, test_dataset
+    else:
+        from fashion_mnist_downloader import train_dataset, test_dataset
 
 batch_size = 1
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
-model_name = 'MNIST_VAE_2021-01-11 22:54:43.183412.pt'
+model_name = 'MNIST_VAE_2021-01-16 15:43:45.546348.pt'
 model_path = MODELS_ROOT + model_name
 
 if vae_type == 'conv':
@@ -29,15 +34,19 @@ else:
 vae.load_state_dict(torch.load(model_path))
 vae.eval()
 
-rand_sample_idx = random.randint(0, 100)
+rand_sample_idx = random.randint(0, 1000)
 rand_sample = next(itertools.islice(test_loader, rand_sample_idx, None))
 
 rand_sample_prime = vae(rand_sample[0])[0]
 
-plt.figure()
-plt.imshow(rand_sample[0].reshape(28, 28).detach().numpy())
 
 plt.figure()
+plt.subplot(1, 2, 1)
+plt.title('Original')
+plt.imshow(rand_sample[0].reshape(28, 28).detach().numpy())
+
+plt.subplot(1, 2, 2)
+plt.title('Reconstruction')
 plt.imshow(rand_sample_prime.reshape(28, 28).detach().numpy())
 
 plt.show()
