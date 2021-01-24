@@ -41,7 +41,7 @@ class DenseVAE(nn.Module):
 
         # decoding
         x_prime = F.relu(self.dec1(z))
-        x_prime = torch.sigmoid(self.dec2(x_prime))
+        x_prime = self.dec2(x_prime)
         return x_prime, mu, log_var
 
     def encode(self, x):
