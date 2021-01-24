@@ -1,4 +1,4 @@
-from models import LinearVAE, ConvVAE
+from models import DenseVAE, ConvVAE
 from training import train_vae
 from constants import *
 import torch
@@ -25,7 +25,7 @@ test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch
 if vae_type == 'conv':
     vae = ConvVAE(image_dim=28, hidden_size=HIDDEN_SIZE, latent_size=int(HIDDEN_SIZE/2), image_channels=1)
 else:
-    vae = LinearVAE()
+    vae = DenseVAE()
     
 optimizer = optim.Adam(vae.parameters())
 

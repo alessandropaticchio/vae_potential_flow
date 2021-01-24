@@ -1,5 +1,5 @@
 from constants import *
-from models import LinearVAE, ConvVAE
+from models import DenseVAE, ConvVAE
 from tqdm import tqdm
 from utils import MyDataset
 import torch
@@ -26,7 +26,7 @@ fashion_mnist_model_path = MODELS_ROOT + fashion_mnist_model_name
 if mapper_type == 'conv':
     mnist_vae = ConvVAE(image_dim=28, hidden_size=HIDDEN_SIZE, latent_size=int(HIDDEN_SIZE / 2), image_channels=1)
 else:
-    mnist_vae = LinearVAE()
+    mnist_vae = DenseVAE()
 
 mnist_vae.load_state_dict(torch.load(mnist_model_path))
 mnist_vae.eval()
@@ -35,7 +35,7 @@ if mapper_type == 'conv':
     fashion_mnist_vae = ConvVAE(image_dim=28, hidden_size=HIDDEN_SIZE, latent_size=int(HIDDEN_SIZE / 2),
                                 image_channels=1)
 else:
-    fashion_mnist_vae = LinearVAE()
+    fashion_mnist_vae = DenseVAE()
 
 fashion_mnist_vae.load_state_dict(torch.load(fashion_mnist_model_path))
 fashion_mnist_vae.eval()

@@ -1,4 +1,4 @@
-from models import LinearVAE, ConvVAE
+from models import DenseVAE, ConvVAE
 from constants import *
 import matplotlib.pyplot as plt
 import random
@@ -28,7 +28,7 @@ if vae_type == 'conv':
     hidden_size = HIDDEN_SIZE
     vae = ConvVAE(image_dim=28, hidden_size=hidden_size, latent_size=int(hidden_size / 2), image_channels=1)
 else:
-    vae = LinearVAE()
+    vae = DenseVAE()
 
 vae.load_state_dict(torch.load(model_path))
 vae.eval()

@@ -3,9 +3,9 @@ import torch
 import torch.nn.functional as F
 
 
-class LinearVAE(nn.Module):
+class DenseVAE(nn.Module):
     def __init__(self, features=16, in_features=784, out_features=512):
-        super(LinearVAE, self).__init__()
+        super(DenseVAE, self).__init__()
         self.features = features
 
         # encoder

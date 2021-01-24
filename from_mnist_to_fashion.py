@@ -1,4 +1,4 @@
-from models import LinearVAE, Mapper, ConvVAE, ConvMapper
+from models import DenseVAE, Mapper, ConvVAE, ConvMapper
 from constants import *
 import random
 import matplotlib.pyplot as plt
@@ -23,14 +23,14 @@ mapper_model_path = MODELS_ROOT + mapper_model_name
 if vae_type == 'conv':
     mnist_vae = ConvVAE(image_dim=28, hidden_size=HIDDEN_SIZE, latent_size=int(HIDDEN_SIZE/2), image_channels=1)
 else:
-    mnist_vae = LinearVAE()
+    mnist_vae = DenseVAE()
 mnist_vae.load_state_dict(torch.load(mnist_model_path))
 mnist_vae.eval()
 
 if vae_type == 'conv':
     fashion_mnist_vae = ConvVAE(image_dim=28, hidden_size=HIDDEN_SIZE, latent_size=int(HIDDEN_SIZE/2), image_channels=1)
 else:
-    fashion_mnist_vae = LinearVAE()
+    fashion_mnist_vae = DenseVAE()
 fashion_mnist_vae.load_state_dict(torch.load(fashion_mnist_model_path))
 fashion_mnist_vae.eval()
 
