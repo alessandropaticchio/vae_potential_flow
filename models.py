@@ -4,63 +4,64 @@ import torch.nn.functional as F
 
 
 class DenseVAE(nn.Module):
-    def __init__(self, features=16, in_features=784, out_features=512):
+    def __init__(self, out_features, features=16, in_features=784):
         super(DenseVAE, self).__init__()
         self.features = features
 
         # encoder
         self.enc1 = nn.Linear(in_features=in_features, out_features=out_features)
-        self.enc2 = nn.Linear(in_features=out_features, out_features=features * 2)
+        self.relu1 = nn.ReLU()
+        self.enc2 = nn.Linear(in_features=out_features, out_features=self.features * 2)
 
         # decoder
-        self.dec1 = nn.Linear(in_features=features, out_features=out_features)
+        self.dec1 = nn.Linear(in_features=self.features, out_features=out_features)
+        self.relu2 = nn.ReLU()
         self.dec2 = nn.Linear(in_features=out_features, out_features=in_features)
 
-    def reparametrize(self, mu, log_var):
+        self.output = nn.Sigmoid()
+
+    def reparametrize(self, mean, log_var):
         """
-        :param mu: mean from the encoder's latent space
+        :param mean: mean from the encoder's latent space
         :param log_var: log variance from the encoder's latent space
         """
         std = torch.exp(0.5 * log_var)  # standard deviation
         eps = torch.randn_like(std)  # `randn_like` as we need the same size
-        sample = mu + (eps * std)  # sampling as if coming from the input space
+        sample = mean + (eps * std)  # sampling as if coming from the input space
         return sample
 
     def forward(self, x):
-        # Flattening
-        x = x.view(-1, x.size(2) * x.size(3))
+        mean, log_var = self.encode(x)
 
-        # encoding
-        x = F.relu(self.enc1(x))
-        x = self.enc2(x).view(-1, 2, self.features)
-        # get `mu` and `log_var`
-        mu = x[:, 0, :]  # the first feature values as mean
-        log_var = x[:, 1, :]  # the other feature values as variance
-        # get the latent vector through reparametrization
-        z = self.reparametrize(mu, log_var)
+        x_prime = self.decode(mean=mean, log_var=log_var)
 
-        # decoding
-        x_prime = F.relu(self.dec1(z))
-        x_prime = torch.sigmoid(self.dec2(x_prime))
-        return x_prime, mu, log_var
+        return x_prime
 
     def encode(self, x):
         # Flattening
         x = x.view(-1, x.size(2) * x.size(3))
 
         # encoding
-        x = F.relu(self.enc1(x))
-        z = self.enc2(x).view(-1, 2, self.features)
-        return z
+        x = self.enc1(x)
+        x = self.relu1(x)
+        x = self.enc2(x).view(-1, 2, self.features)
 
-    def decode(self, z):
+        # get `mu` and `log_var`
+        mean = x[:, 0, :]  # the first feature values as mean
+        log_var = x[:, 1, :]  # the other feature values as variance
+        return mean, log_var
+
+    def decode(self, mean, log_var):
+        # get the latent vector through reparametrization
+        z = self.reparametrize(mean, log_var)
+
         # decoding
-        mu = z[:, 0, :]  # the first feature values as mean
-        log_var = z[:, 1, :]  # the other feature values as variance
-        z = self.reparametrize(mu, log_var)
-        x_prime = F.relu(self.dec1(z))
-        x_prime = torch.sigmoid(self.dec2(x_prime))
-        return x_prime
+        x_prime = self.dec1(z)
+        x_prime = self.relu2(x_prime)
+        x_prime = self.dec2(x_prime)
+
+        x_prime = self.output(x_prime)
+        return x_prime, mean, log_var
 
 
 class ConvVAE(nn.Module):

@@ -1,24 +1,35 @@
 from models import DenseVAE, ConvVAE
 from constants import *
+from utils import MyDataset
 import matplotlib.pyplot as plt
 import random
 import torch
 import itertools
 
-vae_type = 'conv'
-dataset = 'Fashion_MNIST'
+vae_type = 'dense'
+dataset = 'Total'
 subset = True
-model_name = 'Fashion_MNIST_VAE_3layers_2021-01-22 12:15:48.234549.pt'
+model_name = 'Total_VAE__2021-01-24 18:14:04.273408.pt'
 model_path = MODELS_ROOT + model_name
 
 if subset:
-    train_dataset = torch.load(DATA_ROOT + 'subsets/' + dataset + '/training.pt')
-    test_dataset = torch.load(DATA_ROOT + 'subsets/' + dataset + '/test.pt')
+    if dataset == 'Total':
+        mnist_train_dataset = torch.load(DATA_ROOT + 'subsets/' + 'MNIST' + '/training.pt')
+        mnist_test_dataset = torch.load(DATA_ROOT + 'subsets/' + 'MNIST' + '/test.pt')
+        fashion_mnist_train_dataset = torch.load(DATA_ROOT + 'subsets/' + 'Fashion_MNIST' + '/training.pt')
+        fashion_mnist_test_dataset = torch.load(DATA_ROOT + 'subsets/' + 'Fashion_MNIST' + '/test.pt')
+        train_dataset = MyDataset(x=mnist_train_dataset.data, y=fashion_mnist_train_dataset.data)
+        test_dataset = MyDataset(x=mnist_test_dataset.data, y=fashion_mnist_test_dataset.data)
+    else:
+        train_dataset = torch.load(DATA_ROOT + 'subsets/' + dataset + '/training.pt')
+        test_dataset = torch.load(DATA_ROOT + 'subsets/' + dataset + '/test.pt')
 else:
     if dataset == 'MNIST':
         from mnist_downloader import train_dataset, test_dataset
-    else:
+    elif dataset == 'Fashion_MNIST':
         from fashion_mnist_downloader import train_dataset, test_dataset
+    else:
+        raise NotImplementedError
 
 batch_size = 1
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
@@ -28,7 +39,7 @@ if vae_type == 'conv':
     hidden_size = HIDDEN_SIZE
     vae = ConvVAE(image_dim=28, hidden_size=hidden_size, latent_size=int(hidden_size / 2), image_channels=1)
 else:
-    vae = DenseVAE()
+    vae = DenseVAE(out_features=100)
 
 vae.load_state_dict(torch.load(model_path))
 vae.eval()

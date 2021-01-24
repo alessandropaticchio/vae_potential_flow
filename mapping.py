@@ -97,7 +97,7 @@ for target in targets:
             fashion_mnist_sample -= torch.min(fashion_mnist_sample)
             fashion_mnist_sample /= torch.max(fashion_mnist_sample)
             if mapper_type == 'conv':
-                fashion_mnist_sample_encoded_mean, fashion_mnist_sample_encoded_log_var = fashion_mnist_vae.encode(mnist_sample)
+                fashion_mnist_sample_encoded_mean, fashion_mnist_sample_encoded_log_var = fashion_mnist_vae.encode(fashion_mnist_sample)
                 fashion_mnist_sample_encoded = torch.cat((fashion_mnist_sample_encoded_mean, fashion_mnist_sample_encoded_log_var), 1)
             else:
                 fashion_mnist_sample_encoded = fashion_mnist_vae.encode(fashion_mnist_sample).reshape(1, 1, 32)
@@ -132,7 +132,7 @@ for target in targets:
             fashion_mnist_sample -= torch.min(fashion_mnist_sample)
             fashion_mnist_sample /= torch.max(fashion_mnist_sample)
             if mapper_type == 'conv':
-                fashion_mnist_sample_encoded_mean, fashion_mnist_sample_encoded_log_var = fashion_mnist_vae.encode(mnist_sample)
+                fashion_mnist_sample_encoded_mean, fashion_mnist_sample_encoded_log_var = fashion_mnist_vae.encode(fashion_mnist_sample)
                 fashion_mnist_sample_encoded = torch.cat((fashion_mnist_sample_encoded_mean, fashion_mnist_sample_encoded_log_var), 1)
             else:
                 fashion_mnist_sample_encoded = fashion_mnist_vae.encode(fashion_mnist_sample).reshape(1, 1, 32)
