@@ -9,7 +9,7 @@ import itertools
 vae_type = 'dense'
 dataset = 'Total'
 subset = True
-model_name = 'Total_VAE__2021-01-24 16:48:07.057013.pt'
+model_name = 'Total_VAE__2021-01-24 18:14:04.273408.pt'
 model_path = MODELS_ROOT + model_name
 
 if subset:
@@ -39,13 +39,13 @@ if vae_type == 'conv':
     hidden_size = HIDDEN_SIZE
     vae = ConvVAE(image_dim=28, hidden_size=hidden_size, latent_size=int(hidden_size / 2), image_channels=1)
 else:
-    vae = DenseVAE(out_features=10)
+    vae = DenseVAE(out_features=100)
 
 vae.load_state_dict(torch.load(model_path))
 vae.eval()
 
 rand_sample_idx = random.randint(0, 1000)
-rand_sample = next(itertools.islice(test_loader, rand_sample_idx, None))
+rand_sample = next(itertools.islice(train_loader, rand_sample_idx, None))
 
 rand_sample_prime = vae(rand_sample[0])[0]
 
