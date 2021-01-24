@@ -26,7 +26,7 @@ batch_size = 100
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
-vae = DenseVAE(out_features=1000)
+vae = DenseVAE(out_features=100)
 
 optimizer = optim.Adam(vae.parameters())
 
@@ -34,7 +34,7 @@ if torch.cuda.is_available():
     vae.cuda()
 
 recon_weight = 1.
-kl_weight = 20.
+kl_weight = 1.
 
-train_total_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=100, optimizer=optimizer,
+train_total_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=1000, optimizer=optimizer,
           recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset, nn_type=vae_type)

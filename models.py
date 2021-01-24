@@ -10,10 +10,10 @@ class DenseVAE(nn.Module):
 
         # encoder
         self.enc1 = nn.Linear(in_features=in_features, out_features=out_features)
-        self.enc2 = nn.Linear(in_features=out_features, out_features=features * 2)
+        self.enc2 = nn.Linear(in_features=out_features, out_features=self.features * 2)
 
         # decoder
-        self.dec1 = nn.Linear(in_features=features, out_features=out_features)
+        self.dec1 = nn.Linear(in_features=self.features, out_features=out_features)
         self.dec2 = nn.Linear(in_features=out_features, out_features=in_features)
 
     def reparametrize(self, mu, log_var):
@@ -41,7 +41,7 @@ class DenseVAE(nn.Module):
 
         # decoding
         x_prime = F.relu(self.dec1(z))
-        x_prime = self.dec2(x_prime)
+        x_prime = torch.sigmoid(self.dec2(x_prime))
         return x_prime, mu, log_var
 
     def encode(self, x):
