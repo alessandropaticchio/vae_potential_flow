@@ -2,7 +2,7 @@ from utils import MyDataset
 from constants import *
 import torch
 
-dataset = 'MNIST'
+dataset = 'Fashion_MNIST'
 
 sample_size = 1000
 n_targets = 10

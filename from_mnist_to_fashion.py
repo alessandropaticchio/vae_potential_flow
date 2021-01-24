@@ -13,9 +13,9 @@ else:
     from mnist_downloader import train_dataset as mnist_train_dataset
 
 
-mnist_model_name = 'MNIST_VAE_2021-01-17 15:35:37.058141.pt'
-fashion_mnist_model_name = 'Fashion_MNIST_VAE_2021-01-17 15:25:48.940916.pt'
-mapper_model_name = 'Mapper_2021-01-17 15:41:34.428313.pt'
+mnist_model_name = 'MNIST_VAE_3layers_2021-01-22 12:13:27.636602.pt'
+fashion_mnist_model_name = 'Fashion_MNIST_VAE_3layers_2021-01-22 12:15:48.234549.pt'
+mapper_model_name = 'Mapper_2021-01-22 12:19:46.681213.pt'
 mnist_model_path = MODELS_ROOT + mnist_model_name
 fashion_mnist_model_path = MODELS_ROOT + fashion_mnist_model_name
 mapper_model_path = MODELS_ROOT + mapper_model_name
@@ -54,10 +54,11 @@ for i in range(1, 20):
         mnist_encoded = torch.cat((mnist_encoded_mean, mnist_encoded_log_var), 1)
         mapping = mapper(mnist_encoded)
         mapping_mean, mapping_log_var = mapping[:, :int(HIDDEN_SIZE/2)], mapping[:, int(HIDDEN_SIZE/2):]
+        fashion_mnist_decoded = fashion_mnist_vae.decode(mean=mapping_mean, log_var=mapping_log_var)
     else:
         mnist_encoded = mnist_vae.encode(mnist_sample).reshape(1, 1, 32)
         mapping = mapper(mnist_encoded).reshape(1, 2, 16)
-    fashion_mnist_decoded = fashion_mnist_vae.decode(mean=mapping_mean, log_var=mapping_log_var)
+        fashion_mnist_decoded = fashion_mnist_vae.decode(z=mapping)
 
     plt.figure()
     plt.subplot(1, 2, 1)

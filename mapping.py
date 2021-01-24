@@ -18,8 +18,8 @@ else:
     from fashion_mnist_downloader import train_dataset as fashion_mnist_train_dataset, \
         test_dataset as fashion_mnist_test_dataset
 
-mnist_model_name = 'MNIST_VAE_2021-01-17 15:35:37.058141.pt'
-fashion_mnist_model_name = 'Fashion_MNIST_VAE_2021-01-17 15:25:48.940916.pt'
+mnist_model_name = 'MNIST_VAE_3layers_2021-01-22 12:13:27.636602.pt'
+fashion_mnist_model_name = 'Fashion_MNIST_VAE_3layers_2021-01-22 12:15:48.234549.pt'
 mnist_model_path = MODELS_ROOT + mnist_model_name
 fashion_mnist_model_path = MODELS_ROOT + fashion_mnist_model_name
 

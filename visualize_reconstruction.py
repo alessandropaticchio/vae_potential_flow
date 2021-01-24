@@ -8,7 +8,7 @@ import itertools
 vae_type = 'conv'
 dataset = 'Fashion_MNIST'
 subset = True
-model_name = 'Fashion_MNIST_VAE_2021-01-17 15:25:48.940916.pt'
+model_name = 'Fashion_MNIST_VAE_3layers_2021-01-22 12:15:48.234549.pt'
 model_path = MODELS_ROOT + model_name
 
 if subset:
@@ -34,7 +34,7 @@ vae.load_state_dict(torch.load(model_path))
 vae.eval()
 
 rand_sample_idx = random.randint(0, 1000)
-rand_sample = next(itertools.islice(test_loader, rand_sample_idx, None))
+rand_sample = next(itertools.islice(train_loader, rand_sample_idx, None))
 
 rand_sample_prime = vae(rand_sample[0])[0]
 

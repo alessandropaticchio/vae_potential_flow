@@ -29,4 +29,4 @@ lr = 1e-3
 optimizer = optim.Adam(mapper.parameters(), lr=lr)
 
 
-train_mapper(net=mapper, train_loader=train_loader, test_loader=test_loader, epochs=100, optimizer=optimizer)
+train_mapper(net=mapper, train_loader=train_loader, test_loader=test_loader, epochs=200, optimizer=optimizer)

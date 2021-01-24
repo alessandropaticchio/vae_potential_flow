@@ -71,21 +71,33 @@ class ConvVAE(nn.Module):
         self.hidden_size = hidden_size
         self.latent_size = latent_size
 
-        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=16, kernel_size=1, stride=1)
+        # encode
+        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=16, kernel_size=3, stride=1, padding=1)
         self.relu1 = nn.ReLU()
 
         self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
+
+        self.conv2 = nn.Conv2d(in_channels=16, out_channels=8, kernel_size=3, stride=1, padding=1)
+        self.relu2 = nn.ReLU()
+
+        self.maxpool2 = nn.MaxPool2d(kernel_size=2, stride=2)
+
+        self.conv3 = nn.Conv2d(in_channels=8, out_channels=4, kernel_size=3, stride=1, padding=1)
+        self.relu3 = nn.ReLU()
 
         self.encoder_mean = nn.Linear(hidden_size, latent_size)
         self.encoder_logvar = nn.Linear(hidden_size, latent_size)
         self.fc = nn.Linear(latent_size, hidden_size)
 
-        self.conv2 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=1, stride=1, padding=0)
-        self.relu2 = nn.ReLU()
-
+        # decode
         self.upsample1 = nn.Upsample(scale_factor=2)
 
-        self.conv3 = nn.Conv2d(in_channels=16, out_channels=image_channels, kernel_size=3, stride=1, padding=1)
+        self.conv4 = nn.Conv2d(in_channels=4, out_channels=16, kernel_size=3, stride=1, padding=1)
+        self.relu4 = nn.ReLU()
+
+        self.upsample2 = nn.Upsample(scale_factor=2)
+
+        self.conv5 = nn.Conv2d(in_channels=16, out_channels=image_channels, kernel_size=3, stride=1, padding=1)
 
         self.output = nn.Sigmoid()
 
@@ -107,6 +119,14 @@ class ConvVAE(nn.Module):
 
         x = self.maxpool1(x)
 
+        x = self.conv2(x)
+        x = self.relu2(x)
+
+        x = self.maxpool2(x)
+
+        x = self.conv3(x)
+        x = self.relu3(x)
+
         # Flattening
         x = x.view(x.size(0), -1)
 
@@ -120,13 +140,16 @@ class ConvVAE(nn.Module):
         x = self.fc(z)
 
         # Unflattening
-        x = x.view(x.size(0), 16, 14, 14)
+        x = x.view(x.size(0), 4, 7, 7)
 
-        x = self.conv2(x)
-        x = self.relu2(x)
         x = self.upsample1(x)
 
-        x = self.conv3(x)
+        x = self.conv4(x)
+        x = self.relu4(x)
+
+        x = self.upsample2(x)
+
+        x = self.conv5(x)
 
         x_prime = self.output(x)
 
