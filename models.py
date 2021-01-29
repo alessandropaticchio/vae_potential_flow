@@ -31,9 +31,9 @@ class DenseVAE(nn.Module):
         return sample
 
     def forward(self, x):
-        mean, log_var = self.encode(x)
+        mean, log_var, x_to_skip = self.encode(x)
 
-        x_prime = self.decode(mean=mean, log_var=log_var)
+        x_prime = self.decode(mean=mean, log_var=log_var, to_skip=x_to_skip)
 
         return x_prime
 
@@ -43,20 +43,21 @@ class DenseVAE(nn.Module):
 
         # encoding
         x = self.enc1(x)
-        x = self.relu1(x)
-        x = self.enc2(x).view(-1, 2, self.features)
+        x_to_skip = self.relu1(x)
+        x = self.enc2(x_to_skip).view(-1, 2, self.features)
 
         # get `mu` and `log_var`
         mean = x[:, 0, :]  # the first feature values as mean
         log_var = x[:, 1, :]  # the other feature values as variance
-        return mean, log_var
+        return mean, log_var, x_to_skip
 
-    def decode(self, mean, log_var):
+    def decode(self, mean, log_var, to_skip):
         # get the latent vector through reparametrization
         z = self.reparametrize(mean, log_var)
 
         # decoding
         x_prime = self.dec1(z)
+        x_prime = x_prime + to_skip
         x_prime = self.relu2(x_prime)
         x_prime = self.dec2(x_prime)
 
