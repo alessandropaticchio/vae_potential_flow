@@ -145,41 +145,65 @@ class ConvVAE(nn.Module):
         return x_prime
 
 
-# define a Conv VAE
+class DeConvVAE(nn.Module):
 
-class ConvVAETest(nn.Module):
+    def __init__(self, hidden_size, latent_size):
+        super(DeConvVAE, self).__init__()
+        self.hidden_size = hidden_size
+        self.latent_size = latent_size
 
-    def __init__(self):
-        super(ConvVAETest, self).__init__()
+        self.conv1 = nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3)
+        self.relu1 = nn.ReLU()
 
-        self.conv1 = nn.Conv2d(1, 32, 3)
-        self.conv2 = nn.Conv2d(32, 16, 3)
+        self.conv2 = nn.Conv2d(in_channels=32, out_channels=16, kernel_size=3)
+        self.relu2 = nn.ReLU()
+
         self.max_pool = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.fc1_mu = nn.Linear(12 * 12 * 16, 20)
-        self.fc1_sig = nn.Linear(12 * 12 * 16, 20)
-        self.fc2 = nn.Linear(20, 12 * 12 * 16)
+
+        self.encoder_mean = nn.Linear(in_features=self.hidden_size, out_features=self.latent_size)
+        self.encoder_log_var = nn.Linear(in_features=self.hidden_size, out_features=self.latent_size)
+        self.fc = nn.Linear(in_features=self.latent_size, out_features=self.hidden_size)
+        self.relu3 = nn.ReLU()
+
         self.up_sample = nn.UpsamplingNearest2d(scale_factor=2)
-        self.conv3 = nn.ConvTranspose2d(16, 32, 3)
-        self.conv4 = nn.ConvTranspose2d(32, 1, 3)
+
+        self.conv3 = nn.ConvTranspose2d(in_channels=16, out_channels=32, kernel_size=3)
+        self.relu4 = nn.ReLU()
+
+        self.conv4 = nn.ConvTranspose2d(in_channels=32, out_channels=1, kernel_size=3)
+
+        self.output = torch.sigmoid()
 
     def encode(self, x):
-        a1 = F.relu(self.conv1(x))
-        a2 = F.relu(self.conv2(a1))
-        mx_poold = self.max_pool(a2)
-        a_reshaped = mx_poold.reshape(-1, 12 * 12 * 16)
-        a_mu = self.fc1_mu(a_reshaped)
-        a_logvar = self.fc1_sig(a_reshaped)
-        return a_mu, a_logvar
+        x = self.conv1(x)
+        x = self.relu1(x)
+
+        x = self.conv2(x)
+        x = self.relu2(x)
+
+        x = self.max_pool(x)
+        x = x.reshape(-1, self.hidden_size)
+
+        mean = self.encoder_mean(x)
+        log_var = self.encoder_log_var(x)
+        return mean, log_var
 
     def decode(self, mean, log_var):
         z = self.reparameterize(mean, log_var)
 
-        a3 = F.relu(self.fc2(z))
-        a3 = a3.reshape(-1, 16, 12, 12)
-        a3_upsample = self.up_sample(a3)
-        a4 = F.relu(self.conv3(a3_upsample))
-        a5 = torch.sigmoid(self.conv4(a4))
-        return a5
+        x = self.fc(z)
+        x = self.relu3(x)
+
+        x = x.reshape(-1, 16, 12, 12)
+
+        x = self.up_sample(x)
+
+        x = self.conv3(x)
+        x = self.relu4(x)
+
+        x = self.conv4(x)
+        x_prime = self.output(x)
+        return x_prime
 
     def reparameterize(self, mu, logvar):
         std = torch.exp(0.5 * logvar)
@@ -189,6 +213,7 @@ class ConvVAETest(nn.Module):
     def forward(self, x):
         mu, logvar = self.encode(x)
         return self.decode(mean=mu, log_var=logvar), mu, logvar
+
 
 class Mapper(nn.Module):
 
