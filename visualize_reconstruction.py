@@ -1,4 +1,4 @@
-from models import DenseVAE, ConvVAE
+from models import *
 from constants import *
 from utils import MyDataset
 import matplotlib.pyplot as plt
@@ -6,10 +6,10 @@ import random
 import torch
 import itertools
 
-vae_type = 'dense'
+vae_type = 'conv'
 dataset = 'Total'
 subset = True
-model_name = 'Total_VAE__2021-01-24 18:14:04.273408.pt'
+model_name = 'Total_VAE__2021-01-30 11:16:05.504872.pt'
 model_path = MODELS_ROOT + model_name
 
 if subset:
@@ -36,8 +36,8 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=bat
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
 if vae_type == 'conv':
-    hidden_size = HIDDEN_SIZE
-    vae = ConvVAE(image_dim=28, hidden_size=hidden_size, latent_size=int(hidden_size / 2), image_channels=1)
+    hidden_size = 16 * 11 * 11
+    vae = DeConvVAETest(hidden_size=hidden_size, latent_size=LATENT_SIZE)
 else:
     vae = DenseVAE(out_features=100)
 
@@ -45,7 +45,7 @@ vae.load_state_dict(torch.load(model_path))
 vae.eval()
 
 rand_sample_idx = random.randint(0, 1000)
-rand_sample = next(itertools.islice(train_loader, rand_sample_idx, None))
+rand_sample = next(itertools.islice(test_loader, rand_sample_idx, None))
 
 rand_sample_prime = vae(rand_sample[0])[0]
 
