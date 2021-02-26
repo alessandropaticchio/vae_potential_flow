@@ -1,4 +1,4 @@
-from training import train_vae, train_ae
+from training import train_vae
 # from models import ConvVAE, ConvPlainAE
 from models import ConvVAE, DenseVAE
 from constants import *
@@ -46,6 +46,6 @@ optimizer = optim.Adam(vae.parameters(), lr=lr)
 recon_weight = 1.
 kl_weight = 1.
 
-train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=20, optimizer=optimizer, dataset=dataset)
-
+train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=500, optimizer=optimizer,
+          recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset, nn_type=vae_type)
 
