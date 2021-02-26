@@ -26,16 +26,16 @@ batch_size = 100
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
-hidden_size = 16 * 12 * 12
-vae = DeConvVAETest(hidden_size=hidden_size, latent_size=LATENT_SIZE)
+hidden_size = 32 * 11 * 11
+vae = UNet_VAE(hidden_size=hidden_size, latent_size=LATENT_SIZE)
 
-optimizer = optim.Adam(vae.parameters())
+optimizer = optim.Adam(vae.parameters(), weight_decay=0.)
 
 if torch.cuda.is_available():
     vae.cuda()
 
 recon_weight = 1.
-kl_weight = 5.
+kl_weight = 1.
 
-train_total_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=500, optimizer=optimizer,
+train_total_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=50, optimizer=optimizer,
                 recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset, nn_type=vae_type)

@@ -4,9 +4,12 @@ import torch
 
 dataset = 'Fashion_MNIST'
 
-sample_size = 1000
+train_sample_size = 5000
+test_sample_size = int(train_sample_size * 0.2)
 n_targets = 10
-sample_class_size = int(sample_size / n_targets)
+train_sample_class_size = int(train_sample_size / n_targets)
+test_sample_class_size = int(test_sample_size / n_targets)
+
 
 if dataset == 'MNIST':
     from mnist_downloader import train_dataset, test_dataset
@@ -26,14 +29,20 @@ X_test_subset = torch.empty((1, 1, 28, 28))
 y_train_subset = torch.empty((1, 1))
 y_test_subset = torch.empty((1, 1))
 
+# Train
 for target in range(0, n_targets):
-    train_indeces = (y_train == target).nonzero().flatten().tolist()[:sample_class_size]
-    test_indeces = (y_test == target).nonzero().flatten().tolist()[:sample_class_size]
+    train_indeces = (y_train == target).nonzero().flatten().tolist()[:train_sample_class_size]
 
     X_train_subset = torch.cat((X_train_subset, X_train[train_indeces].unsqueeze(1)), 0)
-    X_test_subset = torch.cat((X_test_subset, X_test[test_indeces].unsqueeze(1)), 0)
 
     y_train_subset = torch.cat((y_train_subset, y_train[train_indeces].unsqueeze(1)), 0)
+
+# Test
+for target in range(0, n_targets):
+    test_indeces = (y_test == target).nonzero().flatten().tolist()[:test_sample_class_size]
+
+    X_test_subset = torch.cat((X_test_subset, X_test[test_indeces].unsqueeze(1)), 0)
+
     y_test_subset = torch.cat((y_test_subset, y_test[test_indeces].unsqueeze(1)), 0)
 
 #  First tensor is meaningless
@@ -52,5 +61,5 @@ train_subset = MyDataset(x=X_train_subset, y=y_train_subset)
 test_subset = MyDataset(x=X_test_subset, y=y_test_subset)
 
 torch.save(train_subset, DATA_ROOT + '/subsets/' + dataset + '/training.pt')
-torch.save(train_subset, DATA_ROOT + '/subsets/' + dataset + '/test.pt')
+torch.save(test_subset, DATA_ROOT + '/subsets/' + dataset + '/test.pt')
 

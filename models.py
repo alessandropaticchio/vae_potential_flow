@@ -345,32 +345,38 @@ class ConvMapper(nn.Module):
         return x
 
 
-class DeConvVAETest(nn.Module):
+class UNet_VAE(nn.Module):
 
     def __init__(self, hidden_size, latent_size):
-        super(DeConvVAETest, self).__init__()
+        super(UNet_VAE, self).__init__()
         self.hidden_size = hidden_size
         self.latent_size = latent_size
 
-        self.conv1 = nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3)
+        self.conv1 = nn.Conv2d(in_channels=1, out_channels=8, kernel_size=3)
         self.relu1 = nn.ReLU()
 
-        self.conv2 = nn.Conv2d(in_channels=32, out_channels=16, kernel_size=3)
+        self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=3)
         self.relu2 = nn.ReLU()
+
+        self.conv3 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3)
+        self.relu3 = nn.ReLU()
 
         self.max_pool = nn.MaxPool2d(kernel_size=2, stride=2)
 
         self.encoder_mean = nn.Linear(in_features=self.hidden_size, out_features=self.latent_size)
         self.encoder_log_var = nn.Linear(in_features=self.hidden_size, out_features=self.latent_size)
         self.fc = nn.Linear(in_features=self.latent_size, out_features=self.hidden_size)
-        self.relu3 = nn.ReLU()
+        self.relu4 = nn.ReLU()
 
         self.up_sample = nn.UpsamplingNearest2d(scale_factor=2)
 
-        self.deconv1 = nn.ConvTranspose2d(in_channels=32, out_channels=32, kernel_size=3)
+        self.deconv1 = nn.ConvTranspose2d(in_channels=64, out_channels=16, kernel_size=3)
         self.relu5 = nn.ReLU()
 
-        self.deconv2 = nn.ConvTranspose2d(in_channels=64, out_channels=1, kernel_size=3)
+        self.deconv2 = nn.ConvTranspose2d(in_channels=32, out_channels=8, kernel_size=3)
+        self.relu5 = nn.ReLU()
+
+        self.deconv3 = nn.ConvTranspose2d(in_channels=16, out_channels=1, kernel_size=3)
 
         self.output = nn.Sigmoid()
 
@@ -381,33 +387,40 @@ class DeConvVAETest(nn.Module):
         x = self.conv2(enc1)
         enc2 = self.relu2(x)
 
-        enc2_pool = self.max_pool(enc2)
+        x = self.conv3(enc2)
+        enc3 = self.relu3(x)
 
-        enc2_pool = enc2_pool.reshape(-1, self.hidden_size)
+        enc3_pool = self.max_pool(enc3)
 
-        mean = self.encoder_mean(enc2_pool)
-        log_var = self.encoder_log_var(enc2_pool)
-        return mean, log_var, enc1, enc2
+        enc3_pool = enc3_pool.reshape(-1, self.hidden_size)
 
-    def decode(self, mean, log_var, enc1, enc2):
+        mean = self.encoder_mean(enc3_pool)
+        log_var = self.encoder_log_var(enc3_pool)
+        return mean, log_var, enc1, enc2, enc3
+
+    def decode(self, mean, log_var, enc1, enc2, enc3):
         z = self.reparameterize(mean, log_var)
 
         x = self.fc(z)
-        x = self.relu3(x)
+        x = self.relu4(x)
 
-        x = x.reshape(-1, 16, 12, 12)
+        x = x.reshape(-1, 32, 11, 11)
 
         x = self.up_sample(x)
 
-        x = torch.cat((x, enc2), dim=1)
+        x = torch.cat((x, enc3), dim=1)
 
         x = self.deconv1(x)
+        x = self.relu4(x)
+
+        x = torch.cat((x, enc2), dim=1)
+
+        x = self.deconv2(x)
+        x = self.relu5(x)
 
         x = torch.cat((x, enc1), dim=1)
 
-        x = self.relu5(x)
-
-        x = self.deconv2(x)
+        x = self.deconv3(x)
 
         x_prime = self.output(x)
 
@@ -419,5 +432,68 @@ class DeConvVAETest(nn.Module):
         return eps.mul(std).add_(mu)
 
     def forward(self, x):
-        mu, logvar, enc1, enc2 = self.encode(x)
-        return self.decode(mean=mu, log_var=logvar, enc1=enc1, enc2=enc2), mu, logvar
+        mu, logvar, enc1, enc2, enc3 = self.encode(x)
+        return self.decode(mean=mu, log_var=logvar, enc1=enc1, enc2=enc2, enc3=enc3), mu, logvar
+
+
+class Mini_UNet_VAE(nn.Module):
+
+    def __init__(self, hidden_size, latent_size):
+        super(Mini_UNet_VAE, self).__init__()
+        self.hidden_size = hidden_size
+        self.latent_size = latent_size
+
+        self.conv1 = nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3)
+        self.relu1 = nn.ReLU()
+
+        self.max_pool = nn.MaxPool2d(kernel_size=2, stride=2)
+
+        self.encoder_mean = nn.Linear(in_features=self.hidden_size, out_features=self.latent_size)
+        self.encoder_log_var = nn.Linear(in_features=self.hidden_size, out_features=self.latent_size)
+        self.fc = nn.Linear(in_features=self.latent_size, out_features=self.hidden_size)
+        self.relu4 = nn.ReLU()
+
+        self.up_sample = nn.UpsamplingNearest2d(scale_factor=2)
+
+        self.deconv1 = nn.ConvTranspose2d(in_channels=64, out_channels=1, kernel_size=3)
+
+        self.output = nn.Sigmoid()
+
+    def encode(self, x):
+        x = self.conv1(x)
+        enc1 = self.relu1(x)
+
+        enc1_pool = self.max_pool(enc1)
+
+        enc1_pool = enc1_pool.reshape(-1, self.hidden_size)
+
+        mean = self.encoder_mean(enc1_pool)
+        log_var = self.encoder_log_var(enc1_pool)
+        return mean, log_var, enc1
+
+    def decode(self, mean, log_var, enc1):
+        z = self.reparameterize(mean, log_var)
+
+        x = self.fc(z)
+        x = self.relu4(x)
+
+        x = x.reshape(-1, 32, 13, 13)
+
+        x = self.up_sample(x)
+
+        x = torch.cat((x, enc1), dim=1)
+
+        x = self.deconv1(x)
+
+        x_prime = self.output(x)
+
+        return x_prime
+
+    def reparameterize(self, mu, logvar):
+        std = torch.exp(0.5 * logvar)
+        eps = torch.randn_like(std)
+        return eps.mul(std).add_(mu)
+
+    def forward(self, x):
+        mu, logvar, enc1 = self.encode(x)
+        return self.decode(mean=mu, log_var=logvar, enc1=enc1), mu, logvar

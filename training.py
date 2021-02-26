@@ -72,6 +72,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
             batch_loss, batch_recon_loss, batch_kld_loss = loss_function_vae(recon_batch, data, mu, log_var,
                                                                              recon_weight,
                                                                              kl_weight, nn_type)
+            net.train()
 
             batch_loss.backward()
             train_loss += batch_loss.item()
@@ -156,7 +157,7 @@ def train_total_vae(net, train_loader, test_loader, epochs, optimizer, recon_wei
 
         print('Epoch: {} Average loss: {:.8f}'.format(epoch, train_loss / len(train_loader.dataset)))
 
-        test_loss, test_recon_loss, test_kld_loss = test_vae(net, test_loader, recon_weight, kl_weight, nn_type)
+        test_loss, test_recon_loss, test_kld_loss = test_total_vae(net, test_loader, recon_weight, kl_weight, nn_type)
 
         writer.add_scalar('LogLoss/train', np.log(train_loss / len(train_loader.dataset)), epoch)
         writer.add_scalar('LogLoss/recon_train', np.log(train_recon_loss / len(train_loader.dataset)), epoch)

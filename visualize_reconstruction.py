@@ -9,7 +9,7 @@ import itertools
 vae_type = 'conv'
 dataset = 'Total'
 subset = True
-model_name = 'Total_VAE__2021-01-30 11:16:05.504872.pt'
+model_name = 'Total_VAE__2021-02-04 11:05:04.531770.pt'
 model_path = MODELS_ROOT + model_name
 
 if subset:
@@ -36,27 +36,29 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=bat
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
 if vae_type == 'conv':
-    hidden_size = 16 * 11 * 11
-    vae = DeConvVAETest(hidden_size=hidden_size, latent_size=LATENT_SIZE)
+    hidden_size = 32 * 11 * 11
+    vae = UNet_VAE(hidden_size=hidden_size, latent_size=LATENT_SIZE)
 else:
     vae = DenseVAE(out_features=100)
 
 vae.load_state_dict(torch.load(model_path))
 vae.eval()
 
-rand_sample_idx = random.randint(0, 1000)
-rand_sample = next(itertools.islice(test_loader, rand_sample_idx, None))
+plt.figure(figsize=(15, 5))
 
-rand_sample_prime = vae(rand_sample[0])[0]
+for i in range(1, 8, 2):
 
+    rand_sample_idx = random.randint(0, 5000)
+    rand_sample = next(itertools.islice(train_loader, rand_sample_idx, None))
 
-plt.figure()
-plt.subplot(1, 2, 1)
-plt.title('Original')
-plt.imshow(rand_sample[0].reshape(28, 28).detach().numpy())
+    rand_sample_prime = vae(rand_sample[0])[0]
 
-plt.subplot(1, 2, 2)
-plt.title('Reconstruction')
-plt.imshow(rand_sample_prime.reshape(28, 28).detach().numpy())
+    plt.subplot(1, 8, i)
+    plt.title('Original')
+    plt.imshow(rand_sample[0].reshape(28, 28).detach().numpy())
+
+    plt.subplot(1, 8, i + 1)
+    plt.title('Reconstruction')
+    plt.imshow(rand_sample_prime.reshape(28, 28).detach().numpy())
 
 plt.show()
