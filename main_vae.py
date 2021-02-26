@@ -1,14 +1,22 @@
 from training import train_vae, train_ae
-from models import ConvVAE, ConvPlainAE
+# from models import ConvVAE, ConvPlainAE
+from models import ConvVAE, DenseVAE
 from constants import *
 import torch
 import torch.optim as optim
 
+
+vae_type = 'conv'
+
 batch_size = 8
 
 dataset = 'rays'
-train_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/training_' + dataset + '.pt')
-test_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/test_' + dataset + '.pt')
+
+'''train_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/training_' + dataset + '.pt')
+test_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/test_' + dataset + '.pt')'''
+
+train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/' + dataset + '_pic_data/training_' + dataset + '.pt')
+test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/' + dataset + '_pic_data/test_' + dataset + '.pt')
 
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size,
                                            shuffle=True)
@@ -24,7 +32,13 @@ else:
     hidden_size = POTENTIAL_HIDDEN_SIZE
 latent_size = int(hidden_size / 2)
 
-vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
+
+if vae_type == 'conv':
+    vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=int(hidden_size/2), image_channels=image_channels)
+else:
+    vae = DenseVAE()
+
+# vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
 
 lr = 1e-3
 optimizer = optim.Adam(vae.parameters(), lr=lr)
