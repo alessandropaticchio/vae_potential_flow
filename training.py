@@ -128,8 +128,8 @@ def loss_function_vae(recon_x, x, mu, log_var, recon_weight, kl_weight, nn_type)
     return recon_loss + KLD, recon_loss, KLD
 
 
-def train_total_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., dataset='MNIST',
-                    nn_type='conv', desc=''):
+def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., dataset='MNIST',
+                   nn_type='conv', desc=''):
     now = str(datetime.now())
     writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + desc + '_' + now))
     net = net.to(device)
@@ -169,7 +169,7 @@ def train_total_vae(net, train_loader, test_loader, epochs, optimizer, recon_wei
     torch.save(net.state_dict(), MODELS_ROOT + dataset + '_VAE_' + desc + '_' + now + '.pt')
 
 
-def test_total_vae(net, test_loader, recon_weight, kl_weight, nn_type):
+def test_unet_vae(net, test_loader, recon_weight, kl_weight, nn_type):
     net.eval()
     net = net.to(device)
     test_loss = 0.

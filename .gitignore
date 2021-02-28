@@ -17,3 +17,7 @@ data/subsets/Fashion_MNIST/training.pt
 data/subsets/Fashion_MNIST/test.pt
 data/subsets/encoded_mapped/training.pt
 data/subsets/encoded_mapped/test.pt
+data/DATA21.2.18/training_rays.pt
+data/DATA21.2.18/training_potential.pt
+data/DATA21.2.18/test_rays.pt
+data/DATA21.2.18/test_potential.pt
