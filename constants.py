@@ -3,7 +3,7 @@ import torch
 colab = True
 
 if colab:
-    DATA_ROOT = '/content/gdrive/MyDrive/Colab_Notebooks/data'
+    DATA_ROOT = '/content/gdrive/MyDrive/Colab_Notebooks/data/'
 else:
     DATA_ROOT = './data/'
 
