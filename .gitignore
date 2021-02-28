@@ -11,3 +11,9 @@ data/real_data/potential_pic_data/training_potential.pt
 *.0
 *.0
 models/
+data/subsets/MNIST/training.pt
+data/subsets/MNIST/test.pt
+data/subsets/Fashion_MNIST/training.pt
+data/subsets/Fashion_MNIST/test.pt
+data/subsets/encoded_mapped/training.pt
+data/subsets/encoded_mapped/test.pt

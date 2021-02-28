@@ -23,7 +23,6 @@ for i in tqdm(range(1, int(MAX_PICS * 0.8)), desc='Rays training...'):
         i = '0' + str(i)
     else:
         i = str(i)
-    # Loading pic and passing from 3 channels to just 1
     image = Image.open(img_path + RAYS_ROOT + 'rays_' + i + '.jpg')
     image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
 
@@ -39,7 +38,6 @@ for i in tqdm(range(int(MAX_PICS * 0.8), MAX_PICS), desc='Rays test...'):
         i = '0' + str(i)
     else:
         i = str(i)
-    # Loading pic and passing from 3 channels to just 1
     image = Image.open(img_path + RAYS_ROOT + 'rays_' + i + '.jpg')
     image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
 
@@ -55,7 +53,6 @@ for i in tqdm(range(1, int(MAX_PICS * 0.8)), desc='Potential training...'):
         i = '0' + str(i)
     else:
         i = str(i)
-    # Loading pic and passing from 3 channels to just 1
     image = Image.open(img_path + POTENTIAL_ROOT + 'potential_' + i + '.jpg')
     image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
     image = image[:, :3, :, :]

@@ -9,7 +9,6 @@ MAX_PICS = 200
 
 downsample = True
 
-
 img_path = DATA_ROOT + "DATA21.2.18/"
 
 rays_train_set = torch.empty((1, RAYS_IMAGE_CHANNELS, RAYS_IMAGE_SIZE, RAYS_IMAGE_SIZE))
@@ -17,19 +16,17 @@ rays_test_set = torch.empty((1, RAYS_IMAGE_CHANNELS, RAYS_IMAGE_SIZE, RAYS_IMAGE
 potential_train_set = torch.empty((1, POTENTIAL_IMAGE_CHANNELS, POTENTIAL_IMAGE_SIZE, POTENTIAL_IMAGE_SIZE))
 potential_test_set = torch.empty((1, POTENTIAL_IMAGE_CHANNELS, POTENTIAL_IMAGE_SIZE, POTENTIAL_IMAGE_SIZE))
 
-
 for label in tqdm(os.listdir(img_path)):
-     label_name = os.fsdecode(label)
-     potential = float(label_name.split('D')[1])
-     path = img_path + label_name
-     for i in tqdm(range(1, int(MAX_PICS * 0.8) + 1), desc='Rays training...'):
+    label_name = os.fsdecode(label)
+    potential = float(label_name.split('D')[1])
+    path = img_path + label_name
+    for i in tqdm(range(1, int(MAX_PICS * 0.8) + 1), desc='Rays training...'):
         if i <= 9:
             i = '00' + str(i)
         elif 9 < i <= 99:
             i = '0' + str(i)
         else:
             i = str(i)
-        # Loading pic and passing from 3 channels to just 1
         image = Image.open(path + '/rays_' + i + '.jpg')
         image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
 
@@ -38,14 +35,13 @@ for label in tqdm(os.listdir(img_path)):
 
         rays_train_set = torch.cat((rays_train_set, image), 0)
 
-     for i in tqdm(range(int(MAX_PICS * 0.8) + 1, MAX_PICS + 1), desc='Rays test...'):
+    for i in tqdm(range(int(MAX_PICS * 0.8) + 1, MAX_PICS + 1), desc='Rays test...'):
         if i <= 9:
             i = '00' + str(i)
         elif 9 < i <= 99:
             i = '0' + str(i)
         else:
             i = str(i)
-        # Loading pic and passing from 3 channels to just 1
         image = Image.open(path + '/rays_' + i + '.jpg')
         image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
 
@@ -54,14 +50,13 @@ for label in tqdm(os.listdir(img_path)):
 
         rays_test_set = torch.cat((rays_test_set, image), 0)
 
-     for i in tqdm(range(1, int(MAX_PICS * 0.8) + 1), desc='Potential training...'):
+    for i in tqdm(range(1, int(MAX_PICS * 0.8) + 1), desc='Potential training...'):
         if i <= 9:
             i = '00' + str(i)
         elif 9 < i <= 99:
             i = '0' + str(i)
         else:
             i = str(i)
-        # Loading pic and passing from 3 channels to just 1
         image = Image.open(path + '/ptnl_' + i + '.jpg')
         image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
         image = potential * image[:, :3, :, :]
@@ -71,14 +66,13 @@ for label in tqdm(os.listdir(img_path)):
 
         potential_train_set = torch.cat((potential_train_set, image), 0)
 
-     for i in tqdm(range(int(MAX_PICS * 0.8) + 1, MAX_PICS + 1), desc='Potential test...'):
+    for i in tqdm(range(int(MAX_PICS * 0.8) + 1, MAX_PICS + 1), desc='Potential test...'):
         if i <= 9:
             i = '00' + str(i)
         elif 9 < i <= 99:
             i = '0' + str(i)
         else:
             i = str(i)
-        # Loading pic and passing from 3 channels to just 1
         image = Image.open(path + '/ptnl_' + i + '.jpg')
         image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
         image = potential * image[:, :3, :, :]
@@ -98,5 +92,3 @@ torch.save(rays_train_set, img_path + 'training_rays.pt')
 torch.save(rays_test_set, img_path + 'test_rays.pt')
 torch.save(potential_train_set, img_path + 'training_potential.pt')
 torch.save(potential_test_set, img_path + 'test_potential.pt')
-
-
