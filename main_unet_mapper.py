@@ -8,9 +8,9 @@ import torch.optim as optim
 dataset = 'total'
 vae_type = 'conv'
 
-potential_train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/' + '/training_potential.pt')
+potential_train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/' + 'training_potential.pt')
 potential_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/' + 'test_potential.pt')
-rays_train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/' + '/training_rays.pt')
+rays_train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/' + 'training_rays.pt')
 rays_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/' + 'test_rays.pt')
 
 # Compose datasets where X are potential samples, y are rays samples. The matching before samples from the same
