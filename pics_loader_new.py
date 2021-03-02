@@ -18,7 +18,12 @@ potential_test_set = torch.empty((1, POTENTIAL_IMAGE_CHANNELS, POTENTIAL_IMAGE_S
 
 for label in tqdm(os.listdir(img_path)):
     label_name = os.fsdecode(label)
-    potential = float(label_name.split('D')[1])
+    try:
+        potential = float(label_name.split('D')[1])
+    except:
+        continue
+    if potential != 0.3:
+        continue
     path = img_path + label_name
     for i in tqdm(range(1, int(MAX_PICS * 0.8) + 1), desc='Rays training...'):
         if i <= 9:
@@ -59,7 +64,8 @@ for label in tqdm(os.listdir(img_path)):
             i = str(i)
         image = Image.open(path + '/ptnl_' + i + '.jpg')
         image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
-        image = potential * image[:, :3, :, :]
+        # image = potential * image[:, :3, :, :]
+        image =  image[:, :3, :, :]
 
         if downsample:
             image = F.interpolate(image, size=(POTENTIAL_IMAGE_SIZE, POTENTIAL_IMAGE_SIZE))
@@ -75,7 +81,8 @@ for label in tqdm(os.listdir(img_path)):
             i = str(i)
         image = Image.open(path + '/ptnl_' + i + '.jpg')
         image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
-        image = potential * image[:, :3, :, :]
+        # image = potential * image[:, :3, :, :]
+        image =  image[:, :3, :, :]
 
         if downsample:
             image = F.interpolate(image, size=(POTENTIAL_IMAGE_SIZE, POTENTIAL_IMAGE_SIZE))
@@ -88,7 +95,7 @@ rays_test_set = rays_test_set[1:]
 potential_train_set = potential_train_set[1:]
 potential_test_set = potential_test_set[1:]
 
-torch.save(rays_train_set, img_path + 'training_rays.pt')
-torch.save(rays_test_set, img_path + 'test_rays.pt')
-torch.save(potential_train_set, img_path + 'training_potential.pt')
-torch.save(potential_test_set, img_path + 'test_potential.pt')
+torch.save(rays_train_set, img_path + 'loaded_data/training_rays.pt')
+torch.save(rays_test_set, img_path + 'loaded_data/test_rays.pt')
+torch.save(potential_train_set, img_path + 'loaded_data/training_potential.pt')
+torch.save(potential_test_set, img_path + 'loaded_data/test_potential.pt')
