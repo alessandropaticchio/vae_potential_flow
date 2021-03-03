@@ -1,6 +1,6 @@
 import torch
 
-colab = True
+colab = False
 
 if colab:
     DATA_ROOT = '/content/gdrive/MyDrive/Colab_Notebooks/data/'

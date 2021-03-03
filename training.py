@@ -140,6 +140,7 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
         train_kld_loss = 0.
         for batch_idx, (data, targets) in enumerate(train_loader):
             data = data.to(device)
+            targets = targets.to(device)
             optimizer.zero_grad()
 
             recon_batch, mu, log_var = net(data)
@@ -156,7 +157,7 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
 
         print('Epoch: {} Average loss: {:.8f}'.format(epoch, train_loss / len(train_loader.dataset)))
 
-        test_loss, test_recon_loss, test_kld_loss = test_vae(net, test_loader, recon_weight, kl_weight, nn_type)
+        test_loss, test_recon_loss, test_kld_loss = test_unet_vae(net, test_loader, recon_weight, kl_weight, nn_type)
 
         writer.add_scalar('LogLoss/train', np.log(train_loss / len(train_loader.dataset)), epoch)
         writer.add_scalar('LogLoss/recon_train', np.log(train_recon_loss / len(train_loader.dataset)), epoch)
@@ -178,6 +179,7 @@ def test_unet_vae(net, test_loader, recon_weight, kl_weight, nn_type):
     with torch.no_grad():
         for data, targets in test_loader:
             data = data.to(device)
+            targets = targets.to(device)
             recon, mu, log_var = net(data)
 
             # sum up batch loss
