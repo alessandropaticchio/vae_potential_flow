@@ -1,4 +1,4 @@
-from models import ConvWholeMapper
+from models import UNet_VAE
 from constants import *
 from utils import MyDataset
 import matplotlib.pyplot as plt
@@ -7,21 +7,21 @@ import torch
 
 batch_size = 1
 
-model_name = 'Mapper_2021-01-08 11:00:57.714363.pt'
+model_name = 'total_VAE__2021-03-03 15_23_24.225034.pt'
 model_path = MODELS_ROOT + model_name
 
-whole_mapper = ConvWholeMapper(potential_encoded_size=POTENTIAL_ENCODED_IMAGE_SIZE[1],
-                               rays_encoded_size=RAYS_ENCODED_IMAGE_SIZE[1])
-whole_mapper.load_state_dict(torch.load(model_path))
-whole_mapper.eval()
+hidden_size = HIDDEN_SIZE
+latent_size = LATENT_SIZE
+vae = UNet_VAE(hidden_size=HIDDEN_SIZE, latent_size=latent_size)
+vae.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+vae.eval()
 
 data_path = DATA_ROOT + '/real_data/'
 
-potential_train_dataset = torch.load(data_path + POTENTIAL_ROOT + 'training_potential.pt')
-potential_test_dataset = torch.load(data_path + POTENTIAL_ROOT + 'test_potential.pt')
-
-rays_train_dataset = torch.load(data_path + RAYS_ROOT + 'training_rays.pt')
-rays_test_dataset = torch.load(data_path + RAYS_ROOT + 'test_rays.pt')
+potential_train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_potential.pt')
+potential_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_potential.pt')
+rays_train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_rays.pt')
+rays_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_rays.pt')
 
 whole_train_dataset = MyDataset(x=potential_train_dataset, y=rays_train_dataset)
 whole_test_dataset = MyDataset(x=potential_test_dataset, y=rays_test_dataset)
@@ -29,7 +29,7 @@ whole_test_dataset = MyDataset(x=potential_test_dataset, y=rays_test_dataset)
 rand_sample_idx = random.randint(0, 500)
 rand_sample = whole_train_dataset.X[rand_sample_idx].unsqueeze(0)
 
-rand_sample_prime = whole_mapper(rand_sample)
+rand_sample_prime = vae(rand_sample)
 
 plt.figure()
 

@@ -9,13 +9,13 @@ class UNet_VAE(nn.Module):
         self.hidden_size = hidden_size
         self.latent_size = latent_size
 
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=8, kernel_size=3)
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3)
         self.relu1 = nn.ReLU()
 
-        self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=3)
+        self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3)
         self.relu2 = nn.ReLU()
 
-        self.conv3 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3)
+        self.conv3 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3)
         self.relu3 = nn.ReLU()
 
         self.max_pool = nn.MaxPool2d(kernel_size=2, stride=2)
@@ -27,13 +27,13 @@ class UNet_VAE(nn.Module):
 
         self.up_sample = nn.UpsamplingNearest2d(scale_factor=2)
 
-        self.deconv1 = nn.ConvTranspose2d(in_channels=64, out_channels=16, kernel_size=3)
+        self.deconv1 = nn.ConvTranspose2d(in_channels=256, out_channels=64, kernel_size=3)
         self.relu5 = nn.ReLU()
 
-        self.deconv2 = nn.ConvTranspose2d(in_channels=32, out_channels=8, kernel_size=3)
+        self.deconv2 = nn.ConvTranspose2d(in_channels=128, out_channels=32, kernel_size=3)
         self.relu5 = nn.ReLU()
 
-        self.deconv3 = nn.ConvTranspose2d(in_channels=16, out_channels=3, kernel_size=3)
+        self.deconv3 = nn.ConvTranspose2d(in_channels=64, out_channels=3, kernel_size=3)
 
         self.output = nn.Sigmoid()
 
@@ -61,7 +61,7 @@ class UNet_VAE(nn.Module):
         x = self.fc(z)
         x = self.relu4(x)
 
-        x = x.reshape(-1, 32, 47, 47)
+        x = x.reshape(-1, 128, 47, 47)
 
         x = self.up_sample(x)
 
