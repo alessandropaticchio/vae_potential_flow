@@ -7,7 +7,7 @@ import torch
 
 batch_size = 1
 
-model_name = 'total_VAE__2021-03-03 15_23_24.225034.pt'
+model_name = 'total_VAE__2021-03-05 21:35:04.682995.pt'
 model_path = MODELS_ROOT + model_name
 
 hidden_size = HIDDEN_SIZE
@@ -26,8 +26,13 @@ rays_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_ra
 whole_train_dataset = MyDataset(x=potential_train_dataset, y=rays_train_dataset)
 whole_test_dataset = MyDataset(x=potential_test_dataset, y=rays_test_dataset)
 
-rand_sample_idx = random.randint(0, 500)
-rand_sample = whole_train_dataset.X[rand_sample_idx].unsqueeze(0)
+whole_train_dataset.y = whole_train_dataset.y[1, :,:, :].unsqueeze(0)
+whole_train_dataset.X = whole_train_dataset.X[1, :,:, :].unsqueeze(0)
+
+rand_sample_idx = random.randint(0, 159)
+rand_sample = whole_train_dataset.X[0].unsqueeze(0)
+
+a = rand_sample.squeeze().permute(1, 2, 0)
 
 rand_sample_prime = vae(rand_sample)
 
@@ -39,10 +44,10 @@ plt.imshow(rand_sample.squeeze().permute(1, 2, 0))
 
 plt.subplot(1, 3, 2)
 plt.title('Reconstruction')
-plt.imshow(rand_sample_prime.squeeze().detach().permute(1, 2, 0).numpy(), cmap='gray')
+plt.imshow(rand_sample_prime[0].squeeze().detach().permute(1, 2, 0).numpy(), cmap='gray')
 
 plt.subplot(1, 3, 3)
 plt.title('Target')
-plt.imshow(whole_train_dataset.y[rand_sample_idx].detach().permute(1, 2, 0).numpy(), cmap='gray')
+plt.imshow(whole_train_dataset.y[0].detach().permute(1, 2, 0).numpy(), cmap='gray')
 
 plt.show()

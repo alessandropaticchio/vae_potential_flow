@@ -4,6 +4,7 @@ from torch.nn import MSELoss
 from torch.utils.tensorboard import SummaryWriter
 import torch
 import torch.nn.functional as F
+import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -144,6 +145,16 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
             optimizer.zero_grad()
 
             recon_batch, mu, log_var = net(data)
+
+            if epoch == 49:
+                image = recon_batch.squeeze().permute(1, 2, 0)
+                plt.figure()
+                plt.imshow(image.detach().numpy())
+                plt.show()
+
+                plt.imshow(targets.squeeze().permute(1, 2, 0).detach().numpy())
+                plt.show()
+
             batch_loss, batch_recon_loss, batch_kld_loss = loss_function_vae(recon_batch, targets, mu, log_var,
                                                                              recon_weight,
                                                                              kl_weight, nn_type)
