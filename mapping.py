@@ -10,18 +10,18 @@ rays_model_path = MODELS_ROOT + rays_model_name
 
 mapper_type = 'conv'
 
-potential_ae = ConvPlainAE(image_dim=POTENTIAL_IMAGE_SIZE, image_channels=POTENTIAL_IMAGE_CHANNELS)
+#potential_ae = ConvPlainAE(image_dim=POTENTIAL_IMAGE_SIZE, image_channels=POTENTIAL_IMAGE_CHANNELS)
 potential_ae.load_state_dict(torch.load(potential_model_path))
 potential_ae.eval()
 
-rays_ae = ConvPlainAE(image_dim=RAYS_IMAGE_SIZE, image_channels=RAYS_IMAGE_CHANNELS)
+#rays_ae = ConvPlainAE(image_dim=RAYS_IMAGE_SIZE, image_channels=RAYS_IMAGE_CHANNELS)
 rays_ae.load_state_dict(torch.load(rays_model_path))
 rays_ae.eval()
 
-potential_train_dataset = torch.load(DATA_ROOT + 'real_data/' + POTENTIAL_ROOT + 'training_' + 'potential' + '.pt')
-potential_test_dataset = torch.load(DATA_ROOT + 'real_data/' + POTENTIAL_ROOT + 'test_' + 'potential' + '.pt')
-rays_train_dataset = torch.load(DATA_ROOT + 'real_data/' + RAYS_ROOT + 'training_' + 'rays' + '.pt')
-rays_test_dataset = torch.load(DATA_ROOT + 'real_data/' + RAYS_ROOT + 'test_' + 'rays' + '.pt')
+potential_train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_potential.pt')
+potential_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_potential.pt')
+rays_train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_rays.pt')
+rays_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_rays.pt')
 
 if mapper_type == 'conv':
     encoded_train_set_X = torch.empty(1, POTENTIAL_IMAGE_CHANNELS,
