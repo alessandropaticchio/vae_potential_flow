@@ -1,32 +1,35 @@
-from training import train_ae
-from models import ConvPlainAE
+from training import train_mapper
+from models import ConvPlainAE, DeConvPlainAE
 from constants import *
+from utils import MyDataset
 import torch
 import torch.optim as optim
 
 batch_size = 128
 
-dataset = 'potential'
+dataset = 'total'
+vae_type = 'conv'
 
-if dataset == 'rays':
-    image_size = RAYS_IMAGE_SIZE
-    image_channels = RAYS_IMAGE_CHANNELS
-    dataset_root = RAYS_ROOT
-else:
-    image_size = POTENTIAL_IMAGE_SIZE
-    image_channels = POTENTIAL_IMAGE_CHANNELS
-    dataset_root = POTENTIAL_ROOT
+potential_train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_potential.pt')
+potential_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_potential.pt')
+rays_train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_rays.pt')
+rays_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_rays.pt')
 
-train_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset_root + 'training_' + dataset + '.pt')
-test_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset_root + 'test_' + dataset + '.pt')
+# Compose datasets where X are potential samples, y are rays samples. The matching before samples from the same
+# class is respected due to the generation of the subsets.
+train_dataset = MyDataset(x=potential_train_dataset.data, y=rays_train_dataset.data)
+train_dataset.y = train_dataset.y[1, :, :, :].unsqueeze(0)
+train_dataset.X = train_dataset.X[1, :, :, :].unsqueeze(0)
+test_dataset = MyDataset(x=potential_test_dataset.data, y=rays_test_dataset.data)
 
+batch_size = 100
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size,
                                            shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
-vae = ConvPlainAE(image_channels=image_channels)
+ae = DeConvPlainAE(image_channels=3)
 
 lr = 1e-3
-optimizer = optim.Adam(vae.parameters(), lr=lr)
+optimizer = optim.Adam(ae.parameters(), lr=lr)
 
-train_ae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=300, optimizer=optimizer, dataset=dataset)
+train_mapper(net=ae, train_loader=train_loader, test_loader=test_loader, epochs=600, optimizer=optimizer)

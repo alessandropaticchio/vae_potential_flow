@@ -2,6 +2,7 @@ from torch import nn
 import torch
 import torch.nn.functional as F
 
+
 class UNet_VAE(nn.Module):
 
     def __init__(self, hidden_size, latent_size):
@@ -91,6 +92,7 @@ class UNet_VAE(nn.Module):
     def forward(self, x):
         mu, logvar, enc1, enc2, enc3 = self.encode(x)
         return self.decode(mean=mu, log_var=logvar, enc1=enc1, enc2=enc2, enc3=enc3), mu, logvar
+
 
 class DenseVAE(nn.Module):
     def __init__(self, out_features, features=16, in_features=784):
@@ -231,6 +233,48 @@ class ConvVAE(nn.Module):
 
         x_prime = self.output(x)
 
+        return x_prime
+
+
+class DeConvPlainAE(nn.Module):
+
+    def __init__(self, image_channels=3):
+        super(DeConvPlainAE, self).__init__()
+
+        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=32, kernel_size=3)
+        self.relu1 = nn.ReLU()
+
+        self.conv2 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3)
+        self.relu2 = nn.ReLU()
+
+        self.deconv3 = nn.ConvTranspose2d(in_channels=32, out_channels=32, kernel_size=3)
+        self.relu4 = nn.ReLU()
+
+        self.deconv4 = nn.ConvTranspose2d(in_channels=32, out_channels=image_channels, kernel_size=3)
+
+        self.output = nn.Sigmoid()
+
+    def encode(self, x):
+        x = self.conv1(x)
+        x = self.relu1(x)
+
+        x = self.conv2(x)
+        x = self.relu2(x)
+
+        return x
+
+    def decode(self, x):
+        x = self.deconv3(x)
+        x = self.relu4(x)
+
+        x = self.deconv4(x)
+        x_prime = self.output(x)
+
+        return x_prime
+
+    def forward(self, x):
+        x = self.encode(x)
+        x_prime = self.decode(x)
         return x_prime
 
 
@@ -512,7 +556,53 @@ class DeConvVAETest(nn.Module):
         return self.decode(mean=mu, log_var=logvar, enc1=enc1, enc2=enc2), mu, logvar
 
 
+class ConvPlainAE(nn.Module):
+    def __init__(self, image_channels=3):
+        super(ConvPlainAE, self).__init__()
+        self.image_channels = image_channels
 
+        # Encoder
+        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=32, kernel_size=1, stride=1)
+        self.relu1 = nn.ReLU()
+
+        self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
+
+        # Decoder
+        self.conv2 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=1, stride=1, padding=0)
+        self.relu2 = nn.ReLU()
+
+        self.upsample1 = nn.Upsample(scale_factor=2)
+
+        self.conv3 = nn.Conv2d(in_channels=32, out_channels=image_channels, kernel_size=3, stride=1, padding=1)
+
+        self.output = nn.Sigmoid()
+
+    def forward(self, x):
+        x = self.encode(x)
+
+        x_prime = self.decode(x)
+
+        return x_prime
+
+    def encode(self, x):
+        x = self.conv1(x)
+        x = self.relu1(x)
+
+        x = self.maxpool1(x)
+
+        return x
+
+    def decode(self, x):
+        x = self.conv2(x)
+        x = self.relu2(x)
+
+        x = self.upsample1(x)
+
+        x = self.conv3(x)
+
+        x_prime = self.output(x)
+
+        return x_prime
 
 
 '''from torch import nn
@@ -580,55 +670,6 @@ class ConvVAE(nn.Module):
 
         x = self.conv2(x)
         x = self.relu2(x)
-        x = self.upsample1(x)
-
-        x = self.conv3(x)
-
-        x_prime = self.output(x)
-
-        return x_prime
-
-
-class ConvPlainAE(nn.Module):
-    def __init__(self, image_channels=3):
-        super(ConvPlainAE, self).__init__()
-        self.image_channels = image_channels
-
-        # Encoder
-        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=8, kernel_size=1, stride=1)
-        self.relu1 = nn.ReLU()
-
-        self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
-
-        # Decoder
-        self.conv2 = nn.Conv2d(in_channels=8, out_channels=8, kernel_size=1, stride=1, padding=0)
-        self.relu2 = nn.ReLU()
-
-        self.upsample1 = nn.Upsample(scale_factor=2)
-
-        self.conv3 = nn.Conv2d(in_channels=8, out_channels=image_channels, kernel_size=3, stride=1, padding=1)
-
-        self.output = nn.Sigmoid()
-
-    def forward(self, x):
-        x = self.encode(x)
-
-        x_prime = self.decode(x)
-
-        return x_prime
-
-    def encode(self, x):
-        x = self.conv1(x)
-        x = self.relu1(x)
-
-        x = self.maxpool1(x)
-
-        return x
-
-    def decode(self, x):
-        x = self.conv2(x)
-        x = self.relu2(x)
-
         x = self.upsample1(x)
 
         x = self.conv3(x)
@@ -773,4 +814,3 @@ class ConvWholeMapper(nn.Module):
         x = self.conv4_map(x)
 
         return x'''
-
