@@ -71,14 +71,14 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
 
             recon_batch, mu, log_var = net(data)
 
-            if epoch % 50 == 0 or epoch == 299:
+            '''if epoch % 50 == 0 or epoch == 299:
                 image = recon_batch.squeeze().permute(1, 2, 0)
                 plt.figure()
                 plt.imshow(image.detach().numpy())
                 plt.show()
 
                 plt.imshow(data.squeeze().permute(1, 2, 0).detach().numpy())
-                plt.show()
+                plt.show()'''
 
             batch_loss, batch_recon_loss, batch_kld_loss = loss_function_vae(recon_batch, data, mu, log_var,
                                                                              recon_weight,

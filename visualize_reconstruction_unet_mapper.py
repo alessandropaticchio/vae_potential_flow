@@ -7,7 +7,7 @@ import torch
 
 batch_size = 1
 
-model_name = 'total_VAE__2021-03-05 21:35:04.682995.pt'
+model_name = 'total_VAE__2021-03-06 16:12:56.877493.pt'
 model_path = MODELS_ROOT + model_name
 
 hidden_size = HIDDEN_SIZE

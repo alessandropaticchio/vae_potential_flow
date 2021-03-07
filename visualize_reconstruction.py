@@ -1,4 +1,4 @@
-from models import ConvPlainAE
+from models import ConvVAE
 from constants import *
 import matplotlib.pyplot as plt
 import random
@@ -7,35 +7,35 @@ import itertools
 
 batch_size = 1
 
-dataset = 'rays'
-model_name = 'AE_rays_2021-01-05 18:48:05.829239.pt'
+dataset = 'potential'
+model_name = 'potential_VAE__2021-03-06 15:26:29.528032.pt'
 model_path = MODELS_ROOT + model_name
 
 
 if dataset == 'rays':
     image_size = RAYS_IMAGE_SIZE
-    hidden_size = RAYS_HIDDEN_SIZE
+    hidden_size = HIDDEN_SIZE
     image_channels = RAYS_IMAGE_CHANNELS
     latent_size = int(hidden_size / 2)
-    dataset_root = RAYS_ROOT
 else:
     image_size = POTENTIAL_IMAGE_SIZE
-    hidden_size = POTENTIAL_HIDDEN_SIZE
+    hidden_size = HIDDEN_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
     latent_size = int(hidden_size / 2)
-    dataset_root = POTENTIAL_ROOT
 
 # ae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
-ae = ConvPlainAE(image_dim=image_size, image_channels=image_channels)
+ae = ConvVAE(image_dim=image_size, hidden_size=HIDDEN_SIZE, latent_size=LATENT_SIZE, image_channels=image_channels, net_size=1)
 ae.load_state_dict(torch.load(model_path))
 ae.eval()
 
-train_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset_root + 'training_' + dataset + '.pt')
-test_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset_root + 'test_' + dataset + '.pt')
+train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_' + dataset + '.pt')
+test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_' + dataset + '.pt')
+train_dataset = train_dataset[0, :,:, :].unsqueeze(0)
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
 rand_sample_idx = random.randint(0, 500)
+rand_sample_idx = 0
 rand_sample = next(itertools.islice(train_loader, rand_sample_idx, None))
 
 rand_sample_prime = ae(rand_sample[0].reshape(1, image_channels, image_size, image_size))[0]

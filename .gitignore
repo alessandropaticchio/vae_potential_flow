@@ -21,3 +21,6 @@ data/DATA21.2.18/loaded_data/training_rays.pt
 data/DATA21.2.18/loaded_data/training_potential.pt
 data/DATA21.2.18/loaded_data/test_rays.pt
 data/DATA21.2.18/loaded_data/test_potential.pt
+*.yaml
+cifar-10-batches-py/data_batch_1
+cifar-10-batches-py/test_batch

@@ -3,24 +3,23 @@ from models import Mapper, ConvMapper
 from training import train_mapper
 import torch.optim as optim
 
-mapper_type = 'conv'
 
-data_path = DATA_ROOT + '/plain_mapped/'
+data_path = DATA_ROOT + '/mapped/'
 
 train_dataset = torch.load(data_path + 'training.pt')
 test_dataset = torch.load(data_path + 'test.pt')
+
+train_dataset.y = train_dataset.y[0, :]
+train_dataset.X = train_dataset.X[0, :]
 
 batch_size = 256
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
-if mapper_type == 'conv':
-    mapper = ConvMapper(potential_encoded_size=POTENTIAL_ENCODED_IMAGE_SIZE[1],
-                        rays_encoded_size=RAYS_ENCODED_IMAGE_SIZE[1])
-else:
-    mapper = Mapper(h_sizes=[POTENTIAL_ENCODED_SIZE, POTENTIAL_ENCODED_SIZE, RAYS_ENCODED_SIZE, RAYS_ENCODED_SIZE])
+
+mapper = Mapper(h_sizes=[LATENT_SIZE * 2,  LATENT_SIZE * 2])
 
 lr = 1e-3
 optimizer = optim.Adam(mapper.parameters(), lr=lr)
 
-train_mapper(net=mapper, train_loader=train_loader, test_loader=test_loader, epochs=150, optimizer=optimizer)
+train_mapper(net=mapper, train_loader=train_loader, test_loader=test_loader, epochs=1000, optimizer=optimizer)

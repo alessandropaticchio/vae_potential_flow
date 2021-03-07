@@ -16,9 +16,11 @@ rays_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_ra
 # Compose datasets where X are potential samples, y are rays samples. The matching before samples from the same
 # class is respected due to the generation of the subsets.
 train_dataset = MyDataset(x=potential_train_dataset.data, y=rays_train_dataset.data)
-train_dataset.y = train_dataset.y[1, :,:, :].unsqueeze(0)
-train_dataset.X = train_dataset.X[1, :,:, :].unsqueeze(0)
+train_dataset.y = train_dataset.y[0, :,:, :].unsqueeze(0)
+train_dataset.X = train_dataset.X[0, :,:, :].unsqueeze(0)
 test_dataset = MyDataset(x=potential_test_dataset.data, y=rays_test_dataset.data)
+test_dataset.y = test_dataset.y[0, :,:, :].unsqueeze(0)
+test_dataset.X = test_dataset.X[0, :,:, :].unsqueeze(0)
 
 batch_size = 100
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size,

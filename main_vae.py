@@ -10,7 +10,7 @@ vae_type = 'conv'
 
 batch_size = 8
 
-dataset = 'rays'
+dataset = 'potential'
 
 '''train_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/training_' + dataset + '.pt')
 test_dataset = torch.load(DATA_ROOT + 'real_data/' + dataset + '_pic_data/test_' + dataset + '.pt')'''
@@ -19,7 +19,8 @@ train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_' 
 test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_' + dataset + '.pt')
 
 
-train_dataset = train_dataset[1, :,:, :].unsqueeze(0)
+train_dataset = train_dataset[0, :,:, :].unsqueeze(0)
+test_dataset = test_dataset[0, :,:, :].unsqueeze(0)
 
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size,
                                            shuffle=True)
@@ -34,7 +35,7 @@ else:
 
 
 if vae_type == 'conv':
-    vae = ConvVAE(image_dim=image_size, hidden_size=HIDDEN_SIZE, latent_size=LATENT_SIZE, image_channels=image_channels)
+    vae = ConvVAE(image_dim=image_size, hidden_size=HIDDEN_SIZE, latent_size=LATENT_SIZE, image_channels=image_channels, net_size=1)
 else:
     vae = DenseVAE()
 
