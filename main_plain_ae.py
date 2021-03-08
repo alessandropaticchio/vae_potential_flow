@@ -1,4 +1,4 @@
-from training import train_mapper
+from training import train
 from models import ConvPlainAE, DeConvPlainAE
 from constants import *
 from utils import MyDataset
@@ -32,4 +32,4 @@ ae = DeConvPlainAE(image_channels=3)
 lr = 1e-3
 optimizer = optim.Adam(ae.parameters(), lr=lr)
 
-train_mapper(net=ae, train_loader=train_loader, test_loader=test_loader, epochs=600, optimizer=optimizer)
+train(net=ae, train_loader=train_loader, test_loader=test_loader, epochs=600, optimizer=optimizer)

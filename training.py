@@ -4,11 +4,10 @@ from torch.nn import MSELoss
 from torch.utils.tensorboard import SummaryWriter
 import torch
 import torch.nn.functional as F
-import matplotlib.pyplot as plt
 import numpy as np
 
 
-def train_mapper(net, train_loader, test_loader, epochs, optimizer):
+def train(net, train_loader, test_loader, epochs, optimizer):
     now = str(datetime.now())
     writer = SummaryWriter('runs/{}'.format('Mapper_' + now))
     net = net.to(device)
@@ -29,7 +28,7 @@ def train_mapper(net, train_loader, test_loader, epochs, optimizer):
             optimizer.step()
 
         print('Epoch: {} Average loss: {:.8f}'.format(epoch, train_loss / len(train_loader.dataset)))
-        test_loss = test_mapper(net, test_loader)
+        test_loss = test(net, test_loader)
 
         writer.add_scalar('Loss/train', train_loss / len(train_loader.dataset), epoch)
         writer.add_scalar('Loss/test', test_loss / len(train_loader.dataset), epoch)
@@ -38,7 +37,7 @@ def train_mapper(net, train_loader, test_loader, epochs, optimizer):
     torch.save(net.state_dict(), MODELS_ROOT + 'Mapper_' + now + '.pt')
 
 
-def test_mapper(net, test_loader):
+def test(net, test_loader):
     net.eval()
     net = net.to(device)
     test_loss = 0
@@ -70,15 +69,6 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
             optimizer.zero_grad()
 
             recon_batch, mu, log_var = net(data)
-
-            '''if epoch % 50 == 0 or epoch == 299:
-                image = recon_batch.squeeze().permute(1, 2, 0)
-                plt.figure()
-                plt.imshow(image.detach().numpy())
-                plt.show()
-
-                plt.imshow(data.squeeze().permute(1, 2, 0).detach().numpy())
-                plt.show()'''
 
             batch_loss, batch_recon_loss, batch_kld_loss = loss_function_vae(recon_batch, data, mu, log_var,
                                                                              recon_weight,
@@ -155,15 +145,6 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
             optimizer.zero_grad()
 
             recon_batch, mu, log_var = net(data)
-
-            if epoch == 49:
-                image = recon_batch.squeeze().permute(1, 2, 0)
-                plt.figure()
-                plt.imshow(image.detach().numpy())
-                plt.show()
-
-                plt.imshow(targets.squeeze().permute(1, 2, 0).detach().numpy())
-                plt.show()
 
             batch_loss, batch_recon_loss, batch_kld_loss = loss_function_vae(recon_batch, targets, mu, log_var,
                                                                              recon_weight,

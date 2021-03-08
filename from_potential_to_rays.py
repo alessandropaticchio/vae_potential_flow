@@ -1,4 +1,4 @@
-from models import ConvVAE, Mapper, ConvMapper
+from models import ConvVAE, Mapper
 from constants import *
 import random
 import matplotlib.pyplot as plt
@@ -10,22 +10,24 @@ potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
 mapper_model_path = MODELS_ROOT + mapper_model_name
 
-
 potential_train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_potential.pt')
 potential_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_potential.pt')
-potential_train_dataset = potential_train_dataset[0, :,:, :].unsqueeze(0)
 
 
 rays_train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_rays.pt')
 rays_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_rays.pt')
-rays_train_dataset = rays_train_dataset[0, :,:, :].unsqueeze(0)
 
+# Fetch first sample
+potential_train_dataset = potential_train_dataset[0, :, :, :].unsqueeze(0)
+rays_train_dataset = rays_train_dataset[0, :, :, :].unsqueeze(0)
 
-potential_ae = ConvVAE(image_dim=POTENTIAL_IMAGE_SIZE, hidden_size=HIDDEN_SIZE, latent_size=LATENT_SIZE, image_channels=POTENTIAL_IMAGE_CHANNELS)
+potential_ae = ConvVAE(image_dim=POTENTIAL_IMAGE_SIZE, hidden_size=HIDDEN_SIZE, latent_size=LATENT_SIZE,
+                       image_channels=POTENTIAL_IMAGE_CHANNELS)
 potential_ae.load_state_dict(torch.load(potential_model_path))
 potential_ae.eval()
 
-rays_ae = ConvVAE(image_dim=RAYS_IMAGE_SIZE, hidden_size=HIDDEN_SIZE, latent_size=LATENT_SIZE, image_channels=RAYS_IMAGE_CHANNELS)
+rays_ae = ConvVAE(image_dim=RAYS_IMAGE_SIZE, hidden_size=HIDDEN_SIZE, latent_size=LATENT_SIZE,
+                  image_channels=RAYS_IMAGE_CHANNELS)
 rays_ae.load_state_dict(torch.load(rays_model_path))
 rays_ae.eval()
 
@@ -37,6 +39,8 @@ mapper.eval()
 for i in range(1, 10):
     # Encoding
     rand_sample_idx = random.randint(1, 799)
+
+    # Fetch first sample: TODO remove this
     rand_sample_idx = 0
     potential_sample = potential_train_dataset.data[rand_sample_idx].unsqueeze(0)
     potential_mean, potential_log_var = potential_ae.encode(potential_sample)
@@ -45,8 +49,8 @@ for i in range(1, 10):
     # Mapping
     mapping = mapper(potential_sample_encoded)
 
-    rays_mean = mapping[:, :20]
-    rays_log_var = mapping[:, 20:]
+    rays_mean = mapping[:, :LATENT_SIZE]
+    rays_log_var = mapping[:, LATENT_SIZE:]
 
     rays_sample_mapped = rays_ae.decode(rays_mean, rays_log_var)
 
@@ -62,16 +66,12 @@ for i in range(1, 10):
     plt.title('Original Rays')
     plt.imshow(rays_train_dataset[rand_sample_idx].permute(1, 2, 0).detach().numpy())
 
-    # plt.subplot(1, 4, 3)
-    # plt.title('Decoded Rays')
-    # plt.imshow(rays_sample_decoded.squeeze(0).permute(1, 2, 0).detach().numpy())
-
     plt.subplot(1, 4, 3)
     plt.title('Mapped Rays')
     plt.imshow(rays_sample_mapped.squeeze(0).permute(1, 2, 0).detach().numpy())
 
     plt.subplot(1, 4, 4)
-    plt.title('Reconstructed Rays')
+    plt.title('VAE-Reconstructed Rays')
     plt.imshow(rays_sample_reconstructed.squeeze(0).permute(1, 2, 0).detach().numpy())
 
 plt.show()
