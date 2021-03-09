@@ -3,27 +3,28 @@ from models import ConvVAE
 from utils import MyDataset
 import torch
 
-potential_model_name = 'potential_VAE__2021-03-06 15:26:29.528032.pt'
-rays_model_name = 'rays_VAE__2021-03-06 15:23:14.334476.pt'
+potential_model_name = 'potential_VAE__2021-03-09 18:07:17.864741.pt'
+rays_model_name = 'rays_VAE__2021-03-09 18:11:30.087612.pt'
 potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
 
-potential_ae = ConvVAE(image_dim=POTENTIAL_IMAGE_SIZE, hidden_size=HIDDEN_SIZE, latent_size=LATENT_SIZE, image_channels=POTENTIAL_IMAGE_CHANNELS)
+potential_ae = ConvVAE(image_dim=POTENTIAL_IMAGE_SIZE, hidden_size=HIDDEN_SIZE, latent_size=LATENT_SIZE,
+                       image_channels=POTENTIAL_IMAGE_CHANNELS)
 potential_ae.load_state_dict(torch.load(potential_model_path))
 potential_ae.eval()
 
-rays_ae = ConvVAE(image_dim=RAYS_IMAGE_SIZE, hidden_size=HIDDEN_SIZE, latent_size=LATENT_SIZE, image_channels=RAYS_IMAGE_CHANNELS)
+rays_ae = ConvVAE(image_dim=RAYS_IMAGE_SIZE, hidden_size=HIDDEN_SIZE, latent_size=LATENT_SIZE,
+                  image_channels=RAYS_IMAGE_CHANNELS)
 rays_ae.load_state_dict(torch.load(rays_model_path))
 rays_ae.eval()
 
 potential_train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_potential.pt')
 potential_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_potential.pt')
-potential_train_dataset = potential_train_dataset[0, :,:, :].unsqueeze(0)
-
+potential_train_dataset = potential_train_dataset[0, :, :, :].unsqueeze(0)
 
 rays_train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_rays.pt')
 rays_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_rays.pt')
-rays_train_dataset = rays_train_dataset[0, :,:, :].unsqueeze(0)
+rays_train_dataset = rays_train_dataset[0, :, :, :].unsqueeze(0)
 
 encoded_train_set_X = torch.empty(1, LATENT_SIZE * 2)
 encoded_train_set_y = torch.empty(1, LATENT_SIZE * 2)

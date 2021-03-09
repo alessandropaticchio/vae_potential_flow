@@ -191,3 +191,96 @@ class Mapper(nn.Module):
                 x = layer(x)
         return x
 
+
+class PotentialMapperRaysNN(nn.Module):
+
+    def __init__(self, image_channels, hidden_size, latent_size, net_size, h_sizes):
+        super(PotentialMapperRaysNN, self).__init__()
+        self.image_channels = image_channels
+        self.hidden_size = hidden_size * net_size
+        self.latent_size = latent_size
+        self.net_size = net_size
+
+        # encode
+        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=32 * net_size, kernel_size=3)
+        self.relu1 = nn.ReLU()
+
+        self.conv2 = nn.Conv2d(in_channels=32 * net_size, out_channels=16 * net_size, kernel_size=3)
+        self.relu2 = nn.ReLU()
+
+        self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
+
+        # latent space
+        self.encoder_mean = nn.Linear(self.hidden_size, self.latent_size)
+        self.encoder_logvar = nn.Linear(self.hidden_size, self.latent_size)
+        self.fc = nn.Linear(self.latent_size, self.hidden_size)
+
+        # Mapper
+        self.hidden = nn.ModuleList()
+
+        for k in range(len(h_sizes) - 1):
+            self.hidden.append(nn.Linear(h_sizes[k], h_sizes[k + 1]))
+
+        # Decoder
+        self.upsample1 = nn.Upsample(scale_factor=2)
+
+        self.deconv1 = nn.ConvTranspose2d(in_channels=16 * net_size, out_channels=32 * net_size, kernel_size=3)
+        self.relu3 = nn.ReLU()
+
+        self.deconv2 = nn.ConvTranspose2d(in_channels=32 * net_size, out_channels=image_channels, kernel_size=3)
+
+        self.output = nn.Sigmoid()
+
+    def forward(self, x):
+        x = self.encode(x)
+
+        x = self.mapper(x)
+
+        x_prime = self.decode(x)
+
+        return x_prime
+
+    def encode(self, x):
+        x = self.conv1(x)
+        x = self.relu1(x)
+
+        x = self.conv2(x)
+        x = self.relu2(x)
+
+        x = self.maxpool1(x)
+
+        # Flattening
+        x = x.view(x.size(0), -1)
+
+        mean = self.encoder_mean(x)
+        log_var = self.encoder_logvar(x)
+
+        return mean, log_var
+
+    def decode(self, mean, log_var):
+        z = self.reparametrize(mean=mean, log_var=log_var)
+        x = self.fc(z)
+
+        # Unflattening
+        x = x.view(x.size(0), 16 * self.net_size, 148, 148)
+
+        x = self.upsample1(x)
+
+        x = self.deconv1(x)
+        x = self.relu3(x)
+
+        x = self.deconv2(x)
+
+        x_prime = self.output(x)
+
+        return x_prime
+
+    def mapper(self, x):
+        for i, layer in enumerate(self.hidden):
+            if i != len(self.hidden) - 1:
+                x = F.relu(layer(x))
+            else:
+                x = layer(x)
+        return x
+
+        return x

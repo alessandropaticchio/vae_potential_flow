@@ -88,9 +88,9 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
         writer.add_scalar('LogLoss/train', np.log(train_loss / len(train_loader.dataset)), epoch)
         writer.add_scalar('LogLoss/recon_train', np.log(train_recon_loss / len(train_loader.dataset)), epoch)
         writer.add_scalar('LogLoss/kld_train', np.log(train_kld_loss / len(train_loader.dataset)), epoch)
-        writer.add_scalar('LogLoss/test', np.log(test_loss / len(test_loader.dataset)), epoch)
-        writer.add_scalar('LogLoss/recon_test', np.log(test_recon_loss / len(test_loader.dataset)), epoch)
-        writer.add_scalar('LogLoss/kld_test', np.log(test_kld_loss / len(test_loader.dataset)), epoch)
+        writer.add_scalar('LogLoss/validation', np.log(test_loss / len(test_loader.dataset)), epoch)
+        writer.add_scalar('LogLoss/recon_validation', np.log(test_recon_loss / len(test_loader.dataset)), epoch)
+        writer.add_scalar('LogLoss/kld_validation', np.log(test_kld_loss / len(test_loader.dataset)), epoch)
 
     # Save the model at current date and time
     torch.save(net.state_dict(), MODELS_ROOT + dataset + '_VAE_' + desc + '_' + now + '.pt')
@@ -164,9 +164,9 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
         writer.add_scalar('LogLoss/train', np.log(train_loss / len(train_loader.dataset)), epoch)
         writer.add_scalar('LogLoss/recon_train', np.log(train_recon_loss / len(train_loader.dataset)), epoch)
         writer.add_scalar('LogLoss/kld_train', np.log(train_kld_loss / len(train_loader.dataset)), epoch)
-        writer.add_scalar('LogLoss/test', np.log(test_loss / len(test_loader.dataset)), epoch)
-        writer.add_scalar('LogLoss/recon_test', np.log(test_recon_loss / len(test_loader.dataset)), epoch)
-        writer.add_scalar('LogLoss/kld_test', np.log(test_kld_loss / len(test_loader.dataset)), epoch)
+        writer.add_scalar('LogLoss/validation', np.log(test_loss / len(test_loader.dataset)), epoch)
+        writer.add_scalar('LogLoss/recon_validation', np.log(test_recon_loss / len(test_loader.dataset)), epoch)
+        writer.add_scalar('LogLoss/kld_validation', np.log(test_kld_loss / len(test_loader.dataset)), epoch)
 
     # Save the model at current date and time
     torch.save(net.state_dict(), MODELS_ROOT + dataset + '_VAE_' + desc + '_' + now + '.pt')

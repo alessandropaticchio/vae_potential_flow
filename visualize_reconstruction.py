@@ -7,8 +7,8 @@ import itertools
 
 batch_size = 1
 
-dataset = 'potential'
-model_name = 'potential_VAE__2021-03-06 15:26:29.528032.pt'
+dataset = 'rays'
+model_name = 'rays_VAE__2021-03-09 18:11:30.087612.pt'
 model_path = MODELS_ROOT + model_name
 
 
@@ -35,7 +35,6 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=bat
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
 rand_sample_idx = random.randint(0, 500)
-rand_sample_idx = 0
 rand_sample = next(itertools.islice(train_loader, rand_sample_idx, None))
 
 rand_sample_prime = ae(rand_sample[0].reshape(1, image_channels, image_size, image_size))[0]

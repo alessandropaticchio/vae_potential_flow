@@ -65,7 +65,7 @@ for label in tqdm(os.listdir(img_path)):
         image = Image.open(path + '/ptnl_' + i + '.jpg')
         image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
         # image = potential * image[:, :3, :, :]
-        image =  image[:, :3, :, :]
+        image = image[:, :3, :, :]
 
         if downsample:
             image = F.interpolate(image, size=(POTENTIAL_IMAGE_SIZE, POTENTIAL_IMAGE_SIZE))
@@ -82,7 +82,7 @@ for label in tqdm(os.listdir(img_path)):
         image = Image.open(path + '/ptnl_' + i + '.jpg')
         image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
         # image = potential * image[:, :3, :, :]
-        image =  image[:, :3, :, :]
+        image = image[:, :3, :, :]
 
         if downsample:
             image = F.interpolate(image, size=(POTENTIAL_IMAGE_SIZE, POTENTIAL_IMAGE_SIZE))

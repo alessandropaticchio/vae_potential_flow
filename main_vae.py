@@ -1,19 +1,19 @@
 from training import train_vae
-# from models import ConvVAE, ConvPlainAE
-from models import ConvVAE, DenseVAE
+from models import ConvVAE
 from constants import *
 import torch
 import torch.optim as optim
 
 batch_size = 8
+vae_type = 'conv'
 
-dataset = 'potential'
+dataset = 'rays'
 
 train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_' + dataset + '.pt')
 test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_' + dataset + '.pt')
 
-train_dataset = train_dataset[0, :, :, :].unsqueeze(0)
-test_dataset = test_dataset[0, :, :, :].unsqueeze(0)
+# train_dataset = train_dataset[0, :, :, :].unsqueeze(0)
+# test_dataset = test_dataset[0, :, :, :].unsqueeze(0)
 
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size,
                                            shuffle=True)

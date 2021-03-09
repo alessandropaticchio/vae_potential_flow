@@ -10,7 +10,7 @@ else:
 MODELS_ROOT = './models/'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-HIDDEN_SIZE = 128 * 147 * 147
+HIDDEN_SIZE = 16 * 148 * 148
 LATENT_SIZE = 20
 
 POTENTIAL_IMAGE_SIZE = 300
