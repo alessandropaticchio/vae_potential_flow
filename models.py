@@ -104,7 +104,7 @@ class ConvVAE(nn.Module):
         self.net_size = net_size
 
         # encode
-        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=32 * net_size, kernel_size=3)
+        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=32 * net_size, kernel_size=1)
         self.relu1 = nn.ReLU()
 
         self.conv2 = nn.Conv2d(in_channels=32 * net_size, out_channels=16 * net_size, kernel_size=3)
@@ -161,7 +161,7 @@ class ConvVAE(nn.Module):
         x = self.fc(z)
 
         # Unflattening
-        x = x.view(x.size(0), 16 * self.net_size, 148, 148)
+        x = x.view(x.size(0), 16 * self.net_size, 149, 149)
 
         x = self.upsample1(x)
 
