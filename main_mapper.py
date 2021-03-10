@@ -16,7 +16,7 @@ batch_size = 256
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
-mapper = Mapper(h_sizes=[LATENT_SIZE * 2, LATENT_SIZE * 2, LATENT_SIZE * 2, LATENT_SIZE * 2])
+mapper = Mapper(h_sizes=[POTENTIAL_LATENT_SIZE * 2, RAYS_LATENT_SIZE * 2, RAYS_LATENT_SIZE * 2, RAYS_LATENT_SIZE * 2])
 
 lr = 1e-3
 optimizer = optim.Adam(mapper.parameters(), lr=lr)

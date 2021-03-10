@@ -22,11 +22,17 @@ test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch
 if dataset == 'rays':
     image_size = RAYS_IMAGE_SIZE
     image_channels = RAYS_IMAGE_CHANNELS
+    hidden_size = RAYS_HIDDEN_SIZE
+    latent_size = RAYS_LATENT_SIZE
+    image_channels = RAYS_IMAGE_CHANNELS
 else:
     image_size = POTENTIAL_IMAGE_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
+    hidden_size = POTENTIAL_HIDDEN_SIZE
+    latent_size = POTENTIAL_LATENT_SIZE
+    image_channels = POTENTIAL_IMAGE_CHANNELS
 
-vae = ConvVAE(image_dim=image_size, hidden_size=HIDDEN_SIZE, latent_size=LATENT_SIZE, image_channels=image_channels,
+vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels,
               net_size=1)
 
 lr = 1e-3

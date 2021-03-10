@@ -24,7 +24,7 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=bat
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
 hidden_size = 128 * 147 * 147
-latent_size = LATENT_SIZE
+latent_size = 20
 vae = UNet_VAE(hidden_size=hidden_size, latent_size=latent_size)
 
 optimizer = optim.Adam(vae.parameters(), weight_decay=0.)

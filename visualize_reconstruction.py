@@ -11,22 +11,22 @@ dataset = 'rays'
 model_name = 'rays_VAE__2021-03-09 21_35_39.928892.pt'
 model_path = MODELS_ROOT + model_name
 
-
 if dataset == 'rays':
     image_size = RAYS_IMAGE_SIZE
-    hidden_size = HIDDEN_SIZE
     image_channels = RAYS_IMAGE_CHANNELS
-    latent_size = int(hidden_size / 2)
+    hidden_size = RAYS_HIDDEN_SIZE
+    latent_size = RAYS_LATENT_SIZE
+    image_channels = RAYS_IMAGE_CHANNELS
 else:
     image_size = POTENTIAL_IMAGE_SIZE
-    hidden_size = HIDDEN_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
-    latent_size = int(hidden_size / 2)
+    hidden_size = POTENTIAL_HIDDEN_SIZE
+    latent_size = POTENTIAL_LATENT_SIZE
+    image_channels = POTENTIAL_IMAGE_CHANNELS
 
 # ae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
 ae = ConvVAE(image_dim=image_size, hidden_size=HIDDEN_SIZE, latent_size=LATENT_SIZE, image_channels=image_channels, net_size=1)
 ae.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
-ae.eval()
 
 train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_' + dataset + '.pt')
 test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_' + dataset + '.pt')
