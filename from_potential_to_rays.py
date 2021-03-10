@@ -20,20 +20,19 @@ rays_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_ra
 potential_train_dataset = potential_train_dataset[0, :, :, :].unsqueeze(0)
 rays_train_dataset = rays_train_dataset[0, :, :, :].unsqueeze(0)
 
-potential_vae = ConvVAE(image_dim=POTENTIAL_IMAGE_SIZE, hidden_size=HIDDEN_SIZE, latent_size=LATENT_SIZE,
+potential_vae = ConvVAE(image_dim=POTENTIAL_IMAGE_SIZE, hidden_size=POTENTIAL_HIDDEN_SIZE, latent_size=POTENTIAL_LATENT_SIZE,
                         image_channels=POTENTIAL_IMAGE_CHANNELS,
                         net_size=1)
 potential_vae.load_state_dict(torch.load(potential_model_path))
 potential_vae.eval()
 
-rays_vae = ConvVAE(image_dim=RAYS_IMAGE_SIZE, hidden_size=HIDDEN_SIZE, latent_size=LATENT_SIZE,
+rays_vae = ConvVAE(image_dim=RAYS_IMAGE_SIZE, hidden_size=RAYS_HIDDEN_SIZE, latent_size=RAYS_LATENT_SIZE,
                    image_channels=RAYS_IMAGE_CHANNELS,
                    net_size=1)
 rays_vae.load_state_dict(torch.load(rays_model_path))
 rays_vae.eval()
 
-# mapper = Mapper(h_sizes=[POTENTIAL_ENCODED_SIZE, POTENTIAL_ENCODED_SIZE, RAYS_ENCODED_SIZE, RAYS_ENCODED_SIZE])
-mapper = Mapper(h_sizes=[LATENT_SIZE * 2, LATENT_SIZE * 2, LATENT_SIZE * 2, LATENT_SIZE * 2])
+mapper = Mapper(h_sizes=[POTENTIAL_LATENT_SIZE * 2, RAYS_LATENT_SIZE * 2, RAYS_LATENT_SIZE * 2, RAYS_LATENT_SIZE * 2])
 mapper.load_state_dict(torch.load(mapper_model_path))
 mapper.eval()
 
@@ -48,8 +47,8 @@ for i in range(1, 10):
     # Mapping
     mapping = mapper(potential_sample_encoded)
 
-    rays_mean = mapping[:, :LATENT_SIZE]
-    rays_log_var = mapping[:, LATENT_SIZE:]
+    rays_mean = mapping[:, :RAYS_LATENT_SIZE]
+    rays_log_var = mapping[:, RAYS_LATENT_SIZE:]
 
     rays_sample_mapped = rays_vae.decode(rays_mean, rays_log_var)
 
