@@ -110,6 +110,9 @@ class ConvVAE(nn.Module):
         self.conv2 = nn.Conv2d(in_channels=32 * net_size, out_channels=16 * net_size, kernel_size=3)
         self.relu2 = nn.ReLU()
 
+        self.conv4 = nn.Conv2d(in_channels=16 * net_size, out_channels=8 * net_size, kernel_size=3)
+        self.relu4 = nn.ReLU()
+
         self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
 
         # latent space
@@ -119,6 +122,9 @@ class ConvVAE(nn.Module):
 
         # decode
         self.upsample1 = nn.Upsample(scale_factor=2)
+
+        self.deconv3 = nn.ConvTranspose2d(in_channels=8 * net_size, out_channels=16 * net_size, kernel_size=3)
+        self.relu5 = nn.ReLU()
 
         self.deconv1 = nn.ConvTranspose2d(in_channels=16 * net_size, out_channels=32 * net_size, kernel_size=3)
         self.relu3 = nn.ReLU()
@@ -146,6 +152,9 @@ class ConvVAE(nn.Module):
         x = self.conv2(x)
         x = self.relu2(x)
 
+        x = self.conv4(x)
+        x = self.relu4(x)
+
         x = self.maxpool1(x)
 
         # Flattening
@@ -161,9 +170,12 @@ class ConvVAE(nn.Module):
         x = self.fc(z)
 
         # Unflattening
-        x = x.view(x.size(0), 16 * self.net_size, 148, 148)
+        x = x.view(x.size(0), 8 * self.net_size, 147, 147)
 
         x = self.upsample1(x)
+
+        x = self.deconv3(x)
+        x = self.relu5(x)
 
         x = self.deconv1(x)
         x = self.relu3(x)
