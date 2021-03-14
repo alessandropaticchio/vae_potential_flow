@@ -7,8 +7,8 @@ import itertools
 
 batch_size = 1
 
-dataset = 'rays'
-model_name = 'rays_VAE__2021-03-12 21_44_46.916470.pt'
+dataset = 'potential'
+model_name = 'potential_VAE__2021-03-14 09_34_04.155289.pt'
 model_path = MODELS_ROOT + model_name
 
 if dataset == 'rays':

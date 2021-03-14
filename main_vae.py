@@ -12,9 +12,6 @@ dataset = 'rays'
 train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_' + dataset + '.pt')
 test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_' + dataset + '.pt')
 
-# train_dataset = train_dataset[0, :, :, :].unsqueeze(0)
-# test_dataset = test_dataset[0, :, :, :].unsqueeze(0)
-
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size,
                                            shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)

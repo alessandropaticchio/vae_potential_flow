@@ -284,13 +284,13 @@ class Mapper(nn.Module):
 
     def __init__(self, h_sizes=[16, 16, 16]):
         super(Mapper, self).__init__()
-        self.hidden = nn.ModuleList()
+        self.layers = nn.ModuleList()
         for k in range(len(h_sizes) - 1):
-            self.hidden.append(nn.Linear(h_sizes[k], h_sizes[k + 1]))
+            self.layers.append(nn.Linear(h_sizes[k], h_sizes[k + 1]))
 
     def forward(self, x):
-        for i, layer in enumerate(self.hidden):
-            if i != len(self.hidden) - 1:
+        for i, layer in enumerate(self.layers):
+            if i != len(self.layers) - 1:
                 x = F.relu(layer(x))
             else:
                 x = layer(x)
@@ -320,15 +320,15 @@ class PotentialMapperRaysNN(nn.Module):
         self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
 
         # latent space
-        self.encoder_mean = nn.Linear(self.potential_hidden_size, self.potentiallatent_size)
+        self.encoder_mean = nn.Linear(self.potential_hidden_size, self.potential_latent_size)
         self.encoder_logvar = nn.Linear(self.potential_hidden_size, self.potential_latent_size)
         self.fc = nn.Linear(self.potential_latent_size, self.potential_hidden_size)
 
         # Mapper
-        self.hidden = nn.ModuleList()
+        self.mapper_layers = nn.ModuleList()
 
         for k in range(len(h_sizes) - 1):
-            self.hidden.append(nn.Linear(h_sizes[k], h_sizes[k + 1]))
+            self.mapper_layers.append(nn.Linear(h_sizes[k], h_sizes[k + 1]))
 
         # Decoder
         self.upsample1 = nn.Upsample(scale_factor=2)
@@ -341,16 +341,18 @@ class PotentialMapperRaysNN(nn.Module):
         self.output = nn.Sigmoid()
 
     def forward(self, x):
-        x = self.encode(x)
+        potential_mean, potential_log_var = self.encode(x)
 
-        x = self.mapper(x)
+        x = torch.cat((potential_mean, potential_log_var), 1)
 
-        mean = x[:, :self.rays_latent_size]
-        log_var = x[:, self.rays_latent_size:]
+        x = self.mapping(x)
 
-        x_prime = self.decode(mean=mean, log_var=log_var)
+        rays_mean = x[:, :self.rays_latent_size]
+        rays_log_var = x[:, self.rays_latent_size:]
 
-        return x_prime
+        x_prime = self.decode(mean=rays_mean, log_var=rays_log_var)
+
+        return x_prime, rays_mean, rays_log_var
 
     def encode(self, x):
         x = self.conv1(x)
@@ -387,10 +389,15 @@ class PotentialMapperRaysNN(nn.Module):
 
         return x_prime
 
-    def mapper(self, x):
-        for i, layer in enumerate(self.hidden):
-            if i != len(self.hidden) - 1:
+    def mapping(self, x):
+        for i, layer in enumerate(self.mapper_layers):
+            if i != len(self.mapper_layers) - 1:
                 x = F.relu(layer(x))
             else:
                 x = layer(x)
         return x
+
+    def reparametrize(self, mean, log_var):
+        std = torch.exp(0.5 * log_var)
+        eps = torch.randn_like(std)
+        return mean + eps * std

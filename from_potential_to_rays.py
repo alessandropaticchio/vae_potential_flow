@@ -3,9 +3,9 @@ from constants import *
 import random
 import matplotlib.pyplot as plt
 
-potential_model_name = 'potential_VAE__2021-03-09 18:07:17.864741.pt'
-rays_model_name = 'rays_VAE__2021-03-09 18:11:30.087612.pt'
-mapper_model_name = 'Mapper_2021-03-09 18:16:31.732229.pt'
+potential_model_name = 'potential_VAE__2021-03-14 09_34_04.155289.pt'
+rays_model_name = 'rays_VAE__2021-03-14 09_41_35.551244.pt'
+mapper_model_name = 'Mapper_2021-03-14 09_57_45.376647.pt'
 potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
 mapper_model_path = MODELS_ROOT + mapper_model_name
@@ -19,17 +19,22 @@ rays_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_ra
 potential_vae = ConvVAE(image_dim=POTENTIAL_IMAGE_SIZE, hidden_size=POTENTIAL_HIDDEN_SIZE, latent_size=POTENTIAL_LATENT_SIZE,
                         image_channels=POTENTIAL_IMAGE_CHANNELS,
                         net_size=1)
-potential_vae.load_state_dict(torch.load(potential_model_path))
+potential_vae.load_state_dict(torch.load(potential_model_path, map_location=torch.device('cpu')))
 potential_vae.eval()
 
 rays_vae = ConvVAE(image_dim=RAYS_IMAGE_SIZE, hidden_size=RAYS_HIDDEN_SIZE, latent_size=RAYS_LATENT_SIZE,
                    image_channels=RAYS_IMAGE_CHANNELS,
                    net_size=1)
-rays_vae.load_state_dict(torch.load(rays_model_path))
+rays_vae.load_state_dict(torch.load(rays_model_path, map_location=torch.device('cpu')))
 rays_vae.eval()
 
-mapper = Mapper(h_sizes=[POTENTIAL_LATENT_SIZE * 2, RAYS_LATENT_SIZE * 2, RAYS_LATENT_SIZE * 2, RAYS_LATENT_SIZE * 2])
-mapper.load_state_dict(torch.load(mapper_model_path))
+h0 = POTENTIAL_LATENT_SIZE * 2
+h1 = RAYS_LATENT_SIZE * 2
+h2 = RAYS_LATENT_SIZE * 2
+h3 = RAYS_LATENT_SIZE * 2
+
+mapper = Mapper(h_sizes=[h0, h1, h2, h3])
+mapper.load_state_dict(torch.load(mapper_model_path, map_location=torch.device('cpu')))
 mapper.eval()
 
 for i in range(1, 10):
