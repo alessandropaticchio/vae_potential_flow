@@ -4,6 +4,7 @@ from torch.nn import MSELoss
 from torch.utils.tensorboard import SummaryWriter
 import torch
 import torch.nn.functional as F
+import torch.nn as nn
 import numpy as np
 
 
@@ -55,7 +56,7 @@ def test(net, test_loader):
 
 
 def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., dataset='MNIST',
-              nn_type='conv', desc=''):
+              nn_type='conv', is_L1=False, desc=''):
     now = str(datetime.now())
     writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + desc + '_' + now))
     net = net.to(device)
@@ -73,6 +74,16 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
             batch_loss, batch_recon_loss, batch_kld_loss = loss_function_vae(recon_batch, data, mu, log_var,
                                                                              recon_weight,
                                                                              kl_weight, nn_type)
+            # Adding code for L1 Regularisation
+            if is_L1:
+
+                l1_crit = nn.L1Loss(size_average=False)
+                reg_loss = 0
+                for param in net.parameters():
+                    reg_loss += l1_crit(param, target=torch.zeros_like(param))
+
+                factor = 0.00005
+                batch_loss += factor * reg_loss
 
             batch_loss.backward()
             train_loss += batch_loss.item()

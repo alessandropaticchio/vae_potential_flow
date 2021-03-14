@@ -175,6 +175,111 @@ class ConvVAE(nn.Module):
         return x_prime
 
 
+class ConvVAETest(nn.Module):
+    def __init__(self, image_dim, hidden_size, latent_size, image_channels=3, net_size=1):
+        super(ConvVAETest, self).__init__()
+        self.image_channels = image_channels
+        self.image_dim = image_dim
+        self.hidden_size = hidden_size * net_size
+        self.latent_size = latent_size
+        self.net_size = net_size
+
+        # encode
+        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=32 * net_size, kernel_size=3)
+        self.relu1 = nn.ReLU()
+
+        self.conv2 = nn.Conv2d(in_channels=32 * net_size, out_channels=16 * net_size, kernel_size=3)
+        self.relu2 = nn.ReLU()
+
+        self.conv3 = nn.Conv2d(in_channels=16 * net_size, out_channels=8 * net_size, kernel_size=3)
+        self.relu3 = nn.ReLU()
+
+        self.conv4 = nn.Conv2d(in_channels=8 * net_size, out_channels=4 * net_size, kernel_size=3)
+        self.relu4 = nn.ReLU()
+
+        self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
+
+        # latent space
+        self.encoder_mean = nn.Linear(self.hidden_size, self.latent_size)
+        self.encoder_logvar = nn.Linear(self.hidden_size, self.latent_size)
+        self.fc = nn.Linear(self.latent_size, self.hidden_size)
+
+        # decode
+        self.upsample1 = nn.Upsample(scale_factor=2)
+
+        self.deconv1 = nn.ConvTranspose2d(in_channels=4 * net_size, out_channels=8 * net_size, kernel_size=3)
+        self.relu5 = nn.ReLU()
+
+        self.deconv2 = nn.ConvTranspose2d(in_channels=8 * net_size, out_channels=16 * net_size, kernel_size=3)
+        self.relu6 = nn.ReLU()
+
+        self.deconv3 = nn.ConvTranspose2d(in_channels=16 * net_size, out_channels=32 * net_size, kernel_size=3)
+        self.relu7 = nn.ReLU()
+
+        self.deconv4 = nn.ConvTranspose2d(in_channels=32 * net_size, out_channels=image_channels, kernel_size=3)
+
+        self.output = nn.Sigmoid()
+
+    def reparametrize(self, mean, log_var):
+        std = torch.exp(0.5 * log_var)
+        eps = torch.randn_like(std)
+        return mean + eps * std
+
+    def forward(self, x):
+        mean, log_var = self.encode(x)
+
+        x = self.decode(mean=mean, log_var=log_var)
+
+        return x, mean, log_var
+
+    def encode(self, x):
+        x = self.conv1(x)
+        x = self.relu1(x)
+
+        x = self.conv2(x)
+        x = self.relu2(x)
+
+        x = self.conv3(x)
+        x = self.relu3(x)
+
+        x = self.conv4(x)
+        x = self.relu4(x)
+
+        x = self.maxpool1(x)
+
+        # Flattening
+        x = x.view(x.size(0), -1)
+
+        mean = self.encoder_mean(x)
+        log_var = self.encoder_logvar(x)
+
+        return mean, log_var
+
+    def decode(self, mean, log_var):
+        z = self.reparametrize(mean=mean, log_var=log_var)
+        x = self.fc(z)
+
+        # Unflattening
+        x = x.view(x.size(0), 4 * self.net_size, 146, 146)
+
+        x = self.upsample1(x)
+
+        x = self.deconv1(x)
+        x = self.relu5(x)
+
+        x = self.deconv2(x)
+        x = self.relu6(x)
+
+        x = self.deconv3(x)
+        x = self.relu7(x)
+
+        x = self.deconv4(x)
+
+        x_prime = self.output(x)
+
+        return x_prime
+
+
 class Mapper(nn.Module):
 
     def __init__(self, h_sizes=[16, 16, 16]):
