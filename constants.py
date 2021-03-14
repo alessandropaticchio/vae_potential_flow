@@ -12,12 +12,12 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 POTENTIAL_IMAGE_SIZE = 300
 POTENTIAL_IMAGE_CHANNELS = 3
-POTENTIAL_HIDDEN_SIZE = 4 * 146 * 146
+POTENTIAL_HIDDEN_SIZE = 16 * 148 * 148
 POTENTIAL_LATENT_SIZE = 20
 
 RAYS_IMAGE_SIZE = 300
 RAYS_IMAGE_CHANNELS = 3
-RAYS_HIDDEN_SIZE = 4 * 146 * 146
+RAYS_HIDDEN_SIZE = 16 * 148 * 148
 RAYS_LATENT_SIZE = 20
 
 # python -m tensorboard.main --logdir=runs
