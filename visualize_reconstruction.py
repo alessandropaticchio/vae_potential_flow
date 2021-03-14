@@ -34,7 +34,7 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=bat
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
 rand_sample_idx = random.randint(0, 40)
-rand_sample = next(itertools.islice(test_loader, rand_sample_idx, None))
+rand_sample = next(itertools.islice(train_loader, rand_sample_idx, None))
 
 rand_sample_prime = ae(rand_sample[0].reshape(1, image_channels, image_size, image_size))[0]
 

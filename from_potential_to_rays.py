@@ -16,10 +16,6 @@ potential_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'te
 rays_train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_rays.pt')
 rays_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_rays.pt')
 
-#  Fetch first sample
-potential_train_dataset = potential_train_dataset[0, :, :, :].unsqueeze(0)
-rays_train_dataset = rays_train_dataset[0, :, :, :].unsqueeze(0)
-
 potential_vae = ConvVAE(image_dim=POTENTIAL_IMAGE_SIZE, hidden_size=POTENTIAL_HIDDEN_SIZE, latent_size=POTENTIAL_LATENT_SIZE,
                         image_channels=POTENTIAL_IMAGE_CHANNELS,
                         net_size=1)
