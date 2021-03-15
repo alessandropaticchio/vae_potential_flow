@@ -3,9 +3,9 @@ from constants import *
 import random
 import matplotlib.pyplot as plt
 
-potential_model_name = 'potential_VAE__2021-03-14 09_34_04.155289.pt'
-rays_model_name = 'rays_VAE__2021-03-14 09_41_35.551244.pt'
-mapper_model_name = 'Mapper_2021-03-14 09_57_45.376647.pt'
+potential_model_name = 'potential_VAE__2021-03-14 11_39_22.400044.pt'
+rays_model_name = 'rays_VAE__2021-03-14 11_16_12.968416.pt'
+mapper_model_name = 'Mapper_2021-03-14 11_54_41.242038.pt'
 potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
 mapper_model_path = MODELS_ROOT + mapper_model_name
@@ -39,7 +39,7 @@ mapper.eval()
 
 for i in range(1, 10):
     # Encoding
-    rand_sample_idx = random.randint(1, 799)
+    rand_sample_idx = random.randint(1, 159)
 
     potential_sample = potential_train_dataset.data[rand_sample_idx].unsqueeze(0)
     potential_mean, potential_log_var = potential_vae.encode(potential_sample)

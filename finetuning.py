@@ -63,7 +63,7 @@ rays_vae = ConvVAE(image_dim=rays_image_size, hidden_size=rays_hidden_size, late
 rays_vae.load_state_dict(torch.load(rays_model_path))
 
 mapper = Mapper(h_sizes=[h0, h1, h2, h3])
-#mapper.load_state_dict(torch.load(mapper_model_path))
+mapper.load_state_dict(torch.load(mapper_model_path))
 
 # Initializing emd's encoder as potential encoder and decoder as rays decoder
 # Encoder

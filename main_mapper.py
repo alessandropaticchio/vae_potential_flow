@@ -16,7 +16,7 @@ batch_size = 256
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
-h0 = POTENTIAL_HIDDEN_SIZE * 2
+h0 = POTENTIAL_LATENT_SIZE * 2
 h1 = RAYS_LATENT_SIZE * 2
 h2 = RAYS_LATENT_SIZE * 2
 h3 = RAYS_LATENT_SIZE * 2
