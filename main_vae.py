@@ -33,7 +33,7 @@ vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_
               net_size=1)
 
 lr = 1e-4
-optimizer = optim.Adam(vae.parameters(), lr=lr)
+optimizer = optim.Adam(vae.parameters(), lr=lr, weight_decay=0)
 
 recon_weight = 1.
 kl_weight = 1.
