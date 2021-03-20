@@ -56,7 +56,7 @@ def test(net, test_loader):
 
 
 def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., dataset='MNIST',
-              nn_type='conv', is_L1=False, desc=''):
+              nn_type='conv', is_L1=False, square=False, desc=''):
     now = str(datetime.now())
     writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + desc + '_' + now))
     net = net.to(device)
@@ -70,6 +70,10 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
             optimizer.zero_grad()
 
             recon_batch, mu, log_var = net(data)
+
+            if square:
+                recon_batch = torch.square(recon_batch)
+                data = torch.square(data)
 
             batch_loss, batch_recon_loss, batch_kld_loss = loss_function_vae(recon_batch, data, mu, log_var,
                                                                              recon_weight,
@@ -107,7 +111,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
     torch.save(net.state_dict(), MODELS_ROOT + dataset + '_VAE_' + desc + '_' + now + '.pt')
 
 
-def test_vae(net, test_loader, recon_weight, kl_weight, nn_type):
+def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, square=False):
     net.eval()
     net = net.to(device)
     test_loss = 0.
@@ -118,9 +122,14 @@ def test_vae(net, test_loader, recon_weight, kl_weight, nn_type):
             data = data.to(device)
             recon, mu, log_var = net(data)
 
+            if square:
+                recon = torch.square(recon)
+                data = torch.square(data)
+
             # sum up batch loss
             batch_test_loss, batch_recon_loss, batch_kld_loss = loss_function_vae(recon, data, mu, log_var,
-                                                                                  recon_weight, kl_weight, nn_type)
+                                                                                  recon_weight, kl_weight,
+                                                                                  nn_type)
             test_loss += batch_test_loss.item()
             recon_loss += batch_recon_loss.item()
             kld_loss += batch_kld_loss.item()
