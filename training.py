@@ -107,6 +107,10 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
         writer.add_scalar('LogLoss/recon_validation', np.log(test_recon_loss / len(test_loader.dataset)), epoch)
         writer.add_scalar('LogLoss/kld_validation', np.log(test_kld_loss / len(test_loader.dataset)), epoch)
 
+        # backup save
+        if epoch % 50 == 0 and epoch != 0:
+            torch.save(net.state_dict(), MODELS_ROOT + dataset + '_VAE_' + desc + '_' + now + '.pt')
+
     # Save the model at current date and time
     torch.save(net.state_dict(), MODELS_ROOT + dataset + '_VAE_' + desc + '_' + now + '.pt')
 
