@@ -7,10 +7,10 @@ import torch
 batch_size = 1
 dataset = 'potential'
 
-train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_' + dataset + '.pt')
+train_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'training_' + dataset + '.pt')
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 
-model_name = 'potential_VAE__2021-03-10 20_41_23.106999.pt'
+model_name = 'potential_VAE__2021-03-21 14_31_19.807428.pt'
 model_path = MODELS_ROOT + model_name
 
 if dataset == 'rays':
@@ -26,13 +26,14 @@ else:
     latent_size = POTENTIAL_LATENT_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
 
-vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels)
+vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels,
+              net_size=2)
 vae.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 vae.eval()
 
 encodings = []
 
-max_samples = 160
+max_samples = 500
 
 for i, idx in enumerate(range(max_samples)):
     sample = train_dataset[idx].unsqueeze(0).float()
