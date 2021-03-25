@@ -56,7 +56,7 @@ def test(net, test_loader):
 
 
 def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., dataset='MNIST',
-              nn_type='conv', is_L1=False, square=False, desc=''):
+              nn_type='conv', is_L1=False, exponent=0, desc=''):
     now = str(datetime.now())
     writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + desc + '_' + now))
     net = net.to(device)
@@ -71,9 +71,9 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
 
             recon_batch, mu, log_var = net(data)
 
-            if square:
-                recon_batch = torch.square(recon_batch)
-                data = torch.square(data)
+            if exponent:
+                recon_batch = torch.pow(recon_batch, exponent)
+                data = torch.pow(data, exponent)
 
             batch_loss, batch_recon_loss, batch_kld_loss = loss_function_vae(recon_batch, data, mu, log_var,
                                                                              recon_weight,
@@ -115,7 +115,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
     torch.save(net.state_dict(), MODELS_ROOT + dataset + '_VAE_' + desc + '_' + now + '.pt')
 
 
-def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, square=False):
+def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, exponent=0):
     net.eval()
     net = net.to(device)
     test_loss = 0.
@@ -126,9 +126,9 @@ def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, square=False):
             data = data.to(device)
             recon, mu, log_var = net(data)
 
-            if square:
-                recon = torch.square(recon)
-                data = torch.square(data)
+            if exponent:
+                recon = torch.pow(recon, exponent)
+                data = torch.pow(data, exponent)
 
             # sum up batch loss
             batch_test_loss, batch_recon_loss, batch_kld_loss = loss_function_vae(recon, data, mu, log_var,
