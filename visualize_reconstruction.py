@@ -7,10 +7,11 @@ import itertools
 
 batch_size = 1
 
-dataset = 'rays'
-model_name = 'rays_VAE__2021-03-21 13_30_02.272637.pt'
+dataset = 'potential'
+model_name = 'potential_VAE__2021-03-28 15_26_17.978434.pt'
 model_path = MODELS_ROOT + model_name
-square = True
+power = 1
+train = True
 
 if dataset == 'rays':
     image_size = RAYS_IMAGE_SIZE
@@ -36,13 +37,16 @@ test_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'test_' + d
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
-rand_sample_idx = random.randint(0, 80)
-rand_sample = next(itertools.islice(train_loader, rand_sample_idx, None))
+if train:
+    loader = train_loader
+else:
+    loader = test_loader
+
+rand_sample_idx = random.randint(0, len(loader))
+rand_sample = next(itertools.islice(loader, rand_sample_idx, None))
 
 rand_sample_prime = ae(rand_sample[0].reshape(1, image_channels, image_size, image_size))[0]
-
-if square:
-    rand_sample_prime = rand_sample_prime.square()
+rand_sample_prime = torch.pow(rand_sample_prime, power)
 
 plt.figure()
 
@@ -53,5 +57,13 @@ plt.imshow(rand_sample.squeeze().permute(1, 2, 0))
 plt.subplot(1, 2, 2)
 plt.title('Reconstruction')
 plt.imshow(rand_sample_prime.squeeze().detach().permute(1, 2, 0).numpy(), cmap='gray')
+
+if dataset == 'rays':
+    plt.figure()
+    pixel_val = RAYS_IMAGE_SIZE // 5
+    plt.title('Projection along x = {}'.format(pixel_val))
+    plt.plot(range(0, image_size), rand_sample.squeeze()[0, :, pixel_val], label='Ground truth')
+    plt.plot(range(0, image_size), rand_sample_prime.squeeze().detach().numpy()[0, :, pixel_val], label='Predicted')
+    plt.legend(loc='best')
 
 plt.show()

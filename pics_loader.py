@@ -5,11 +5,11 @@ from constants import *
 from tqdm import tqdm
 import torch.nn.functional as F
 
-MAX_PICS = 200
+MAX_PICS = 999
 
 downsample = True
 
-img_path = DATA_ROOT + "DATA21.2.18/"
+img_path = DATA_ROOT + "D=0.3 num=999/"
 
 rays_train_set = torch.empty((1, RAYS_IMAGE_CHANNELS, RAYS_IMAGE_SIZE, RAYS_IMAGE_SIZE))
 rays_test_set = torch.empty((1, RAYS_IMAGE_CHANNELS, RAYS_IMAGE_SIZE, RAYS_IMAGE_SIZE))
