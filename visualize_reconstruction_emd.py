@@ -9,8 +9,10 @@ batch_size = 1
 
 net = 'emd'
 
-model_name = 'EMD_VAE__2021-03-14 11_59_22.112026.pt'
+model_name = 'EMD_VAE__2021-03-28 17_15_00.903323.pt'
 model_path = MODELS_ROOT + model_name
+
+power = 4
 
 if net == 'unet':
     hidden_size = 128 * 147 * 147
@@ -48,18 +50,19 @@ vae.eval()
 
 data_path = DATA_ROOT + '/real_data/'
 
-potential_train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_potential.pt')
-potential_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_potential.pt')
-rays_train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_rays.pt')
-rays_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_rays.pt')
+potential_train_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'training_potential.pt')
+potential_test_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'test_potential.pt')
+rays_train_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'training_rays.pt')
+rays_test_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'test_rays.pt')
 
 train_dataset = MyDataset(x=potential_train_dataset, y=rays_train_dataset)
 test_dataset = MyDataset(x=potential_test_dataset, y=rays_test_dataset)
 
-rand_sample_idx = random.randint(0, 39)
+rand_sample_idx = random.randint(0, 799)
 rand_sample = train_dataset.X[rand_sample_idx].unsqueeze(0)
 
-rand_sample_prime = vae(rand_sample)
+rand_sample_prime = vae(rand_sample)[0]
+rand_sample_prime = torch.pow(rand_sample_prime, power)
 
 plt.figure()
 

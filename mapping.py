@@ -18,11 +18,11 @@ rays_ae = ConvVAE(image_dim=RAYS_IMAGE_SIZE, hidden_size=RAYS_HIDDEN_SIZE, laten
 rays_ae.load_state_dict(torch.load(rays_model_path, map_location=torch.device('cpu')))
 rays_ae.eval()
 
-potential_train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_potential.pt')
-potential_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_potential.pt')
+potential_train_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'training_potential.pt')
+potential_test_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'test_potential.pt')
 
-rays_train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_rays.pt')
-rays_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_rays.pt')
+rays_train_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'training_rays.pt')
+rays_test_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'test_rays.pt')
 
 encoded_train_set_X = torch.empty(1, POTENTIAL_LATENT_SIZE * 2)
 encoded_train_set_y = torch.empty(1, RAYS_LATENT_SIZE * 2)
@@ -63,5 +63,5 @@ encoded_test_set_y = encoded_test_set_y[1:]
 encoded_test_set = MyDataset(x=encoded_test_set_X, y=encoded_test_set_y)
 encoded_train_set = MyDataset(x=encoded_train_set_X, y=encoded_train_set_y)
 
-torch.save(encoded_train_set, DATA_ROOT + '/mapped/training.pt')
-torch.save(encoded_test_set, DATA_ROOT + '/mapped/test.pt')
+torch.save(encoded_train_set, DATA_ROOT + 'D=0.3 num=999/mapped/training.pt')
+torch.save(encoded_test_set, DATA_ROOT + 'D=0.3 num=999/mapped/test.pt')

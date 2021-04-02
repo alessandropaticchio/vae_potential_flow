@@ -161,7 +161,7 @@ class ConvVAE(nn.Module):
         x = self.fc(z)
 
         # Unflattening
-        x = x.view(x.size(0), 16 * self.net_size, 148, 148)
+        x = x.view(x.size(0), 16 * self.net_size, 48, 48)
 
         x = self.upsample1(x)
 
@@ -376,7 +376,7 @@ class PotentialMapperRaysNN(nn.Module):
         x = self.fc(z)
 
         # Unflattening
-        x = x.view(x.size(0), 16 * self.net_size, 148, 148)
+        x = x.view(x.size(0), 16 * self.net_size, 48, 48)
 
         x = self.upsample1(x)
 
@@ -392,7 +392,9 @@ class PotentialMapperRaysNN(nn.Module):
     def mapping(self, x):
         for i, layer in enumerate(self.mapper_layers):
             if i != len(self.mapper_layers) - 1:
-                x = F.relu(layer(x))
+                # x = F.relu(layer(x))
+                # x = F.tanh(layer(x))
+                x = torch.sin(layer(x))
             else:
                 x = layer(x)
         return x

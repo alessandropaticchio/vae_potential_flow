@@ -6,15 +6,15 @@ from models import PotentialMapperRaysNN, ConvVAE, Mapper
 
 data_path = DATA_ROOT + '/real_data/'
 
-potential_train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_potential.pt')
-potential_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_potential.pt')
-rays_train_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'training_rays.pt')
-rays_test_dataset = torch.load(DATA_ROOT + 'DATA21.2.18/loaded_data/' + 'test_rays.pt')
+potential_train_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'training_potential.pt')
+potential_test_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'test_potential.pt')
+rays_train_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'training_rays.pt')
+rays_test_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'test_rays.pt')
 
 train_dataset = MyDataset(x=potential_train_dataset, y=rays_train_dataset)
 test_dataset = MyDataset(x=potential_test_dataset, y=rays_test_dataset)
 
-batch_size = 8
+batch_size = 64
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
@@ -35,6 +35,8 @@ h1 = RAYS_LATENT_SIZE * 2
 h2 = RAYS_LATENT_SIZE * 2
 h3 = RAYS_LATENT_SIZE * 2
 
+power = 4
+
 emd = PotentialMapperRaysNN(potential_image_channels=potential_image_channels,
                             rays_image_channels=rays_image_channels,
                             potential_hidden_size=potential_hidden_size,
@@ -45,9 +47,9 @@ emd = PotentialMapperRaysNN(potential_image_channels=potential_image_channels,
                             net_size=1)
 
 #  Load VAEs
-potential_model_name = 'potential_VAE__2021-03-09 18:07:17.864741.pt'
-rays_model_name = 'rays_VAE__2021-03-09 18:11:30.087612.pt'
-mapper_model_name = 'Mapper_2021-03-09 18:16:31.732229.pt'
+potential_model_name = 'potential_VAE__2021-03-28 15_26_17.978434.pt'
+rays_model_name = 'rays_VAE__2021-03-28 15_01_00.790258.pt'
+mapper_model_name = 'Mapper_2021-03-28 15_44_57.245977.pt'
 potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
 mapper_model_path = MODELS_ROOT + mapper_model_name
@@ -55,15 +57,15 @@ mapper_model_path = MODELS_ROOT + mapper_model_name
 potential_vae = ConvVAE(image_dim=potential_image_size, hidden_size=potential_hidden_size,
                         latent_size=potential_latent_size, image_channels=potential_image_channels,
                         net_size=1)
-potential_vae.load_state_dict(torch.load(potential_model_path))
+potential_vae.load_state_dict(torch.load(potential_model_path, map_location=torch.device('cpu')))
 
 rays_vae = ConvVAE(image_dim=rays_image_size, hidden_size=rays_hidden_size, latent_size=rays_latent_size,
                    image_channels=rays_image_channels,
                    net_size=1)
-rays_vae.load_state_dict(torch.load(rays_model_path))
+rays_vae.load_state_dict(torch.load(rays_model_path, map_location=torch.device('cpu')))
 
 mapper = Mapper(h_sizes=[h0, h1, h2, h3])
-mapper.load_state_dict(torch.load(mapper_model_path))
+mapper.load_state_dict(torch.load(mapper_model_path, map_location=torch.device('cpu')))
 
 # Initializing emd's encoder as potential encoder and decoder as rays decoder
 # Encoder
@@ -106,4 +108,4 @@ recon_weight = 1.
 kl_weight = 1.
 
 train_unet_vae(net=emd, train_loader=train_loader, test_loader=test_loader, epochs=300, optimizer=optimizer,
-          recon_weight=recon_weight, kl_weight=kl_weight, dataset='EMD', nn_type='conv')
+               recon_weight=recon_weight, kl_weight=kl_weight, dataset='EMD', nn_type='conv', power=power)
