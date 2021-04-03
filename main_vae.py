@@ -49,9 +49,14 @@ vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_
 lr = 1e-4
 optimizer = optim.Adam(vae.parameters(), lr=lr, weight_decay=0)
 
+if dataset == 'potential':
+    power = 1
+else:
+    power = 4
+
 recon_weight = 1.
 kl_weight = 1.
 
 train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=100, optimizer=optimizer,
-          recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset, nn_type=vae_type, is_L1=False, power=4,
+          recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset, nn_type=vae_type, is_L1=False, power=power,
           desc=strengths)

@@ -11,7 +11,10 @@ batch_size = 1
 dataset = 'potential'
 model_name = 'potential_VAE_[0.2, 0.3]_1617440148.841339.pt'
 model_path = MODELS_ROOT + model_name
-power = 1
+if dataset == 'potential':
+    power = 1
+else:
+    power = 4
 train = True
 strengths = [0.01, 0.3]
 

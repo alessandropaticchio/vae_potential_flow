@@ -11,7 +11,7 @@ potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
 mapper_model_path = MODELS_ROOT + mapper_model_name
 train = True
-strengths = [0.2, 0.3]
+strengths = [0.01, 0.3]
 
 power = 4
 
