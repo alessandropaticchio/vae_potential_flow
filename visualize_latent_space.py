@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import torch
 
 batch_size = 1
-strengths = [0.2, 0.3]
+strengths = [0.01, 0.3]
 dataset = 'potential'
 model_name = 'potential_VAE_[0.2, 0.3]_1617440148.841339.pt'
 model_path = MODELS_ROOT + model_name

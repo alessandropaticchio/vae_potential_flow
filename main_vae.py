@@ -10,7 +10,7 @@ vae_type = 'conv'
 
 dataset = 'rays'
 
-strengths = [0.2, 0.3]
+strengths = [0.01, 0.3]
 
 pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_' + dataset + '.pt')
 pics_test_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_' + dataset + '.pt')
