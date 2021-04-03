@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 import torch
 
 batch_size = 1
-dataset = 'potential'
 strengths = [0.2, 0.3]
-model_name = 'rays_VAE_[0.2, 0.3]_1617431982.820919.pt'
+dataset = 'potential'
+model_name = 'potential_VAE_[0.2, 0.3]_1617440148.841339.pt'
 model_path = MODELS_ROOT + model_name
 
 pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_' + dataset + '.pt')
@@ -39,8 +39,9 @@ vae.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 vae.eval()
 
 encodings = []
+encoded_strenghts = []
 
-max_samples = 20
+max_samples = 999
 
 for i, idx in enumerate(range(max_samples)):
     pic_sample = train_dataset[idx][0].unsqueeze(0).float()
@@ -48,11 +49,12 @@ for i, idx in enumerate(range(max_samples)):
     mean, log_var = vae.encode(pic_sample, strength_sample)
     sample_encoded = torch.cat((mean, log_var), 0).flatten().tolist()
     encodings.append(sample_encoded)
+    encoded_strenghts.append(train_dataset[idx][1])
 
 encodings_embedded = TSNE(n_components=2).fit_transform(encodings)
 
 plt.figure()
 
-plt.scatter(encodings_embedded[:, 0], encodings_embedded[:, 1])
+plt.scatter(encodings_embedded[:, 0], encodings_embedded[:, 1], c=encoded_strenghts)
 plt.title('T-SNE visualization of {} encodings'.format(dataset))
 plt.show()

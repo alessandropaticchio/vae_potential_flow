@@ -8,8 +8,8 @@ import itertools
 
 batch_size = 1
 
-dataset = 'rays'
-model_name = 'rays_VAE_[0.2, 0.3]_1617431982.820919.pt'
+dataset = 'potential'
+model_name = 'potential_VAE_[0.2, 0.3]_1617440148.841339.pt'
 model_path = MODELS_ROOT + model_name
 power = 1
 train = True

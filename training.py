@@ -67,6 +67,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
         train_kld_loss = 0.
         for batch_idx, (data, strength) in enumerate(train_loader):
             data = data.to(device)
+            strength = strength.to(device)
             optimizer.zero_grad()
 
             recon_batch, mu, log_var = net(data, strength)
@@ -124,6 +125,8 @@ def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, exponent=0):
     with torch.no_grad():
         for (data, strength) in test_loader:
             data = data.to(device)
+            strength = strength.to(device)
+
             recon, mu, log_var = net(data, strength)
 
             if exponent:
