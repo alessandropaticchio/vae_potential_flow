@@ -13,7 +13,7 @@ class MyDataset(Dataset):
         return (self.X[idx], self.y[idx])
 
 
-class PotentialDataset(Dataset):
+class StrengthDataset(Dataset):
     def __init__(self, x, d):
         self.X = x
         self.D = d
@@ -36,3 +36,11 @@ class MappingDataset(Dataset):
 
     def __getitem__(self, idx):
         return (self.X[idx], self.y[idx], self.D[idx])
+
+
+def generate_dataset_from_strength(pics_data, strengths_data, picked_strenghts):
+    indeces = []
+    for i, d in enumerate(strengths_data):
+        if d in picked_strenghts:
+            indeces.append(i)
+    return pics_data[indeces], strengths_data[indeces]

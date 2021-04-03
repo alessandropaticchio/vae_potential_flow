@@ -8,10 +8,6 @@ data_path = DATA_ROOT + '/mapped/'
 train_dataset = torch.load(data_path + 'training.pt')
 test_dataset = torch.load(data_path + 'test.pt')
 
-# Fetch first sample
-# train_dataset.y = train_dataset.y[0, :]
-# train_dataset.X = train_dataset.X[0, :]
-
 batch_size = 256
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)

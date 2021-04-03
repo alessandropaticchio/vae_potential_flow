@@ -1,5 +1,6 @@
 from models import ConvVAE, ConvVAETest
 from constants import *
+from utils import StrengthDataset, generate_dataset_from_strength
 import matplotlib.pyplot as plt
 import random
 import torch
@@ -7,11 +8,12 @@ import itertools
 
 batch_size = 1
 
-dataset = 'potential'
-model_name = 'potential_VAE__2021-03-28 15_26_17.978434.pt'
+dataset = 'rays'
+model_name = 'rays_VAE_[0.2, 0.3]_1617431982.820919.pt'
 model_path = MODELS_ROOT + model_name
 power = 1
 train = True
+strengths = [0.2, 0.3]
 
 if dataset == 'rays':
     image_size = RAYS_IMAGE_SIZE
@@ -32,8 +34,20 @@ ae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_s
 ae.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 ae.eval()
 
-train_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'training_' + dataset + '.pt')
-test_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'test_' + dataset + '.pt')
+pics_train_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'training_' + dataset + '.pt')
+pics_test_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'test_' + dataset + '.pt')
+
+strength_train_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'training_strength.pt')
+strength_test_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'test_strength.pt')
+
+pics_train_dataset, strength_train_dataset = generate_dataset_from_strength(pics_train_dataset, strength_train_dataset,
+                                                                            strengths)
+pics_test_dataset, strength_test_dataset = generate_dataset_from_strength(pics_test_dataset, strength_test_dataset,
+                                                                          strengths)
+
+train_dataset = StrengthDataset(x=pics_train_dataset, d=strength_train_dataset)
+test_dataset = StrengthDataset(x=pics_test_dataset, d=strength_test_dataset)
+
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
@@ -43,9 +57,9 @@ else:
     loader = test_loader
 
 rand_sample_idx = random.randint(0, len(loader))
-rand_sample = next(itertools.islice(loader, rand_sample_idx, None))
+rand_sample, rand_strength = next(itertools.islice(loader, rand_sample_idx, None))
 
-rand_sample_prime = ae(rand_sample[0].reshape(1, image_channels, image_size, image_size))[0]
+rand_sample_prime = ae(rand_sample[0].reshape(1, image_channels, image_size, image_size), rand_strength)[0]
 rand_sample_prime = torch.pow(rand_sample_prime, power)
 
 plt.figure()

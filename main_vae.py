@@ -1,6 +1,7 @@
 from training import train_vae
 from models import ConvVAE, ConvVAETest
 from constants import *
+from utils import StrengthDataset, generate_dataset_from_strength
 import torch
 import torch.optim as optim
 
@@ -9,8 +10,21 @@ vae_type = 'conv'
 
 dataset = 'rays'
 
-train_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'training_' + dataset + '.pt')
-test_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'test_' + dataset + '.pt')
+strengths = [0.2, 0.3]
+
+pics_train_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'training_' + dataset + '.pt')
+pics_test_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'test_' + dataset + '.pt')
+
+strength_train_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'training_strength.pt')
+strength_test_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'test_strength.pt')
+
+pics_train_dataset, strength_train_dataset = generate_dataset_from_strength(pics_train_dataset, strength_train_dataset,
+                                                                            strengths)
+pics_test_dataset, strength_test_dataset = generate_dataset_from_strength(pics_test_dataset, strength_test_dataset,
+                                                                          strengths)
+
+train_dataset = StrengthDataset(x=pics_train_dataset, d=strength_train_dataset)
+test_dataset = StrengthDataset(x=pics_test_dataset, d=strength_test_dataset)
 
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size,
                                            shuffle=True)
@@ -38,5 +52,6 @@ optimizer = optim.Adam(vae.parameters(), lr=lr, weight_decay=0)
 recon_weight = 1.
 kl_weight = 1.
 
-train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=300, optimizer=optimizer,
-          recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset, nn_type=vae_type, is_L1=False, power=4)
+train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=100, optimizer=optimizer,
+          recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset, nn_type=vae_type, is_L1=False, power=4,
+          desc=strengths)

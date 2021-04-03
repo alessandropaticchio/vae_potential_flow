@@ -6,31 +6,34 @@ from tqdm import tqdm
 import torch.nn.functional as F
 import numpy as np
 
-MAX_PICS = 200
+MAX_PICS = 20
 
 downsample = True
 
-img_path = DATA_ROOT
+img_path = DATA_ROOT + '/num=999/'
 
 rays_train_set = torch.empty((1, RAYS_IMAGE_CHANNELS, RAYS_IMAGE_SIZE, RAYS_IMAGE_SIZE))
 rays_test_set = torch.empty((1, RAYS_IMAGE_CHANNELS, RAYS_IMAGE_SIZE, RAYS_IMAGE_SIZE))
 rays_data_set = torch.empty((1, RAYS_IMAGE_CHANNELS, RAYS_IMAGE_SIZE, RAYS_IMAGE_SIZE))
+
 potential_train_set = torch.empty((1, POTENTIAL_IMAGE_CHANNELS, POTENTIAL_IMAGE_SIZE, POTENTIAL_IMAGE_SIZE))
 potential_test_set = torch.empty((1, POTENTIAL_IMAGE_CHANNELS, POTENTIAL_IMAGE_SIZE, POTENTIAL_IMAGE_SIZE))
 potential_data_set = torch.empty((1, POTENTIAL_IMAGE_CHANNELS, POTENTIAL_IMAGE_SIZE, POTENTIAL_IMAGE_SIZE))
-potential_strength_train = torch.empty(1, 1)
-potential_strength_test = torch.empty(1, 1)
-potential_strength_data = torch.empty(1, 1)
+
+strength_train = torch.empty(1, 1)
+strength_test = torch.empty(1, 1)
+strength_data_set = torch.empty(1, 1)
+
+n_strenghts = 0
 
 for label in tqdm(os.listdir(img_path)):
     label_name = os.fsdecode(label)
     try:
         potential = float(label_name.split('D')[1].split(' ')[0])
+        n_strenghts += 1
     except:
         continue
-    if potential != 0.3:
-        continue
-    path = img_path + label_name
+    path = img_path + label_name + '/' + label_name
     for i in tqdm(range(1, int(MAX_PICS) + 1), desc='Rays data...'):
         if i <= 9:
             i = '00' + str(i)
@@ -63,27 +66,28 @@ for label in tqdm(os.listdir(img_path)):
 
         potential_data_set = torch.cat((potential_data_set, image), 0)
         potential_tensor = torch.tensor([[[potential]]]).squeeze(0)
-        potential_strength_data = torch.cat((potential_strength_data, potential_tensor), 0)
+        strength_data_set = torch.cat((strength_data_set, potential_tensor), 0)
 
 
 #  First tensor is meaningless
 rays_data_set = rays_data_set[1:]
 potential_data_set = potential_data_set[1:]
-potential_strength_data = potential_strength_data[1:]
+strength_data_set = strength_data_set[1:]
 
-index = np.random.choice(MAX_PICS, int(0.8 * MAX_PICS), replace=False)
+train_index = np.random.choice(int(MAX_PICS * n_strenghts), int(0.8 * MAX_PICS * n_strenghts), replace=False)
+test_index = [i for i in range(0, int(MAX_PICS * n_strenghts)) if i not in train_index]
 
-rays_train_set = rays_data_set[index]
-potential_train_set = potential_data_set[index]
-potential_strength_train = potential_strength_data[index]
+rays_train_set = rays_data_set[train_index]
+potential_train_set = potential_data_set[train_index]
+strength_train = strength_data_set[train_index]
 
-rays_test_set = np.delete(rays_data_set, index)
-potential_test_set = np.delete(potential_data_set, index)
-potential_strength_test = np.delete(potential_strength_data, index)
+rays_test_set = rays_data_set[test_index]
+potential_test_set = potential_data_set[test_index]
+strength_test = strength_data_set[test_index]
 
 torch.save(rays_train_set, img_path + 'loaded_data/training_rays.pt')
 torch.save(rays_test_set, img_path + 'loaded_data/test_rays.pt')
 torch.save(potential_train_set, img_path + 'loaded_data/training_potential.pt')
 torch.save(potential_test_set, img_path + 'loaded_data/test_potential.pt')
-torch.save(potential_strength_train, img_path + 'loaded_data/train_strength_potential.pt')
-torch.save(potential_strength_test, img_path + 'loaded_data/test_strength_potential.pt')
+torch.save(strength_train, img_path + 'loaded_data/training_strength.pt')
+torch.save(strength_test, img_path + 'loaded_data/test_strength.pt')

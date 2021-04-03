@@ -112,9 +112,9 @@ class ConvVAE(nn.Module):
 
         self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
 
-        # latent space
-        self.encoder_mean = nn.Linear(self.hidden_size, self.latent_size)
-        self.encoder_logvar = nn.Linear(self.hidden_size, self.latent_size)
+        # latent space, + 1 is for the strength
+        self.encoder_mean = nn.Linear(self.hidden_size + 1, self.latent_size)
+        self.encoder_logvar = nn.Linear(self.hidden_size + 1, self.latent_size)
         self.fc = nn.Linear(self.latent_size, self.hidden_size)
 
         # decode
@@ -132,14 +132,14 @@ class ConvVAE(nn.Module):
         eps = torch.randn_like(std)
         return mean + eps * std
 
-    def forward(self, x):
-        mean, log_var = self.encode(x)
+    def forward(self, x, strength):
+        mean, log_var = self.encode(x, strength)
 
         x = self.decode(mean=mean, log_var=log_var)
 
         return x, mean, log_var
 
-    def encode(self, x):
+    def encode(self, x, strength):
         x = self.conv1(x)
         x = self.relu1(x)
 
@@ -150,6 +150,9 @@ class ConvVAE(nn.Module):
 
         # Flattening
         x = x.view(x.size(0), -1)
+
+        #  Concatenating strength
+        x = torch.cat([x, strength], dim=1)
 
         mean = self.encoder_mean(x)
         log_var = self.encoder_logvar(x)

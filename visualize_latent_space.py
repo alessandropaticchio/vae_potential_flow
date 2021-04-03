@@ -1,17 +1,24 @@
 from models import ConvVAE
 from constants import *
+from utils import StrengthDataset, generate_dataset_from_strength
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 import torch
 
 batch_size = 1
 dataset = 'potential'
-
-train_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'training_' + dataset + '.pt')
-train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
-
-model_name = 'potential_VAE__2021-03-21 14_31_19.807428.pt'
+strengths = [0.2, 0.3]
+model_name = 'rays_VAE_[0.2, 0.3]_1617431982.820919.pt'
 model_path = MODELS_ROOT + model_name
+
+pics_train_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'training_' + dataset + '.pt')
+strength_train_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'training_strength.pt')
+pics_train_dataset, strength_train_dataset = generate_dataset_from_strength(pics_train_dataset, strength_train_dataset,
+                                                                            strengths)
+
+train_dataset = StrengthDataset(x=pics_train_dataset, d=strength_train_dataset)
+
+train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 
 if dataset == 'rays':
     image_size = RAYS_IMAGE_SIZE
@@ -27,17 +34,18 @@ else:
     image_channels = POTENTIAL_IMAGE_CHANNELS
 
 vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels,
-              net_size=2)
+              net_size=1)
 vae.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 vae.eval()
 
 encodings = []
 
-max_samples = 500
+max_samples = 20
 
 for i, idx in enumerate(range(max_samples)):
-    sample = train_dataset[idx].unsqueeze(0).float()
-    mean, log_var = vae.encode(sample)
+    pic_sample = train_dataset[idx][0].unsqueeze(0).float()
+    strength_sample = train_dataset[idx][1].unsqueeze(0)
+    mean, log_var = vae.encode(pic_sample, strength_sample)
     sample_encoded = torch.cat((mean, log_var), 0).flatten().tolist()
     encodings.append(sample_encoded)
 

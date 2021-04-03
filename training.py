@@ -16,7 +16,7 @@ def train(net, train_loader, test_loader, epochs, optimizer):
     mse_loss = MSELoss()
     for epoch in range(epochs):
         train_loss = 0.
-        for batch_idx, (data, target) in enumerate(train_loader):
+        for batch_idx, (data, target, _) in enumerate(train_loader):
             data = data.to(device)
             target = target.to(device)
             optimizer.zero_grad()
@@ -44,7 +44,7 @@ def test(net, test_loader):
     test_loss = 0
     mse_loss = MSELoss()
     with torch.no_grad():
-        for data, target in test_loader:
+        for data, target, _ in test_loader:
             data = data.to(device)
             target = target.to(device)
             output = net(data)
@@ -57,19 +57,19 @@ def test(net, test_loader):
 
 def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., dataset='MNIST',
               nn_type='conv', is_L1=False, power=0, desc=''):
-    now = str(datetime.now())
-    writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + desc + '_' + now))
+    now = str(datetime.now().timestamp())
+    writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + str(desc) + '_' + now))
     net = net.to(device)
     net.train()
     for epoch in range(epochs):
         train_loss = 0.
         train_recon_loss = 0.
         train_kld_loss = 0.
-        for batch_idx, data in enumerate(train_loader):
+        for batch_idx, (data, strength) in enumerate(train_loader):
             data = data.to(device)
             optimizer.zero_grad()
 
-            recon_batch, mu, log_var = net(data)
+            recon_batch, mu, log_var = net(data, strength)
 
             if power:
                 recon_batch = torch.pow(recon_batch, power)
@@ -109,10 +109,10 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
 
         # backup save
         if epoch % 50 == 0 and epoch != 0:
-            torch.save(net.state_dict(), MODELS_ROOT + dataset + '_VAE_' + desc + '_' + now + '.pt')
+            torch.save(net.state_dict(), MODELS_ROOT + dataset + '_VAE_' + str(desc) + '_' + now + '.pt')
 
     # Save the model at current date and time
-    torch.save(net.state_dict(), MODELS_ROOT + dataset + '_VAE_' + desc + '_' + now + '.pt')
+    torch.save(net.state_dict(), MODELS_ROOT + dataset + '_VAE_' + str(desc) + '_' + now + '.pt')
 
 
 def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, exponent=0):
@@ -122,9 +122,9 @@ def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, exponent=0):
     recon_loss = 0.
     kld_loss = 0.
     with torch.no_grad():
-        for data in test_loader:
+        for (data, strength) in test_loader:
             data = data.to(device)
-            recon, mu, log_var = net(data)
+            recon, mu, log_var = net(data, strength)
 
             if exponent:
                 recon = torch.pow(recon, exponent)

@@ -1,4 +1,5 @@
 from models import ConvVAE, Mapper
+from utils import StrengthDataset, generate_dataset_from_strength
 from constants import *
 import random
 import matplotlib.pyplot as plt
@@ -9,14 +10,31 @@ mapper_model_name = 'Mapper_2021-03-28 15_44_57.245977.pt'
 potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
 mapper_model_path = MODELS_ROOT + mapper_model_name
+train = True
+strengths = [0.2, 0.3]
 
 power = 4
 
-potential_train_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'training_potential.pt')
-potential_test_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'test_potential.pt')
+potential_train_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'training_potential.pt')
+potential_test_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'test_potential.pt')
 
-rays_train_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'training_rays.pt')
-rays_test_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'test_rays.pt')
+rays_train_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'training_rays.pt')
+rays_test_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'test_rays.pt')
+
+strength_train_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'training_strength.pt')
+strength_test_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'test_strength.pt')
+
+potential_train_dataset, strength_train_dataset = generate_dataset_from_strength(potential_train_dataset,
+                                                                                 strength_train_dataset,
+                                                                                 strengths)
+potential_test_dataset, strength_test_dataset = generate_dataset_from_strength(potential_test_dataset,
+                                                                               strength_test_dataset,
+                                                                               strengths)
+
+rays_train_dataset, _ = generate_dataset_from_strength(rays_train_dataset, strength_train_dataset,
+                                                       strengths)
+rays_test_dataset, _ = generate_dataset_from_strength(rays_test_dataset, strength_test_dataset,
+                                                      strengths)
 
 potential_vae = ConvVAE(image_dim=POTENTIAL_IMAGE_SIZE, hidden_size=POTENTIAL_HIDDEN_SIZE,
                         latent_size=POTENTIAL_LATENT_SIZE,
@@ -40,12 +58,20 @@ mapper = Mapper(h_sizes=[h0, h1, h2, h3])
 mapper.load_state_dict(torch.load(mapper_model_path, map_location=torch.device('cpu')))
 mapper.eval()
 
+if train:
+    potential_dataset = potential_train_dataset
+    rays_dataset = rays_train_dataset
+else:
+    potential_dataset = potential_test_dataset
+    rays_train_dataset = rays_test_dataset
+
 for i in range(1, 2):
     # Encoding
     rand_sample_idx = random.randint(1, 159)
 
-    potential_sample = potential_test_dataset.data[rand_sample_idx].unsqueeze(0)
-    potential_mean, potential_log_var = potential_vae.encode(potential_sample)
+    pic_potential_sample = potential_dataset.data[rand_sample_idx][0].unsqueeze(0)
+    strength_potential_sample = potential_dataset.data[rand_sample_idx][1].unsqueeze(0)
+    potential_mean, potential_log_var = potential_vae.encode(pic_potential_sample, strength_potential_sample)
     potential_sample_encoded = torch.cat((potential_mean, potential_log_var), 1)
 
     # Mapping
@@ -58,17 +84,17 @@ for i in range(1, 2):
     rays_sample_mapped = torch.pow(rays_sample_mapped, power)
 
     # Reconstructing the original image for comparison
-    rays_sample_reconstructed = rays_vae(rays_train_dataset.data[rand_sample_idx].unsqueeze(0))[0]
+    rays_sample_reconstructed = rays_vae(rays_dataset.data[rand_sample_idx].unsqueeze(0))[0]
     rays_sample_reconstructed = torch.pow(rays_sample_reconstructed, power)
 
     plt.figure(figsize=(10, 5))
     plt.subplot(1, 4, 1)
     plt.title('Original Potential')
-    plt.imshow(potential_sample.squeeze(0).permute(1, 2, 0).detach().numpy())
+    plt.imshow(pic_potential_sample.squeeze(0).permute(1, 2, 0).detach().numpy())
 
     plt.subplot(1, 4, 2)
     plt.title('Original Rays')
-    plt.imshow(rays_train_dataset[rand_sample_idx].permute(1, 2, 0).detach().numpy())
+    plt.imshow(rays_dataset[rand_sample_idx].permute(1, 2, 0).detach().numpy())
 
     plt.subplot(1, 4, 3)
     plt.title('Mapped Rays')
@@ -81,7 +107,8 @@ for i in range(1, 2):
     plt.figure()
     pixel_val = int(POTENTIAL_IMAGE_SIZE / 5)
     plt.title('Projection along x = {}'.format(pixel_val))
-    plt.plot(range(0, POTENTIAL_IMAGE_SIZE), rays_train_dataset[rand_sample_idx].squeeze()[0, :, pixel_val], label='Ground truth')
+    plt.plot(range(0, POTENTIAL_IMAGE_SIZE), rays_dataset[rand_sample_idx].squeeze()[0, :, pixel_val],
+             label='Ground truth')
     plt.plot(range(0, POTENTIAL_IMAGE_SIZE), rays_sample_mapped.squeeze().detach().numpy()[0, :, pixel_val],
              label='Predicted')
     plt.legend(loc='best')
