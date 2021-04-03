@@ -6,9 +6,11 @@ from tqdm import tqdm
 import torch.nn.functional as F
 import numpy as np
 
-MAX_PICS = 20
+MAX_PICS = 999
 
 downsample = True
+
+strenghts = [0.2, 0.3]
 
 img_path = DATA_ROOT + '/num=999_unzipped/'
 
@@ -30,7 +32,10 @@ for label in tqdm(os.listdir(img_path)):
     label_name = os.fsdecode(label)
     try:
         potential = float(label_name.split('D')[1].split(' ')[0])
-        n_strenghts += 1
+        if potential in strenghts:
+            n_strenghts += 1
+        else:
+            continue
     except:
         continue
     path = img_path + label_name + '/' + label_name
