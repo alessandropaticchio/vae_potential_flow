@@ -11,8 +11,8 @@ strengths = [0.2, 0.3]
 model_name = 'rays_VAE_[0.2, 0.3]_1617431982.820919.pt'
 model_path = MODELS_ROOT + model_name
 
-pics_train_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'training_' + dataset + '.pt')
-strength_train_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'training_strength.pt')
+pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_' + dataset + '.pt')
+strength_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_strength.pt')
 pics_train_dataset, strength_train_dataset = generate_dataset_from_strength(pics_train_dataset, strength_train_dataset,
                                                                             strengths)
 

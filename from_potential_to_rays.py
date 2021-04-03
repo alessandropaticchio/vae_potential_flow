@@ -15,14 +15,14 @@ strengths = [0.2, 0.3]
 
 power = 4
 
-potential_train_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'training_potential.pt')
-potential_test_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'test_potential.pt')
+potential_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_potential.pt')
+potential_test_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_potential.pt')
 
-rays_train_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'training_rays.pt')
-rays_test_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'test_rays.pt')
+rays_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_rays.pt')
+rays_test_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_rays.pt')
 
-strength_train_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'training_strength.pt')
-strength_test_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'test_strength.pt')
+strength_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_strength.pt')
+strength_test_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_strength.pt')
 
 potential_train_dataset, strength_train_dataset = generate_dataset_from_strength(potential_train_dataset,
                                                                                  strength_train_dataset,

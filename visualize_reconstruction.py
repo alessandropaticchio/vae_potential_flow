@@ -34,11 +34,11 @@ ae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_s
 ae.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 ae.eval()
 
-pics_train_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'training_' + dataset + '.pt')
-pics_test_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'test_' + dataset + '.pt')
+pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_' + dataset + '.pt')
+pics_test_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_' + dataset + '.pt')
 
-strength_train_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'training_strength.pt')
-strength_test_dataset = torch.load(DATA_ROOT + 'num=999/loaded_data/' + 'test_strength.pt')
+strength_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_strength.pt')
+strength_test_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_strength.pt')
 
 pics_train_dataset, strength_train_dataset = generate_dataset_from_strength(pics_train_dataset, strength_train_dataset,
                                                                             strengths)

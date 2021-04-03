@@ -50,10 +50,10 @@ vae.eval()
 
 data_path = DATA_ROOT + '/real_data/'
 
-potential_train_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'training_potential.pt')
-potential_test_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'test_potential.pt')
-rays_train_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'training_rays.pt')
-rays_test_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999/loaded_data/' + 'test_rays.pt')
+potential_train_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999_unzipped/loaded_data/' + 'training_potential.pt')
+potential_test_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999_unzipped/loaded_data/' + 'test_potential.pt')
+rays_train_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999_unzipped/loaded_data/' + 'training_rays.pt')
+rays_test_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999_unzipped/loaded_data/' + 'test_rays.pt')
 
 train_dataset = MyDataset(x=potential_train_dataset, y=rays_train_dataset)
 test_dataset = MyDataset(x=potential_test_dataset, y=rays_test_dataset)
