@@ -56,7 +56,7 @@ def test(net, test_loader):
 
 
 def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., dataset='MNIST',
-              nn_type='conv', is_L1=False, power=0, desc=''):
+              nn_type='conv', is_L1=False, power=0, desc='', is_reg=0):
     now = str(datetime.now())
     writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + str(desc) + '_' + now))
     net = net.to(device)
@@ -76,9 +76,9 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
                 recon_batch = torch.pow(recon_batch, power)
                 data = torch.pow(data, power)
 
-            batch_loss, batch_recon_loss, batch_kld_loss = loss_function_vae(recon_batch, data, mu, log_var,
+            batch_loss, batch_recon_loss, batch_kld_loss = loss_function_vae(recon_batch, data, strength, mu, log_var,
                                                                              recon_weight,
-                                                                             kl_weight, nn_type)
+                                                                             kl_weight, nn_type, is_reg)
             # Adding code for L1 Regularisation
             if is_L1:
 
@@ -99,7 +99,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
 
         print('Epoch: {} Average loss: {:.8f}'.format(epoch, train_loss / len(train_loader.dataset)))
 
-        test_loss, test_recon_loss, test_kld_loss = test_vae(net, test_loader, recon_weight, kl_weight, nn_type)
+        test_loss, test_recon_loss, test_kld_loss = test_vae(net, test_loader, recon_weight, kl_weight, nn_type, is_reg)
 
         writer.add_scalar('LogLoss/train', np.log(train_loss / len(train_loader.dataset)), epoch)
         writer.add_scalar('LogLoss/recon_train', np.log(train_recon_loss / len(train_loader.dataset)), epoch)
@@ -116,7 +116,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
     torch.save(net.state_dict(), MODELS_ROOT + dataset + '_VAE_' + str(desc) + '_' + now + '.pt')
 
 
-def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, exponent=0):
+def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, exponent=0, is_reg=0):
     net.eval()
     net = net.to(device)
     test_loss = 0.
@@ -134,9 +134,9 @@ def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, exponent=0):
                 data = torch.pow(data, exponent)
 
             # sum up batch loss
-            batch_test_loss, batch_recon_loss, batch_kld_loss = loss_function_vae(recon, data, mu, log_var,
+            batch_test_loss, batch_recon_loss, batch_kld_loss = loss_function_vae(recon, data, strength, mu, log_var,
                                                                                   recon_weight, kl_weight,
-                                                                                  nn_type)
+                                                                                  nn_type, is_reg)
             test_loss += batch_test_loss.item()
             recon_loss += batch_recon_loss.item()
             kld_loss += batch_kld_loss.item()
@@ -147,13 +147,14 @@ def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, exponent=0):
 
 
 # return reconstruction error + KL divergence losses
-def loss_function_vae(recon_x, x, mu, log_var, recon_weight, kl_weight, nn_type):
+def loss_function_vae(recon_x, x, strength, mu, log_var, recon_weight, kl_weight, nn_type, is_reg):
     if nn_type == 'conv':
         recon_loss = F.mse_loss(recon_x, x, reduction='sum') * recon_weight
     else:
         recon_loss = F.mse_loss(recon_x, x.view(-1, 784), reduction='sum') * recon_weight
     KLD = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp()) * kl_weight
-    return recon_loss + KLD, recon_loss, KLD
+    reg_latent_space = is_reg * F.mse_loss(strength.pow(2), mu.pow(2), reduction='sum')
+    return recon_loss + KLD + reg_latent_space, recon_loss, KLD
 
 
 def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., dataset='MNIST',
