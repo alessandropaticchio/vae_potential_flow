@@ -58,7 +58,7 @@ def test(net, test_loader):
 def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., dataset='MNIST',
               nn_type='conv', is_L1=False, power=0, desc='', is_reg=0):
     now = str(datetime.now())
-    writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + "Santa"))
+    writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + + str(desc) + '_' + now + '.pt'))
     net = net.to(device)
     net.train()
     for epoch in range(epochs):
