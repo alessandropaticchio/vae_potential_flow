@@ -120,7 +120,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
     torch.save(net.state_dict(), MODELS_ROOT + dataset + '_VAE_' + str(desc) + '_' + now + '.pt')
 
 
-def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, exponent=0, is_reg=0):
+def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, is_reg, exponent=0):
     net.eval()
     net = net.to(device)
     test_loss = 0.
