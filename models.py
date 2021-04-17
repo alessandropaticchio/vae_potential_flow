@@ -113,8 +113,10 @@ class ConvVAE(nn.Module):
         self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
 
         # latent space, + 1 is for the strength
-        self.encoder_mean = nn.Linear(self.hidden_size + 1, self.latent_size)
-        self.encoder_logvar = nn.Linear(self.hidden_size + 1, self.latent_size)
+        # self.encoder_mean = nn.Linear(self.hidden_size + 1, self.latent_size)
+        # self.encoder_logvar = nn.Linear(self.hidden_size + 1, self.latent_size)
+        self.encoder_mean = nn.Linear(self.hidden_size, self.latent_size)
+        self.encoder_logvar = nn.Linear(self.hidden_size, self.latent_size)
         self.fc = nn.Linear(self.latent_size, self.hidden_size)
 
         # decode
@@ -152,7 +154,7 @@ class ConvVAE(nn.Module):
         x = x.view(x.size(0), -1)
 
         #  Concatenating strength
-        x = torch.cat([x, strength], dim=1)
+        # x = torch.cat([x, strength], dim=1)
 
         mean = self.encoder_mean(x)
         log_var = self.encoder_logvar(x)

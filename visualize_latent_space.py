@@ -6,13 +6,13 @@ import matplotlib.pyplot as plt
 import torch
 
 batch_size = 1
-strengths = [0.01, 0.3]
+strengths = STRENGTHS
 dataset = 'potential'
-model_name = 'potential_VAE_[0.2, 0.3]_1617440148.841339.pt'
+model_name = 'potential_VAE_[0.01, 0.1, 0.2, 0.03, 0.3, 0.05, 0.07, 0.09]_2021-04-14 15_30_09.465300.pt'
 model_path = MODELS_ROOT + model_name
 
-pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_' + dataset + '.pt')
-strength_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_strength.pt')
+pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_' + dataset + '.pt')
+strength_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_strength.pt')
 pics_train_dataset, strength_train_dataset = generate_dataset_from_strength(pics_train_dataset, strength_train_dataset,
                                                                             strengths)
 
@@ -43,6 +43,8 @@ encoded_strenghts = []
 
 max_samples = 999
 
+
+
 for i, idx in enumerate(range(max_samples)):
     pic_sample = train_dataset[idx][0].unsqueeze(0).float()
     strength_sample = train_dataset[idx][1].unsqueeze(0)
@@ -55,6 +57,10 @@ encodings_embedded = TSNE(n_components=2).fit_transform(encodings)
 
 plt.figure()
 
-plt.scatter(encodings_embedded[:, 0], encodings_embedded[:, 1], c=encoded_strenghts)
+fig, ax = plt.subplots()
+scatter = ax.scatter(encodings_embedded[:, 0], encodings_embedded[:, 1], c=encoded_strenghts, cmap='Accent')
+legend = ax.legend(*scatter.legend_elements(),
+                   loc="best", title="Strengths")
+ax.add_artist(legend)
 plt.title('T-SNE visualization of {} encodings'.format(dataset))
 plt.show()

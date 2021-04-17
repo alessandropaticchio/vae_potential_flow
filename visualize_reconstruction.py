@@ -5,18 +5,22 @@ import matplotlib.pyplot as plt
 import random
 import torch
 import itertools
+from torchvision import transforms
+import numpy as np
 
 batch_size = 1
+n_forwards = 1
+transform = True
 
 dataset = 'potential'
-model_name = 'potential_VAE_[0.2, 0.3]_1617440148.841339.pt'
+model_name = 'potential_VAE_[0.01, 0.1, 0.2, 0.03, 0.3, 0.05, 0.07, 0.09]_2021-04-14 20_51_48.929274.pt'
 model_path = MODELS_ROOT + model_name
 if dataset == 'potential':
     power = 1
 else:
     power = 4
 train = True
-strengths = [0.01, 0.3]
+strengths = STRENGTHS
 
 if dataset == 'rays':
     image_size = RAYS_IMAGE_SIZE
@@ -37,11 +41,11 @@ ae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_s
 ae.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 ae.eval()
 
-pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_' + dataset + '.pt')
-pics_test_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_' + dataset + '.pt')
+pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_' + dataset + '.pt')
+pics_test_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_' + dataset + '.pt')
 
-strength_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_strength.pt')
-strength_test_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_strength.pt')
+strength_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_strength.pt')
+strength_test_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_strength.pt')
 
 pics_train_dataset, strength_train_dataset = generate_dataset_from_strength(pics_train_dataset, strength_train_dataset,
                                                                             strengths)
@@ -62,18 +66,48 @@ else:
 rand_sample_idx = random.randint(0, len(loader))
 rand_sample, rand_strength = next(itertools.islice(loader, rand_sample_idx, None))
 
-rand_sample_prime = ae(rand_sample[0].reshape(1, image_channels, image_size, image_size), rand_strength)[0]
+predicted_samples = []
+for i in range(n_forwards):
+    forward = ae(rand_sample[0].reshape(1, image_channels, image_size, image_size), rand_strength)[0]
+    predicted_samples.append(forward)
+
+rand_sample_prime = torch.mean(torch.stack(predicted_samples), dim=0)
 rand_sample_prime = torch.pow(rand_sample_prime, power)
 
-plt.figure()
+if transform:
 
-plt.subplot(1, 2, 1)
-plt.title('Original')
-plt.imshow(rand_sample.squeeze().permute(1, 2, 0))
+    rand_sample = transforms.Compose([
+                transforms.ToPILImage(),
+                transforms.Grayscale(num_output_channels=1),
+                transforms.ToTensor(),
+            ])(rand_sample.squeeze(0))
 
-plt.subplot(1, 2, 2)
-plt.title('Reconstruction')
-plt.imshow(rand_sample_prime.squeeze().detach().permute(1, 2, 0).numpy(), cmap='gray')
+    rand_sample_prime = transforms.Compose([
+                transforms.ToPILImage(),
+                transforms.Grayscale(num_output_channels=1),
+                transforms.ToTensor(),
+            ])(rand_sample_prime.squeeze(0))
+
+    plt.figure()
+
+    plt.subplot(1, 2, 1)
+    plt.title('Original')
+    plt.imshow(rand_sample.squeeze(), cmap='gray', vmin=0, vmax=rand_strength)
+
+    plt.subplot(1, 2, 2)
+    plt.title('Reconstruction')
+    plt.imshow(rand_sample_prime.squeeze().detach().numpy(), cmap='gray', vmin=0, vmax=rand_strength)
+
+else:
+    plt.figure()
+
+    plt.subplot(1, 2, 1)
+    plt.title('Original')
+    plt.imshow(rand_sample.squeeze().permute(1, 2, 0))
+
+    plt.subplot(1, 2, 2)
+    plt.title('Reconstruction')
+    plt.imshow(rand_sample_prime.squeeze().detach().permute(1, 2, 0).numpy(), cmap='gray')
 
 if dataset == 'rays':
     plt.figure()
