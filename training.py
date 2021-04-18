@@ -126,7 +126,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
     torch.save(net.state_dict(), MODELS_ROOT + dataset + '_VAE_' + str(desc) + '_' + now + '.pt')
 
 
-def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight, exponent=0):
+def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight, power=0):
     net.eval()
     net = net.to(device)
     test_loss = 0.
@@ -140,9 +140,9 @@ def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight, exp
 
             recon, mu, log_var = net(data, strength)
 
-            if exponent:
-                recon = torch.pow(recon, exponent)
-                data = torch.pow(data, exponent)
+            if power:
+                recon = torch.pow(recon, power)
+                data = torch.pow(data, power)
 
             # sum up batch loss
             batch_test_loss, batch_recon_loss, batch_kld_loss, batch_reg_loss = loss_function_vae(recon_x=recon, x=data,
@@ -152,7 +152,8 @@ def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight, exp
                                                                                                   recon_weight=recon_weight,
                                                                                                   kl_weight=kl_weight,
                                                                                                   nn_type=nn_type,
-                                                                                                  reg_weight=reg_weight)
+                                                                                                  reg_weight=reg_weight,
+                                                                                                  power=power)
             test_loss += batch_test_loss.item()
             recon_loss += batch_recon_loss.item()
             kld_loss += batch_kld_loss.item()

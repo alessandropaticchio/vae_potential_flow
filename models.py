@@ -115,7 +115,7 @@ class ConvVAE(nn.Module):
 
         if conditional:
             # latent space, + 1 is for the strength
-            reduced_hidden_size = self.hidden_size // 2
+            reduced_hidden_size = self.hidden_size // 1000
             self.conditional_layer = nn.Linear(self.hidden_size + 1, reduced_hidden_size)
             self.encoder_mean = nn.Linear(reduced_hidden_size, self.latent_size)
             self.encoder_logvar = nn.Linear(reduced_hidden_size, self.latent_size)
@@ -123,8 +123,6 @@ class ConvVAE(nn.Module):
             self.encoder_mean = nn.Linear(self.hidden_size, self.latent_size)
             self.encoder_logvar = nn.Linear(self.hidden_size, self.latent_size)
 
-        self.encoder_mean = nn.Linear(self.hidden_size, self.latent_size)
-        self.encoder_logvar = nn.Linear(self.hidden_size, self.latent_size)
         self.fc = nn.Linear(self.latent_size, self.hidden_size)
 
         # decode
