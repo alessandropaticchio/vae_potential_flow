@@ -73,10 +73,6 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
 
             recon_batch, mu, log_var = net(data, strength)
 
-            if power:
-                recon_batch = torch.pow(recon_batch, power)
-                data = torch.pow(data, power)
-
             batch_loss, batch_recon_loss, batch_kld_loss, batch_reg_loss = loss_function_vae(recon_x=recon_batch,
                                                                                              x=data, strength=strength,
                                                                                              mu=mu, log_var=log_var,
@@ -140,10 +136,6 @@ def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight, pow
 
             recon, mu, log_var = net(data, strength)
 
-            if power:
-                recon = torch.pow(recon, power)
-                data = torch.pow(data, power)
-
             # sum up batch loss
             batch_test_loss, batch_recon_loss, batch_kld_loss, batch_reg_loss = loss_function_vae(recon_x=recon, x=data,
                                                                                                   strength=strength,
@@ -167,9 +159,12 @@ def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight, pow
 # return reconstruction error + KL divergence losses
 def loss_function_vae(recon_x, x, strength, mu, log_var, recon_weight, kl_weight, nn_type, reg_weight, power):
     if nn_type == 'conv':
-        # recon_loss = F.mse_loss(recon_x, x, reduction='sum') * recon_weight
-        # recon_loss = torch.pow(torch.norm(recon_x - x), 1/4) * recon_weight
-        recon_loss = torch.pow((recon_x - x), power).sum()
+        if power:
+            recon_x = torch.pow(recon_x, power)
+            x = torch.pow(x, power)
+            recon_loss = torch.pow(torch.norm(recon_x - x), 1 / power) * recon_weight
+        else:
+            recon_loss = F.mse_loss(recon_x, x, reduction='sum') * recon_weight
     else:
         recon_loss = F.mse_loss(recon_x, x.view(-1, 784), reduction='sum') * recon_weight
     KLD = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp()) * kl_weight
