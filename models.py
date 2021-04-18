@@ -115,7 +115,13 @@ class ConvVAE(nn.Module):
 
         if conditional:
             # latent space, + 1 is for the strength
-            self.conditional_layer = nn.Linear(self.hidden_size + 1, self.hidden_size)
+            reduced_hidden_size = self.hidden_size // 2
+            self.conditional_layer = nn.Linear(self.hidden_size + 1, reduced_hidden_size)
+            self.encoder_mean = nn.Linear(reduced_hidden_size, self.latent_size)
+            self.encoder_logvar = nn.Linear(reduced_hidden_size, self.latent_size)
+        else:
+            self.encoder_mean = nn.Linear(self.hidden_size, self.latent_size)
+            self.encoder_logvar = nn.Linear(self.hidden_size, self.latent_size)
 
         self.encoder_mean = nn.Linear(self.hidden_size, self.latent_size)
         self.encoder_logvar = nn.Linear(self.hidden_size, self.latent_size)
@@ -156,7 +162,6 @@ class ConvVAE(nn.Module):
         x = x.view(x.size(0), -1)
 
         if self.conditional:
-
             #  Concatenating strength
             x = torch.cat([x, strength], dim=1)
             x = self.conditional_layer(x)
