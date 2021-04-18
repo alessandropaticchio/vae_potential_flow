@@ -159,10 +159,12 @@ def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight, pow
 # return reconstruction error + KL divergence losses
 def loss_function_vae(recon_x, x, strength, mu, log_var, recon_weight, kl_weight, nn_type, reg_weight, power):
     if nn_type == 'conv':
-        if power:
+        if power > 1:
             recon_x = torch.pow(recon_x, power)
             x = torch.pow(x, power)
-            recon_loss = torch.pow(torch.norm(recon_x - x), 1 / power) * recon_weight
+            # recon_loss = torch.pow((recon_x - x), 1 / power).sum() * recon_weight
+            # recon_loss = torch.pow(recon_x - x, power).sum() * recon_weight
+            recon_loss = torch.pow(abs(recon_x - x), 1 / power).sum() * recon_weight
         else:
             recon_loss = F.mse_loss(recon_x, x, reduction='sum') * recon_weight
     else:
