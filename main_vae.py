@@ -5,18 +5,18 @@ from utils import StrengthDataset, generate_dataset_from_strength
 import torch
 import torch.optim as optim
 
-batch_size = 8
+batch_size = 64
 vae_type = 'conv'
-
-dataset = 'potential'
+conditional = True
+dataset = 'rays'
 
 strengths = STRENGTHS
 
-pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_' + dataset + '.pt')
-pics_test_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_' + dataset + '.pt')
+pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_' + dataset + '.pt')
+pics_test_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_' + dataset + '.pt')
 
-strength_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_strength.pt')
-strength_test_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_strength.pt')
+strength_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_strength.pt')
+strength_test_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_strength.pt')
 
 pics_train_dataset, strength_train_dataset = generate_dataset_from_strength(pics_train_dataset, strength_train_dataset,
                                                                             strengths)
@@ -44,7 +44,7 @@ else:
     image_channels = POTENTIAL_IMAGE_CHANNELS
 
 vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels,
-              net_size=1)
+              net_size=1, conditional=conditional)
 
 lr = 1e-4
 optimizer = optim.Adam(vae.parameters(), lr=lr, weight_decay=0)
@@ -56,7 +56,8 @@ else:
 
 recon_weight = 1.
 kl_weight = 1.
+reg_weight = 0.
 
 train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=100, optimizer=optimizer,
           recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset, nn_type=vae_type, is_L1=False, power=power,
-          desc=strengths, is_reg=1)
+          desc=strengths, reg_weight=reg_weight)

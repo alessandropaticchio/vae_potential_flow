@@ -95,13 +95,14 @@ class UNet_VAE(nn.Module):
 
 
 class ConvVAE(nn.Module):
-    def __init__(self, image_dim, hidden_size, latent_size, image_channels=3, net_size=1):
+    def __init__(self, image_dim, hidden_size, latent_size, image_channels=3, net_size=1, conditional=False):
         super(ConvVAE, self).__init__()
         self.image_channels = image_channels
         self.image_dim = image_dim
         self.hidden_size = hidden_size * net_size
         self.latent_size = latent_size
         self.net_size = net_size
+        self.conditional = conditional
 
         # encode
         self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=32 * net_size, kernel_size=3)
@@ -112,9 +113,10 @@ class ConvVAE(nn.Module):
 
         self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
 
-        # latent space, + 1 is for the strength
-        # self.encoder_mean = nn.Linear(self.hidden_size + 1, self.latent_size)
-        # self.encoder_logvar = nn.Linear(self.hidden_size + 1, self.latent_size)
+        if conditional:
+            # latent space, + 1 is for the strength
+            self.conditional_layer = nn.Linear(self.hidden_size + 1, self.hidden_size)
+
         self.encoder_mean = nn.Linear(self.hidden_size, self.latent_size)
         self.encoder_logvar = nn.Linear(self.hidden_size, self.latent_size)
         self.fc = nn.Linear(self.latent_size, self.hidden_size)
@@ -153,8 +155,11 @@ class ConvVAE(nn.Module):
         # Flattening
         x = x.view(x.size(0), -1)
 
-        #  Concatenating strength
-        # x = torch.cat([x, strength], dim=1)
+        if self.conditional:
+
+            #  Concatenating strength
+            x = torch.cat([x, strength], dim=1)
+            x = self.conditional_layer(x)
 
         mean = self.encoder_mean(x)
         log_var = self.encoder_logvar(x)
