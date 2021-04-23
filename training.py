@@ -103,7 +103,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
         print('Epoch: {} Average loss: {:.8f}'.format(epoch, train_loss / len(train_loader.dataset)))
 
         test_loss, test_recon_loss, test_kld_loss, test_reg_loss = test_vae(net, test_loader, recon_weight, kl_weight,
-                                                                            nn_type, reg_weight)
+                                                                            nn_type, reg_weight, power=power)
 
         writer.add_scalar('LogLoss/train', np.log(train_loss / len(train_loader.dataset)), epoch)
         writer.add_scalar('LogLoss/recon_train', np.log(train_recon_loss / len(train_loader.dataset)), epoch)
@@ -160,11 +160,13 @@ def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight, pow
 def loss_function_vae(recon_x, x, strength, mu, log_var, recon_weight, kl_weight, nn_type, reg_weight, power):
     if nn_type == 'conv':
         if power > 1:
-            recon_x = torch.pow(recon_x, power)
-            x = torch.pow(x, power)
+            # recon_x = torch.pow(recon_x, power)
+            # x = torch.pow(x, power)
             # recon_loss = torch.pow((recon_x - x), 1 / power).sum() * recon_weight
             # recon_loss = torch.pow(recon_x - x, power).sum() * recon_weight
-            recon_loss = torch.pow(abs(recon_x - x), 1 / power).sum() * recon_weight
+            recon_x = recon_x.view(recon_x.shape[1], -1)
+            x = x.view(x.shape[1], -1)
+            recon_loss = torch.norm(recon_x - x, p=power, dim=1).sum() * recon_weight
         else:
             recon_loss = F.mse_loss(recon_x, x, reduction='sum') * recon_weight
     else:

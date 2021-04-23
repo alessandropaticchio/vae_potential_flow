@@ -10,17 +10,21 @@ import numpy as np
 
 batch_size = 1
 n_forwards = 1
-transform = True
 
-dataset = 'potential'
-model_name = 'potential_VAE_[0.01, 0.1, 0.2, 0.03, 0.3, 0.05, 0.07, 0.09]_2021-04-14 20_51_48.929274.pt'
+dataset = 'rays'
+model_name = 'rays_VAE_[0.01, 0.1, 0.2, 0.03, 0.3]_2021-04-18 12_55_18.750127.pt'
 model_path = MODELS_ROOT + model_name
+conditional = True
+
 if dataset == 'potential':
     power = 1
+    transform = True
 else:
     power = 4
+    transform = False
+
 train = True
-strengths = STRENGTHS
+strengths = STRENGTHS[:5]
 
 if dataset == 'rays':
     image_size = RAYS_IMAGE_SIZE
@@ -37,7 +41,7 @@ else:
     image_channels = POTENTIAL_IMAGE_CHANNELS
 
 ae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels,
-             net_size=1)
+             net_size=1, conditional=conditional)
 ae.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 ae.eval()
 
@@ -77,16 +81,16 @@ rand_sample_prime = torch.pow(rand_sample_prime, power)
 if transform:
 
     rand_sample = transforms.Compose([
-                transforms.ToPILImage(),
-                transforms.Grayscale(num_output_channels=1),
-                transforms.ToTensor(),
-            ])(rand_sample.squeeze(0))
+        transforms.ToPILImage(),
+        transforms.Grayscale(num_output_channels=1),
+        transforms.ToTensor(),
+    ])(rand_sample.squeeze(0))
 
     rand_sample_prime = transforms.Compose([
-                transforms.ToPILImage(),
-                transforms.Grayscale(num_output_channels=1),
-                transforms.ToTensor(),
-            ])(rand_sample_prime.squeeze(0))
+        transforms.ToPILImage(),
+        transforms.Grayscale(num_output_channels=1),
+        transforms.ToTensor(),
+    ])(rand_sample_prime.squeeze(0))
 
     plt.figure()
 

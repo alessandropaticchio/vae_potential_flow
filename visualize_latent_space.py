@@ -6,9 +6,10 @@ import matplotlib.pyplot as plt
 import torch
 
 batch_size = 1
-strengths = STRENGTHS
-dataset = 'potential'
-model_name = 'potential_VAE_[0.01, 0.1, 0.2, 0.03, 0.3, 0.05, 0.07, 0.09]_2021-04-14 15_30_09.465300.pt'
+strengths = STRENGTHS[:5]
+dataset = 'rays'
+model_name = 'rays_VAE_[0.01, 0.1, 0.2, 0.03, 0.3]_2021-04-18 12_27_15.732017.pt'
+conditional = True
 model_path = MODELS_ROOT + model_name
 
 pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_' + dataset + '.pt')
@@ -34,7 +35,7 @@ else:
     image_channels = POTENTIAL_IMAGE_CHANNELS
 
 vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels,
-              net_size=1)
+              net_size=1, conditional=conditional)
 vae.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 vae.eval()
 
@@ -42,8 +43,6 @@ encodings = []
 encoded_strenghts = []
 
 max_samples = 999
-
-
 
 for i, idx in enumerate(range(max_samples)):
     pic_sample = train_dataset[idx][0].unsqueeze(0).float()
@@ -54,8 +53,6 @@ for i, idx in enumerate(range(max_samples)):
     encoded_strenghts.append(train_dataset[idx][1])
 
 encodings_embedded = TSNE(n_components=2).fit_transform(encodings)
-
-plt.figure()
 
 fig, ax = plt.subplots()
 scatter = ax.scatter(encodings_embedded[:, 0], encodings_embedded[:, 1], c=encoded_strenghts, cmap='Accent')
