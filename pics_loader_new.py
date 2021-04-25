@@ -10,9 +10,9 @@ MAX_PICS = 999
 
 downsample = True
 
-strenghts = [0.2, 0.3]
+strenghts = STRENGTHS
 
-img_path = DATA_ROOT + '/num=999_unzipped/'
+img_path = DATA_ROOT + '/num=999_unscaled/'
 
 rays_train_set = torch.empty((1, RAYS_IMAGE_CHANNELS, RAYS_IMAGE_SIZE, RAYS_IMAGE_SIZE))
 rays_test_set = torch.empty((1, RAYS_IMAGE_CHANNELS, RAYS_IMAGE_SIZE, RAYS_IMAGE_SIZE))
@@ -63,7 +63,7 @@ for label in tqdm(os.listdir(img_path)):
             i = str(i)
         image = Image.open(path + '/ptnl_' + i + '.jpg')
         image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
-        # image = potential * image[:, :3, :, :]
+        image = potential * image[:, :3, :, :]
         image = image[:, :3, :, :]
 
         if downsample:
