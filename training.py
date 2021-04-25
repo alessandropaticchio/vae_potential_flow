@@ -185,13 +185,12 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
         for batch_idx, (data, targets, strengths) in enumerate(train_loader):
             data = data.to(device)
             targets = targets.to(device)
+            strengths = strengths.to(device)
+
             optimizer.zero_grad()
 
             recon_batch, mu, log_var = net(data)
 
-            if power:
-                recon_batch = torch.pow(recon_batch, power)
-                targets = torch.pow(targets, power)
             batch_loss, batch_recon_loss, batch_kld_loss, batch_reg_loss = loss_function_vae(recon_x=recon_batch,
                                                                                              x=targets,
                                                                                              strength=strengths,
@@ -212,7 +211,9 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
 
         print('Epoch: {} Average loss: {:.8f}'.format(epoch, train_loss / len(train_loader.dataset)))
 
-        test_loss, test_recon_loss, test_kld_loss = test_unet_vae(net, test_loader, recon_weight, kl_weight, nn_type)
+        test_loss, test_recon_loss, test_kld_loss = test_unet_vae(net=net, test_loader=test_loader,
+                                                                  recon_weight=recon_weight, kl_weight=kl_weight,
+                                                                  nn_type=nn_type, power=power)
 
         writer.add_scalar('LogLoss/train', np.log(train_loss / len(train_loader.dataset)), epoch)
         writer.add_scalar('LogLoss/recon_train', np.log(train_recon_loss / len(train_loader.dataset)), epoch)
@@ -236,11 +237,9 @@ def test_unet_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight
         for data, targets, strengths in test_loader:
             data = data.to(device)
             targets = targets.to(device)
-            recon, mu, log_var = net(data)
+            strengths = strengths.to(device)
 
-            if power:
-                recon_batch = torch.pow(recon_batch, power)
-                targets = torch.pow(targets, power)
+            recon_batch, mu, log_var = net(data)
 
             batch_test_loss, batch_recon_loss, batch_kld_loss, batch_reg_loss = loss_function_vae(recon_x=recon_batch,
                                                                                                   x=targets,

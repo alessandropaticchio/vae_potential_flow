@@ -1,15 +1,16 @@
 from models import UNet_VAE, PotentialMapperRaysNN
 from constants import *
-from utils import MyDataset
+from utils import MappingDataset, generate_dataset_from_strength
 import matplotlib.pyplot as plt
 import random
 import torch
 
 batch_size = 1
-
+strengths = STRENGTHS
 net = 'emd'
+net_size = 2
 
-model_name = 'EMD_VAE__2021-03-28 17_15_00.903323.pt'
+model_name = 'EMD_VAE__2021-04-25 15_02_31.537109.pt'
 model_path = MODELS_ROOT + model_name
 
 power = 4
@@ -19,15 +20,17 @@ if net == 'unet':
     latent_size = POTENTIAL_LATENT_SIZE
     vae = UNet_VAE(hidden_size=hidden_size, latent_size=latent_size)
 if net == 'emd':
-    potential_image_size = RAYS_IMAGE_SIZE
-    potential_image_channels = RAYS_IMAGE_CHANNELS
-    potential_hidden_size = RAYS_HIDDEN_SIZE
-    potential_latent_size = RAYS_LATENT_SIZE
-    potential_image_channels = RAYS_IMAGE_CHANNELS
+    potential_image_size = POTENTIAL_IMAGE_SIZE
+    potential_image_channels = POTENTIAL_IMAGE_CHANNELS
+    # potential_hidden_size = POTENTIAL_HIDDEN_SIZE
+    potential_hidden_size = 4 * 47 * 47 * 2
+    potential_latent_size = POTENTIAL_LATENT_SIZE
+    potential_image_channels = POTENTIAL_IMAGE_CHANNELS
 
     rays_image_size = RAYS_IMAGE_SIZE
     rays_image_channels = RAYS_IMAGE_CHANNELS
-    rays_hidden_size = RAYS_HIDDEN_SIZE
+    # rays_hidden_size = RAYS_HIDDEN_SIZE
+    rays_hidden_size = 4 * 47 * 47
     rays_latent_size = RAYS_LATENT_SIZE
     rays_image_channels = RAYS_IMAGE_CHANNELS
 
@@ -43,20 +46,34 @@ if net == 'emd':
                                 potential_latent_size=potential_latent_size,
                                 rays_latent_size=rays_latent_size,
                                 h_sizes=[h0, h1, h2, h3],
-                                net_size=1)
+                                net_size=net_size)
 
 vae.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 vae.eval()
 
-data_path = DATA_ROOT + '/real_data/'
+potential_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_potential.pt')
+potential_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_potential.pt')
 
-potential_train_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999_unzipped/loaded_data/' + 'training_potential.pt')
-potential_test_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999_unzipped/loaded_data/' + 'test_potential.pt')
-rays_train_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999_unzipped/loaded_data/' + 'training_rays.pt')
-rays_test_dataset = torch.load(DATA_ROOT + 'D=0.3 num=999_unzipped/loaded_data/' + 'test_rays.pt')
+rays_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_rays.pt')
+rays_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_rays.pt')
 
-train_dataset = MyDataset(x=potential_train_dataset, y=rays_train_dataset)
-test_dataset = MyDataset(x=potential_test_dataset, y=rays_test_dataset)
+strength_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_strength.pt')
+strength_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_strength.pt')
+
+potential_train_dataset, strength_train_dataset = generate_dataset_from_strength(potential_train_dataset_full,
+                                                                                 strength_train_dataset_full,
+                                                                                 strengths)
+potential_test_dataset, strength_test_dataset = generate_dataset_from_strength(potential_test_dataset_full,
+                                                                               strength_test_dataset_full,
+                                                                               strengths)
+
+rays_train_dataset, _ = generate_dataset_from_strength(rays_train_dataset_full, strength_train_dataset_full,
+                                                       strengths)
+rays_test_dataset, _ = generate_dataset_from_strength(rays_test_dataset_full, strength_test_dataset_full,
+                                                      strengths)
+
+train_dataset = MappingDataset(x=potential_train_dataset, y=rays_train_dataset, d=strength_train_dataset)
+test_dataset = MappingDataset(x=potential_test_dataset, y=rays_test_dataset, d=strength_test_dataset)
 
 rand_sample_idx = random.randint(0, 799)
 rand_sample = train_dataset.X[rand_sample_idx].unsqueeze(0)

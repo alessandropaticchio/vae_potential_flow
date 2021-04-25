@@ -1,30 +1,47 @@
 import torch.optim as optim
 from constants import *
-from utils import MyDataset, MappingDataset
+from utils import MyDataset, MappingDataset, generate_dataset_from_strength
 from training import train_unet_vae
 from models import PotentialMapperRaysNN, ConvVAE, Mapper, ConvVAETest
 
-potential_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_potential.pt')
-potential_test_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_potential.pt')
-rays_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_rays.pt')
-rays_test_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_rays.pt')
-strength_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_strength.pt')
-strength_test_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_strength.pt')
+net_size = 2
+batch_size = 64
+strengths = STRENGTHS
+power = 4
+
+potential_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_potential.pt')
+potential_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_potential.pt')
+
+rays_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_rays.pt')
+rays_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_rays.pt')
+
+strength_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_strength.pt')
+strength_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_strength.pt')
+
+potential_train_dataset, strength_train_dataset = generate_dataset_from_strength(potential_train_dataset_full,
+                                                                                 strength_train_dataset_full,
+                                                                                 strengths)
+potential_test_dataset, strength_test_dataset = generate_dataset_from_strength(potential_test_dataset_full,
+                                                                               strength_test_dataset_full,
+                                                                               strengths)
+
+rays_train_dataset, _ = generate_dataset_from_strength(rays_train_dataset_full, strength_train_dataset_full,
+                                                       strengths)
+rays_test_dataset, _ = generate_dataset_from_strength(rays_test_dataset_full, strength_test_dataset_full,
+                                                      strengths)
 
 train_dataset = MappingDataset(x=potential_train_dataset, y=rays_train_dataset, d=strength_train_dataset)
 test_dataset = MappingDataset(x=potential_test_dataset, y=rays_test_dataset, d=strength_test_dataset)
 
-net_size = 2
-batch_size = 64
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
-potential_image_size = RAYS_IMAGE_SIZE
-potential_image_channels = RAYS_IMAGE_CHANNELS
-# potential_hidden_size = RAYS_HIDDEN_SIZE
+potential_image_size = POTENTIAL_IMAGE_SIZE
+potential_image_channels = POTENTIAL_IMAGE_CHANNELS
+# potential_hidden_size = POTENTIAL_HIDDEN_SIZE
 potential_hidden_size = 4 * 47 * 47
-potential_latent_size = RAYS_LATENT_SIZE
-potential_image_channels = RAYS_IMAGE_CHANNELS
+potential_latent_size = POTENTIAL_LATENT_SIZE
+potential_image_channels = POTENTIAL_IMAGE_CHANNELS
 
 rays_image_size = RAYS_IMAGE_SIZE
 rays_image_channels = RAYS_IMAGE_CHANNELS
@@ -37,8 +54,6 @@ h0 = POTENTIAL_LATENT_SIZE * 2
 h1 = RAYS_LATENT_SIZE * 2
 h2 = RAYS_LATENT_SIZE * 2
 h3 = RAYS_LATENT_SIZE * 2
-
-power = 4
 
 emd = PotentialMapperRaysNN(potential_image_channels=potential_image_channels,
                             rays_image_channels=rays_image_channels,
@@ -104,17 +119,17 @@ emd.mapper_layers[2].weight = mapper.layers[2].weight
 emd.mapper_layers[2].bias = mapper.layers[2].bias
 
 # Decoder
-emd.deconv1.weight = potential_vae.deconv1.weight
-emd.deconv1.bias = potential_vae.deconv1.bias
+emd.deconv1.weight = rays_vae.deconv1.weight
+emd.deconv1.bias = rays_vae.deconv1.bias
 
-emd.deconv2.weight = potential_vae.deconv2.weight
-emd.deconv2.bias = potential_vae.deconv2.bias
+emd.deconv2.weight = rays_vae.deconv2.weight
+emd.deconv2.bias = rays_vae.deconv2.bias
 
-emd.deconv3.weight = potential_vae.deconv3.weight
-emd.deconv3.bias = potential_vae.deconv3.bias
+emd.deconv3.weight = rays_vae.deconv3.weight
+emd.deconv3.bias = rays_vae.deconv3.bias
 
-emd.deconv4.weight = potential_vae.deconv4.weight
-emd.deconv4.bias = potential_vae.deconv4.bias
+emd.deconv4.weight = rays_vae.deconv4.weight
+emd.deconv4.bias = rays_vae.deconv4.bias
 
 lr = 1e-4
 optimizer = optim.Adam(emd.parameters(), lr=lr)
@@ -122,5 +137,9 @@ optimizer = optim.Adam(emd.parameters(), lr=lr)
 recon_weight = 1.
 kl_weight = 1.
 
-train_unet_vae(net=emd, train_loader=train_loader, test_loader=test_loader, epochs=300, optimizer=optimizer,
-               recon_weight=recon_weight, kl_weight=kl_weight, dataset='EMD', nn_type='conv', power=power,)
+model_name = 'EMD_VAE__2021-04-25 14_13_40.846365.pt'
+model_path = MODELS_ROOT + model_name
+emd.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+
+train_unet_vae(net=emd, train_loader=train_loader, test_loader=test_loader, epochs=1, optimizer=optimizer,
+               recon_weight=recon_weight, kl_weight=kl_weight, dataset='EMD', nn_type='conv', power=power)
