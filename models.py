@@ -204,7 +204,7 @@ class ConvVAETest(nn.Module):
         self.conditional = conditional
 
         # encode
-        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=32 * net_size, kernel_size=3)
+        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=32 * net_size, kernel_size=1)
         self.relu1 = nn.ReLU()
 
         self.conv2 = nn.Conv2d(in_channels=32 * net_size, out_channels=16 * net_size, kernel_size=3)
@@ -233,7 +233,7 @@ class ConvVAETest(nn.Module):
         # decode
         self.upsample1 = nn.Upsample(scale_factor=2)
 
-        self.deconv1 = nn.ConvTranspose2d(in_channels=4 * net_size, out_channels=8 * net_size, kernel_size=3)
+        self.deconv1 = nn.ConvTranspose2d(in_channels=4 * net_size, out_channels=8 * net_size, kernel_size=1)
         self.relu5 = nn.ReLU()
 
         self.deconv2 = nn.ConvTranspose2d(in_channels=8 * net_size, out_channels=16 * net_size, kernel_size=3)
@@ -296,7 +296,7 @@ class ConvVAETest(nn.Module):
         x = self.fc(z)
 
         # Unflattening
-        x = x.view(x.size(0), 4 * self.net_size, 46, 46)
+        x = x.view(x.size(0), 4 * self.net_size, 47, 47)
 
         x = self.upsample1(x)
 
