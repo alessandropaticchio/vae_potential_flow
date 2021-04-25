@@ -16,7 +16,7 @@ def train(net, train_loader, test_loader, epochs, optimizer):
     mse_loss = MSELoss()
     for epoch in range(epochs):
         train_loss = 0.
-        for batch_idx, (data, target, _) in enumerate(train_loader):
+        for batch_idx, (data, target) in enumerate(train_loader):
             data = data.to(device)
             target = target.to(device)
             optimizer.zero_grad()
@@ -44,7 +44,7 @@ def test(net, test_loader):
     test_loss = 0
     mse_loss = MSELoss()
     with torch.no_grad():
-        for data, target, _ in test_loader:
+        for data, target in test_loader:
             data = data.to(device)
             target = target.to(device)
             output = net(data)
