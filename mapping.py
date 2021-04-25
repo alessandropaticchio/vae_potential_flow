@@ -3,19 +3,21 @@ from models import ConvVAE
 from utils import MappingDataset, generate_dataset_from_strength
 import torch
 
-potential_model_name = 'potential_VAE__2021-03-14 11_39_22.400044.pt'
-rays_model_name = 'rays_VAE__2021-03-14 11_16_12.968416.pt'
+conditional = False
+
+potential_model_name = 'potential_VAE_[0.01, 0.3]_2021-04-23 13_24_56.913723.pt'
+rays_model_name = 'rays_VAE_[0.01, 0.3]_2021-04-23 13_14_47.903668.pt'
 potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
-strengths = [0.2, 0.3]
+strengths = [0.01, 0.3]
 
 potential_ae = ConvVAE(image_dim=POTENTIAL_IMAGE_SIZE, hidden_size=POTENTIAL_HIDDEN_SIZE, latent_size=POTENTIAL_LATENT_SIZE,
-                       image_channels=POTENTIAL_IMAGE_CHANNELS)
+                       image_channels=POTENTIAL_IMAGE_CHANNELS, conditional=conditional)
 potential_ae.load_state_dict(torch.load(potential_model_path, map_location=torch.device('cpu')))
 potential_ae.eval()
 
 rays_ae = ConvVAE(image_dim=RAYS_IMAGE_SIZE, hidden_size=RAYS_HIDDEN_SIZE, latent_size=RAYS_LATENT_SIZE,
-                  image_channels=RAYS_IMAGE_CHANNELS)
+                  image_channels=RAYS_IMAGE_CHANNELS, conditional=conditional)
 rays_ae.load_state_dict(torch.load(rays_model_path, map_location=torch.device('cpu')))
 rays_ae.eval()
 
@@ -49,10 +51,10 @@ encoded_test_set_y = torch.empty(1, RAYS_LATENT_SIZE * 2)
 # Training set generation
 for i, sample in enumerate(potential_train_dataset):
     # Encoding
-    potential_mean, potential_log_var = potential_ae.encode(sample.unsqueeze(0))
+    potential_mean, potential_log_var = potential_ae.encode(sample.unsqueeze(0),strength_train_dataset[i])
     potential_sample_encoded = torch.cat((potential_mean, potential_log_var), 1)
 
-    rays_mean, rays_log_var = rays_ae.encode(rays_train_dataset[i].unsqueeze(0))
+    rays_mean, rays_log_var = rays_ae.encode(rays_train_dataset[i].unsqueeze(0), strength_train_dataset[i])
     rays_sample_encoded = torch.cat((rays_mean, rays_log_var), 1)
 
     encoded_train_set_X = torch.cat((encoded_train_set_X, potential_sample_encoded), 0)
@@ -61,10 +63,10 @@ for i, sample in enumerate(potential_train_dataset):
 # Test set generation
 for i, sample in enumerate(potential_test_dataset):
     # Encoding
-    potential_mean, potential_log_var = potential_ae.encode(sample.unsqueeze(0))
+    potential_mean, potential_log_var = potential_ae.encode(sample.unsqueeze(0), strength_test_dataset[i])
     potential_sample_encoded = torch.cat((potential_mean, potential_log_var), 1)
 
-    rays_mean, rays_log_var = rays_ae.encode(rays_test_dataset[i].unsqueeze(0))
+    rays_mean, rays_log_var = rays_ae.encode(rays_test_dataset[i].unsqueeze(0), strength_test_dataset[i])
     rays_sample_encoded = torch.cat((rays_mean, rays_log_var), 1)
 
     encoded_test_set_X = torch.cat((encoded_test_set_X, potential_sample_encoded), 0)
