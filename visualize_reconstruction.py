@@ -9,12 +9,12 @@ from torchvision import transforms
 import numpy as np
 
 batch_size = 1
-n_forwards = 1
+n_forwards = 4
 
 dataset = 'rays'
-model_name = 'rays_VAE_[0.01, 0.1, 0.2, 0.03, 0.3]_2021-04-18 12_55_18.750127.pt'
+model_name = 'rays_VAE_[0.01, 0.3]_2021-04-25 08_00_19.564650.pt'
 model_path = MODELS_ROOT + model_name
-conditional = True
+conditional = False
 
 if dataset == 'potential':
     power = 1
@@ -45,11 +45,11 @@ ae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_s
 ae.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 ae.eval()
 
-pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_' + dataset + '.pt')
-pics_test_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_' + dataset + '.pt')
+pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_' + dataset + '.pt')
+pics_test_dataset = torch.load(DATA_ROOT + 'num=999_unzipped//loaded_data/' + 'test_' + dataset + '.pt')
 
-strength_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_strength.pt')
-strength_test_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_strength.pt')
+strength_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped//loaded_data/' + 'training_strength.pt')
+strength_test_dataset = torch.load(DATA_ROOT + 'num=999_unzipped//loaded_data/' + 'test_strength.pt')
 
 pics_train_dataset, strength_train_dataset = generate_dataset_from_strength(pics_train_dataset, strength_train_dataset,
                                                                             strengths)

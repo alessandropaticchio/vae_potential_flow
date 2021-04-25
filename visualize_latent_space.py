@@ -6,10 +6,10 @@ import matplotlib.pyplot as plt
 import torch
 
 batch_size = 1
-strengths = STRENGTHS[:5]
+strengths = STRENGTHS
 dataset = 'rays'
-model_name = 'rays_VAE_[0.01, 0.1, 0.2, 0.03, 0.3]_2021-04-18 12_27_15.732017.pt'
-conditional = True
+model_name = 'rays_VAE_[0.01, 0.3]_2021-04-25 08_00_19.564650.pt'
+conditional = False
 model_path = MODELS_ROOT + model_name
 
 pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_' + dataset + '.pt')

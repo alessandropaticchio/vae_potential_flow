@@ -119,11 +119,11 @@ class ConvVAE(nn.Module):
             self.conditional_layer = nn.Linear(self.hidden_size + 1, reduced_hidden_size)
             self.encoder_mean = nn.Linear(reduced_hidden_size, self.latent_size)
             self.encoder_logvar = nn.Linear(reduced_hidden_size, self.latent_size)
+            self.fc = nn.Linear(self.latent_size + 1, self.hidden_size)
         else:
             self.encoder_mean = nn.Linear(self.hidden_size, self.latent_size)
             self.encoder_logvar = nn.Linear(self.hidden_size, self.latent_size)
-
-        self.fc = nn.Linear(self.latent_size, self.hidden_size)
+            self.fc = nn.Linear(self.latent_size, self.hidden_size)
 
         # decode
         self.upsample1 = nn.Upsample(scale_factor=2)
@@ -141,9 +141,9 @@ class ConvVAE(nn.Module):
         return mean + eps * std
 
     def forward(self, x, strength):
-        mean, log_var = self.encode(x, strength)
+        mean, log_var = self.encode(x=x, strength=strength)
 
-        x = self.decode(mean=mean, log_var=log_var)
+        x = self.decode(mean=mean, log_var=log_var, strength=strength)
 
         return x, mean, log_var
 
@@ -169,8 +169,13 @@ class ConvVAE(nn.Module):
 
         return mean, log_var
 
-    def decode(self, mean, log_var):
+    def decode(self, mean, log_var, strength):
         z = self.reparametrize(mean=mean, log_var=log_var)
+
+        if self.conditional:
+            #  Concatenating strength
+            z = torch.cat([z, strength], dim=1)
+
         x = self.fc(z)
 
         # Unflattening
