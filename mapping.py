@@ -22,25 +22,25 @@ rays_ae = ConvVAETest(image_dim=RAYS_IMAGE_SIZE, hidden_size=4 * 47 * 47, latent
 rays_ae.load_state_dict(torch.load(rays_model_path, map_location=torch.device('cpu')))
 rays_ae.eval()
 
-potential_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_potential.pt')
-potential_test_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_potential.pt')
+potential_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_potential.pt')
+potential_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_potential.pt')
 
-rays_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_rays.pt')
-rays_test_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_rays.pt')
+rays_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_rays.pt')
+rays_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_rays.pt')
 
-strength_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_strength.pt')
-strength_test_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_strength.pt')
+strength_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_strength.pt')
+strength_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_strength.pt')
 
-potential_train_dataset, strength_train_dataset = generate_dataset_from_strength(potential_train_dataset,
-                                                                                 strength_train_dataset,
+potential_train_dataset, strength_train_dataset = generate_dataset_from_strength(potential_train_dataset_full,
+                                                                                 strength_train_dataset_full,
                                                                                  strengths)
-potential_test_dataset, strength_test_dataset = generate_dataset_from_strength(potential_test_dataset,
-                                                                               strength_test_dataset,
+potential_test_dataset, strength_test_dataset = generate_dataset_from_strength(potential_test_dataset_full,
+                                                                               strength_test_dataset_full,
                                                                                strengths)
 
-rays_train_dataset, _ = generate_dataset_from_strength(rays_train_dataset, strength_train_dataset,
+rays_train_dataset, _ = generate_dataset_from_strength(rays_train_dataset_full, strength_train_dataset_full,
                                                        strengths)
-rays_test_dataset, _ = generate_dataset_from_strength(rays_test_dataset, strength_test_dataset,
+rays_test_dataset, _ = generate_dataset_from_strength(rays_test_dataset_full, strength_test_dataset_full,
                                                       strengths)
 
 encoded_train_set_X = torch.empty(1, POTENTIAL_LATENT_SIZE * 2)
@@ -79,8 +79,8 @@ encoded_train_set_y = encoded_train_set_y[1:]
 encoded_test_set_X = encoded_test_set_X[1:]
 encoded_test_set_y = encoded_test_set_y[1:]
 
-encoded_test_set = MappingDataset(x=encoded_test_set_X, y=encoded_test_set_y, d=strength_train_dataset)
-encoded_train_set = MappingDataset(x=encoded_train_set_X, y=encoded_train_set_y, d=strength_test_dataset)
+encoded_test_set = MappingDataset(x=encoded_test_set_X, y=encoded_test_set_y, d=strength_test_dataset)
+encoded_train_set = MappingDataset(x=encoded_train_set_X, y=encoded_train_set_y, d=strength_train_dataset)
 
 torch.save(encoded_train_set, DATA_ROOT + 'num=999_unscaled/mapped/training.pt')
 torch.save(encoded_test_set, DATA_ROOT + 'num=999_unscaled/mapped/test.pt')

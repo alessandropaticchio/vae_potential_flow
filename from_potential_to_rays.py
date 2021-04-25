@@ -6,12 +6,12 @@ import matplotlib.pyplot as plt
 
 potential_model_name = 'potential_VAE_[0.01, 0.3]_2021-04-25 09_03_16.262794.pt'
 rays_model_name = 'rays_VAE_[0.01, 0.3]_2021-04-25 08_52_35.615340.pt'
-mapper_model_name = 'Mapper_2021-04-25 11:28:49.564276.pt'
+mapper_model_name = 'Mapper_2021-04-25 10_52_41.969362.pt'
 potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
 mapper_model_path = MODELS_ROOT + mapper_model_name
 train = True
-strengths = STRENGTHS[:1]
+strengths = STRENGTHS
 net_size = 2
 
 power = 4

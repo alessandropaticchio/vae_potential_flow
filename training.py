@@ -16,7 +16,7 @@ def train(net, train_loader, test_loader, epochs, optimizer):
     mse_loss = MSELoss()
     for epoch in range(epochs):
         train_loss = 0.
-        for batch_idx, (data, target) in enumerate(train_loader):
+        for batch_idx, (data, target, _) in enumerate(train_loader):
             data = data.to(device)
             target = target.to(device)
             optimizer.zero_grad()
@@ -44,7 +44,7 @@ def test(net, test_loader):
     test_loss = 0
     mse_loss = MSELoss()
     with torch.no_grad():
-        for data, target in test_loader:
+        for data, target, _ in test_loader:
             data = data.to(device)
             target = target.to(device)
             output = net(data)
@@ -170,7 +170,8 @@ def loss_function_vae(recon_x, x, strength, mu, log_var, recon_weight, kl_weight
     return recon_loss + KLD + reg_latent_space, recon_loss, KLD, reg_latent_space
 
 
-def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., dataset='MNIST',
+def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., reg_weight=0,
+                   dataset='MNIST',
                    power=0, nn_type='conv', desc=''):
     now = str(datetime.now())
     writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + desc + '_' + now))
@@ -180,7 +181,8 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
         train_loss = 0.
         train_recon_loss = 0.
         train_kld_loss = 0.
-        for batch_idx, (data, targets) in enumerate(train_loader):
+        train_reg_loss = 0.
+        for batch_idx, (data, targets, strengths) in enumerate(train_loader):
             data = data.to(device)
             targets = targets.to(device)
             optimizer.zero_grad()
@@ -190,15 +192,21 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
             if power:
                 recon_batch = torch.pow(recon_batch, power)
                 targets = torch.pow(targets, power)
-
-            batch_loss, batch_recon_loss, batch_kld_loss = loss_function_vae(recon_batch, targets, mu, log_var,
-                                                                             recon_weight,
-                                                                             kl_weight, nn_type)
+            batch_loss, batch_recon_loss, batch_kld_loss, batch_reg_loss = loss_function_vae(recon_x=recon_batch,
+                                                                                             x=targets,
+                                                                                             strength=strengths,
+                                                                                             mu=mu, log_var=log_var,
+                                                                                             recon_weight=recon_weight,
+                                                                                             kl_weight=kl_weight,
+                                                                                             nn_type=nn_type,
+                                                                                             reg_weight=reg_weight,
+                                                                                             power=power)
 
             batch_loss.backward()
             train_loss += batch_loss.item()
             train_recon_loss += batch_recon_loss.item()
             train_kld_loss += batch_kld_loss.item()
+            train_reg_loss += batch_reg_loss.item()
 
             optimizer.step()
 
@@ -217,14 +225,15 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
     torch.save(net.state_dict(), MODELS_ROOT + dataset + '_VAE_' + desc + '_' + now + '.pt')
 
 
-def test_unet_vae(net, test_loader, recon_weight, kl_weight, nn_type, power=0):
+def test_unet_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight=0, power=0):
     net.eval()
     net = net.to(device)
     test_loss = 0.
     recon_loss = 0.
     kld_loss = 0.
+    reg_loss = 0.
     with torch.no_grad():
-        for data, targets in test_loader:
+        for data, targets, strengths in test_loader:
             data = data.to(device)
             targets = targets.to(device)
             recon, mu, log_var = net(data)
@@ -233,12 +242,20 @@ def test_unet_vae(net, test_loader, recon_weight, kl_weight, nn_type, power=0):
                 recon_batch = torch.pow(recon_batch, power)
                 targets = torch.pow(targets, power)
 
-            # sum up batch loss
-            batch_test_loss, batch_recon_loss, batch_kld_loss = loss_function_vae(recon, targets, mu, log_var,
-                                                                                  recon_weight, kl_weight, nn_type)
+            batch_test_loss, batch_recon_loss, batch_kld_loss, batch_reg_loss = loss_function_vae(recon_x=recon_batch,
+                                                                                                  x=targets,
+                                                                                                  strength=strengths,
+                                                                                                  mu=mu,
+                                                                                                  log_var=log_var,
+                                                                                                  recon_weight=recon_weight,
+                                                                                                  kl_weight=kl_weight,
+                                                                                                  nn_type=nn_type,
+                                                                                                  reg_weight=reg_weight,
+                                                                                                  power=power)
             test_loss += batch_test_loss.item()
             recon_loss += batch_recon_loss.item()
             kld_loss += batch_kld_loss.item()
+            reg_loss += batch_reg_loss.item()
 
     print('Test set loss: {:.8f}'.format(test_loss / len(test_loader.dataset)))
 

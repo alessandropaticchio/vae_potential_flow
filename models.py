@@ -347,15 +347,20 @@ class PotentialMapperRaysNN(nn.Module):
         self.net_size = net_size
 
         # encode
-        self.conv1 = nn.Conv2d(in_channels=potential_image_channels, out_channels=32 * net_size, kernel_size=3)
+        self.conv1 = nn.Conv2d(in_channels=potential_image_channels, out_channels=32 * net_size, kernel_size=1)
         self.relu1 = nn.ReLU()
 
         self.conv2 = nn.Conv2d(in_channels=32 * net_size, out_channels=16 * net_size, kernel_size=3)
         self.relu2 = nn.ReLU()
 
+        self.conv3 = nn.Conv2d(in_channels=16 * net_size, out_channels=8 * net_size, kernel_size=3)
+        self.relu3 = nn.ReLU()
+
+        self.conv4 = nn.Conv2d(in_channels=8 * net_size, out_channels=4 * net_size, kernel_size=3)
+        self.relu4 = nn.ReLU()
+
         self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
 
-        # latent space
         self.encoder_mean = nn.Linear(self.potential_hidden_size, self.potential_latent_size)
         self.encoder_logvar = nn.Linear(self.potential_hidden_size, self.potential_latent_size)
         self.fc = nn.Linear(self.potential_latent_size, self.potential_hidden_size)
@@ -366,13 +371,19 @@ class PotentialMapperRaysNN(nn.Module):
         for k in range(len(h_sizes) - 1):
             self.mapper_layers.append(nn.Linear(h_sizes[k], h_sizes[k + 1]))
 
-        # Decoder
+        # decode
         self.upsample1 = nn.Upsample(scale_factor=2)
 
-        self.deconv1 = nn.ConvTranspose2d(in_channels=16 * net_size, out_channels=32 * net_size, kernel_size=3)
-        self.relu3 = nn.ReLU()
+        self.deconv1 = nn.ConvTranspose2d(in_channels=4 * net_size, out_channels=8 * net_size, kernel_size=1)
+        self.relu5 = nn.ReLU()
 
-        self.deconv2 = nn.ConvTranspose2d(in_channels=32 * net_size, out_channels=rays_image_channels, kernel_size=3)
+        self.deconv2 = nn.ConvTranspose2d(in_channels=8 * net_size, out_channels=16 * net_size, kernel_size=3)
+        self.relu6 = nn.ReLU()
+
+        self.deconv3 = nn.ConvTranspose2d(in_channels=16 * net_size, out_channels=32 * net_size, kernel_size=3)
+        self.relu7 = nn.ReLU()
+
+        self.deconv4 = nn.ConvTranspose2d(in_channels=32 * net_size, out_channels=rays_image_channels, kernel_size=3)
 
         self.output = nn.Sigmoid()
 
@@ -397,6 +408,12 @@ class PotentialMapperRaysNN(nn.Module):
         x = self.conv2(x)
         x = self.relu2(x)
 
+        x = self.conv3(x)
+        x = self.relu3(x)
+
+        x = self.conv4(x)
+        x = self.relu4(x)
+
         x = self.maxpool1(x)
 
         # Flattening
@@ -409,17 +426,24 @@ class PotentialMapperRaysNN(nn.Module):
 
     def decode(self, mean, log_var):
         z = self.reparametrize(mean=mean, log_var=log_var)
+
         x = self.fc(z)
 
         # Unflattening
-        x = x.view(x.size(0), 16 * self.net_size, 48, 48)
+        x = x.view(x.size(0), 4 * self.net_size, 47, 47)
 
         x = self.upsample1(x)
 
         x = self.deconv1(x)
-        x = self.relu3(x)
+        x = self.relu5(x)
 
         x = self.deconv2(x)
+        x = self.relu6(x)
+
+        x = self.deconv3(x)
+        x = self.relu7(x)
+
+        x = self.deconv4(x)
 
         x_prime = self.output(x)
 
@@ -428,9 +452,7 @@ class PotentialMapperRaysNN(nn.Module):
     def mapping(self, x):
         for i, layer in enumerate(self.mapper_layers):
             if i != len(self.mapper_layers) - 1:
-                # x = F.relu(layer(x))
-                # x = F.tanh(layer(x))
-                x = torch.sin(layer(x))
+                x = F.relu(layer(x))
             else:
                 x = layer(x)
         return x
