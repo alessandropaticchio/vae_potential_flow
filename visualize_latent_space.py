@@ -1,4 +1,4 @@
-from models import ConvVAE
+from models import ConvVAE, ConvVAETest
 from constants import *
 from utils import StrengthDataset, generate_dataset_from_strength
 from sklearn.manifold import TSNE
@@ -8,12 +8,12 @@ import torch
 batch_size = 1
 strengths = STRENGTHS
 dataset = 'rays'
-model_name = 'rays_VAE_[0.01, 0.3]_2021-04-25 08_00_19.564650.pt'
-conditional = False
+model_name = 'rays_VAE_[0.01, 0.05, 0.1, 0.3]_2021-04-28 11_55_27.891061.pt'
+conditional = True
 model_path = MODELS_ROOT + model_name
 
-pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_' + dataset + '.pt')
-strength_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_strength.pt')
+pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_' + dataset + '.pt')
+strength_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_strength.pt')
 pics_train_dataset, strength_train_dataset = generate_dataset_from_strength(pics_train_dataset, strength_train_dataset,
                                                                             strengths)
 
@@ -24,7 +24,8 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=bat
 if dataset == 'rays':
     image_size = RAYS_IMAGE_SIZE
     image_channels = RAYS_IMAGE_CHANNELS
-    hidden_size = RAYS_HIDDEN_SIZE
+    # hidden_size = RAYS_HIDDEN_SIZE
+    hidden_size = 4 * 47 * 47
     latent_size = RAYS_LATENT_SIZE
     image_channels = RAYS_IMAGE_CHANNELS
 else:
@@ -34,8 +35,8 @@ else:
     latent_size = POTENTIAL_LATENT_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
 
-vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels,
-              net_size=1, conditional=conditional)
+vae = ConvVAETest(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels,
+                  net_size=12, conditional=conditional)
 vae.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 vae.eval()
 
