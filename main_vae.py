@@ -8,15 +8,15 @@ import torch.optim as optim
 batch_size = 64
 vae_type = 'conv'
 conditional = True
-dataset = 'rays'
+dataset = 'potential'
 
 strengths = STRENGTHS
 
-pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_' + dataset + '.pt')
-pics_test_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_' + dataset + '.pt')
+pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_' + dataset + '.pt')
+pics_test_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_' + dataset + '.pt')
 
-strength_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_strength.pt')
-strength_test_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_strength.pt')
+strength_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_strength.pt')
+strength_test_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_strength.pt')
 
 pics_train_dataset, strength_train_dataset = generate_dataset_from_strength(pics_train_dataset, strength_train_dataset,
                                                                             strengths)
@@ -40,7 +40,8 @@ if dataset == 'rays':
 else:
     image_size = POTENTIAL_IMAGE_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
-    hidden_size = POTENTIAL_HIDDEN_SIZE
+    # hidden_size = POTENTIAL_HIDDEN_SIZE
+    hidden_size = 4 * 47 * 47
     latent_size = POTENTIAL_LATENT_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
 
@@ -56,7 +57,7 @@ else:
     power = 4
 
 recon_weight = 1.
-kl_weight = 1.
+kl_weight = 0.
 reg_weight = 0.
 
 train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=100, optimizer=optimizer,
