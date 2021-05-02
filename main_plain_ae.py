@@ -1,4 +1,4 @@
-from training import train
+from training import train_ae
 from models import ConvPlainAE
 from constants import *
 from utils import StrengthDataset, generate_dataset_from_strength
@@ -35,4 +35,4 @@ ae = ConvPlainAE(image_channels=3)
 lr = 1e-3
 optimizer = optim.Adam(ae.parameters(), lr=lr)
 
-train(net=ae, train_loader=train_loader, test_loader=test_loader, epochs=600, optimizer=optimizer)
+train_ae(net=ae, train_loader=train_loader, test_loader=test_loader, epochs=600, optimizer=optimizer)
