@@ -34,7 +34,7 @@ if dataset == 'rays':
     image_size = RAYS_IMAGE_SIZE
     image_channels = RAYS_IMAGE_CHANNELS
     # hidden_size = RAYS_HIDDEN_SIZE
-    hidden_size = 4 * 47 * 47
+    hidden_size = 4 * 46 * 46
     latent_size = RAYS_LATENT_SIZE
     image_channels = RAYS_IMAGE_CHANNELS
 else:
