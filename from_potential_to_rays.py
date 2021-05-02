@@ -4,9 +4,9 @@ from constants import *
 import random
 import matplotlib.pyplot as plt
 
-potential_model_name = 'potential_VAE_[0.01, 0.3]_2021-04-25 09_03_16.262794.pt'
-rays_model_name = 'rays_VAE_[0.01, 0.3]_2021-04-25 08_52_35.615340.pt'
-mapper_model_name = 'Mapper_2021-04-25 10_52_41.969362.pt'
+potential_model_name = 'potential_VAE_[0.01, 0.3]_2021-05-02 06_1_35.402389.pt'
+rays_model_name = 'rays_VAE_[0.01, 0.3]_2021-05-02 06_17_51.133207.pt'
+mapper_model_name = 'Mapper_2021-05-02 06_23_12.374117.pt'
 potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
 mapper_model_path = MODELS_ROOT + mapper_model_name
@@ -106,13 +106,13 @@ for i in range(1, 2):
     plt.title('VAE-Reconstructed Rays')
     plt.imshow(rays_sample_reconstructed.squeeze(0).permute(1, 2, 0).detach().numpy())
 
-    plt.figure()
-    pixel_val = int(POTENTIAL_IMAGE_SIZE / 5)
-    plt.title('Projection along x = {}'.format(pixel_val))
-    plt.plot(range(0, POTENTIAL_IMAGE_SIZE), rays_dataset[rand_sample_idx].squeeze()[0, :, pixel_val],
-             label='Ground truth')
-    plt.plot(range(0, POTENTIAL_IMAGE_SIZE), rays_sample_mapped.squeeze().detach().numpy()[0, :, pixel_val],
-             label='Predicted')
-    plt.legend(loc='best')
+    # plt.figure()
+    # pixel_val = int(POTENTIAL_IMAGE_SIZE / 5)
+    # plt.title('Projection along x = {}'.format(pixel_val))
+    # plt.plot(range(0, POTENTIAL_IMAGE_SIZE), rays_dataset[rand_sample_idx].squeeze()[0, :, pixel_val],
+    #          label='Ground truth')
+    # plt.plot(range(0, POTENTIAL_IMAGE_SIZE), rays_sample_mapped.squeeze().detach().numpy()[0, :, pixel_val],
+    #          label='Predicted')
+    # plt.legend(loc='best')
 
 plt.show()

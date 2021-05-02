@@ -461,3 +461,52 @@ class PotentialMapperRaysNN(nn.Module):
         std = torch.exp(0.5 * log_var)
         eps = torch.randn_like(std)
         return mean + eps * std
+
+
+class ConvPlainAE(nn.Module):
+    def __init__(self,image_channels=3, net_size=1):
+        super(ConvPlainAE, self).__init__()
+        self.image_channels = image_channels
+        self.net_size = net_size
+
+        # encode
+        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=32 * net_size, kernel_size=3)
+        self.relu1 = nn.ReLU()
+
+        self.conv2 = nn.Conv2d(in_channels=32 * net_size, out_channels=16 * net_size, kernel_size=3)
+        self.relu2 = nn.ReLU()
+
+        self.deconv1 = nn.ConvTranspose2d(in_channels=16 * net_size, out_channels=32 * net_size, kernel_size=3)
+        self.relu3 = nn.ReLU()
+
+        self.deconv2 = nn.ConvTranspose2d(in_channels=32 * net_size, out_channels=image_channels, kernel_size=3)
+
+        self.output = nn.Sigmoid()
+
+
+    def forward(self, x):
+        x = self.encode(x=x)
+
+        x = self.decode(x=x)
+
+        return x
+
+    def encode(self, x):
+        x = self.conv1(x)
+        x = self.relu1(x)
+
+        x = self.conv2(x)
+        x = self.relu2(x)
+
+        return x
+
+    def decode(self, x):
+
+        x = self.deconv1(x)
+        x = self.relu3(x)
+
+        x = self.deconv2(x)
+
+        x_prime = self.output(x)
+
+        return x_prime

@@ -65,9 +65,9 @@ emd = PotentialMapperRaysNN(potential_image_channels=potential_image_channels,
                             net_size=net_size)
 
 #  Load VAEs
-potential_model_name = 'potential_VAE_[0.01, 0.3]_2021-04-25 09_03_16.262794.pt'
-rays_model_name = 'rays_VAE_[0.01, 0.3]_2021-04-25 08_52_35.615340.pt'
-mapper_model_name = 'Mapper_2021-04-25 10_52_41.969362.pt'
+potential_model_name = 'potential_VAE_[0.01, 0.3]_2021-05-02 06_1_35.402389.pt'
+rays_model_name = 'rays_VAE_[0.01, 0.3]_2021-05-02 06_17_51.133207.pt'
+mapper_model_name = 'Mapper_2021-05-02 06_23_12.374117.pt'
 potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
 mapper_model_path = MODELS_ROOT + mapper_model_name
@@ -136,10 +136,6 @@ optimizer = optim.Adam(emd.parameters(), lr=lr)
 
 recon_weight = 1.
 kl_weight = 1.
-
-model_name = 'EMD_VAE__2021-04-25 14_13_40.846365.pt'
-model_path = MODELS_ROOT + model_name
-emd.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 
 train_unet_vae(net=emd, train_loader=train_loader, test_loader=test_loader, epochs=1, optimizer=optimizer,
                recon_weight=recon_weight, kl_weight=kl_weight, dataset='EMD', nn_type='conv', power=power)
