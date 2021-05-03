@@ -10,9 +10,9 @@ import numpy as np
 
 def train_ae(net, train_loader, test_loader, epochs, optimizer):
     now = str(datetime.now())
-    writer = SummaryWriter('runs/{}'.format('Mapper_' + now))
+    writer = SummaryWriter('runs/{}'.format('AE_' + now))
     net = net.to(device)
-    net.train_ae()
+    net.train()
     mse_loss = MSELoss()
     for epoch in range(epochs):
         train_loss = 0.
@@ -34,8 +34,13 @@ def train_ae(net, train_loader, test_loader, epochs, optimizer):
         writer.add_scalar('Loss/train', train_loss / len(train_loader.dataset), epoch)
         writer.add_scalar('Loss/test', test_loss / len(train_loader.dataset), epoch)
 
+        for tag, param in net.named_parameters():
+            writer.add_histogram(tag, param.grad.data.cpu().numpy(), epoch)
+
+        pass
+
     # Save the model at current date and time
-    torch.save(net.state_dict(), MODELS_ROOT + 'Mapper_' + now + '.pt')
+    torch.save(net.state_dict(), MODELS_ROOT + 'AE_' + now + '.pt')
 
 
 def test_ae(net, test_loader):
@@ -60,7 +65,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
     now = str(datetime.now())
     writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + str(desc) + '_' + now))
     net = net.to(device)
-    net.train_ae()
+    net.train()
     for epoch in range(epochs):
         train_loss = 0.
         train_recon_loss = 0.

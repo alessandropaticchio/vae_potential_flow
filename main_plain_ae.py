@@ -23,6 +23,12 @@ pics_train_dataset, strength_train_dataset = generate_dataset_from_strength(pics
 pics_test_dataset, strength_test_dataset = generate_dataset_from_strength(pics_test_dataset, strength_test_dataset,
                                                                           strengths)
 
+# TODO REMOVE THIS
+pics_train_dataset = pics_train_dataset[0, :, :, :].unsqueeze(0)
+pics_test_dataset = pics_test_dataset[0, :, :, :].unsqueeze(0)
+strength_train_dataset = strength_train_dataset[0].unsqueeze(0)
+strength_test_dataset = strength_test_dataset[0].unsqueeze(0)
+
 train_dataset = StrengthDataset(x=pics_train_dataset, d=strength_train_dataset)
 test_dataset = StrengthDataset(x=pics_test_dataset, d=strength_test_dataset)
 
@@ -35,4 +41,4 @@ ae = ConvPlainAE(image_channels=3)
 lr = 1e-3
 optimizer = optim.Adam(ae.parameters(), lr=lr)
 
-train_ae(net=ae, train_loader=train_loader, test_loader=test_loader, epochs=600, optimizer=optimizer)
+train_ae(net=ae, train_loader=train_loader, test_loader=test_loader, epochs=200, optimizer=optimizer)

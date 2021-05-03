@@ -250,7 +250,7 @@ class ConvVAETest(nn.Module):
 
         self.deconv5 = nn.ConvTranspose2d(in_channels=64 * net_size, out_channels=image_channels, kernel_size=3)
 
-        self.output = nn.Sigmoid()
+        self.output = nn.ReLU()
 
     def reparametrize(self, mean, log_var):
         std = torch.exp(0.5 * log_var)
@@ -324,6 +324,7 @@ class ConvVAETest(nn.Module):
         x = self.deconv5(x)
 
         x_prime = self.output(x)
+        # x_prime = 0.01 / (1 + torch.exp((-0.01 * x))) - 0.01/2
 
         return x_prime
 
@@ -476,25 +477,36 @@ class PotentialMapperRaysNN(nn.Module):
 
 
 class ConvPlainAE(nn.Module):
-    def __init__(self,image_channels=3, net_size=1):
+    def __init__(self, image_channels=3, net_size=1):
         super(ConvPlainAE, self).__init__()
         self.image_channels = image_channels
         self.net_size = net_size
 
         # encode
-        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=32 * net_size, kernel_size=3)
+        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=4 * net_size, kernel_size=1)
         self.relu1 = nn.ReLU()
+        # self.relu1 = nn.Identity()
+        # self.relu1 = nn.LeakyReLU()
+        # self.relu1 = nn.Sigmoid()
 
-        self.conv2 = nn.Conv2d(in_channels=32 * net_size, out_channels=16 * net_size, kernel_size=3)
+        self.conv2 = nn.Conv2d(in_channels=4 * net_size, out_channels=2 * net_size, kernel_size=3)
         self.relu2 = nn.ReLU()
+        # self.relu2 = nn.Identity()
+        # self.relu2 = nn.LeakyReLU()
+        # self.relu2 = nn.Sigmoid()
 
-        self.deconv1 = nn.ConvTranspose2d(in_channels=16 * net_size, out_channels=32 * net_size, kernel_size=3)
+        self.deconv1 = nn.ConvTranspose2d(in_channels=2 * net_size, out_channels=4 * net_size, kernel_size=3)
         self.relu3 = nn.ReLU()
+        # self.relu3 = nn.Identity()
+        # self.relu3 = nn.LeakyReLU()
+        # self.relu3 = nn.Sigmoid()
 
-        self.deconv2 = nn.ConvTranspose2d(in_channels=32 * net_size, out_channels=image_channels, kernel_size=3)
+        self.deconv2 = nn.ConvTranspose2d(in_channels=4 * net_size, out_channels=image_channels, kernel_size=1)
 
-        self.output = nn.Sigmoid()
-
+        # self.output = nn.Sigmoid()
+        self.output = nn.ReLU()
+        # self.output = nn.Identity()
+        # self.output = nn.LeakyReLU()
 
     def forward(self, x):
         x = self.encode(x=x)
@@ -513,7 +525,6 @@ class ConvPlainAE(nn.Module):
         return x
 
     def decode(self, x):
-
         x = self.deconv1(x)
         x = self.relu3(x)
 
