@@ -7,9 +7,9 @@ import torch.optim as optim
 
 batch_size = 64
 vae_type = 'conv'
-conditional = True
+conditional = False
 dataset = 'potential'
-
+epochs = 150
 strengths = STRENGTHS
 
 pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_' + dataset + '.pt')
@@ -41,12 +41,12 @@ else:
     image_size = POTENTIAL_IMAGE_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
     # hidden_size = POTENTIAL_HIDDEN_SIZE
-    hidden_size = 4 * 47 * 47
+    hidden_size = 4 * 46 * 46
     latent_size = POTENTIAL_LATENT_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
 
 vae = ConvVAETest(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels,
-                  net_size=1, conditional=conditional)
+                  net_size=2, conditional=conditional)
 
 lr = 1e-3
 optimizer = optim.Adam(vae.parameters(), lr=lr, weight_decay=0)
@@ -57,9 +57,9 @@ else:
     power = 4
 
 recon_weight = 1.
-kl_weight = 0.
+kl_weight = 1.
 reg_weight = 0.
 
-train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=100, optimizer=optimizer,
+train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=epochs, optimizer=optimizer,
           recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset, nn_type=vae_type, is_L1=False, power=power,
           desc=strengths, reg_weight=reg_weight)
