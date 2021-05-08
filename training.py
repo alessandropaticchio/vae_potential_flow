@@ -6,6 +6,7 @@ import torch
 import torch.nn.functional as F
 import torch.nn as nn
 import numpy as np
+import copy
 
 
 def train_ae(net, train_loader, test_loader, epochs, optimizer):
@@ -60,12 +61,15 @@ def test_ae(net, test_loader):
     return test_loss
 
 
-def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., dataset='MNIST',
+def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., early_stopping=True, early_stopping_limit=15, dataset='MNIST',
               nn_type='conv', is_L1=False, power=0, desc='', reg_weight=0):
     now = str(datetime.now())
     writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + str(desc) + '_' + now))
     net = net.to(device)
     net.train()
+    early_stopping_losses = []
+    early_stopping_counter = 0
+    best = net
     for epoch in range(epochs):
         train_loss = 0.
         train_recon_loss = 0.
@@ -110,6 +114,8 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
         test_loss, test_recon_loss, test_kld_loss, test_reg_loss = test_vae(net, test_loader, recon_weight, kl_weight,
                                                                             nn_type, reg_weight, power=power)
 
+        early_stopping_losses.append(test_loss)
+
         writer.add_scalar('LogLoss/train', np.log(train_loss / len(train_loader.dataset)), epoch)
         writer.add_scalar('LogLoss/recon_train', np.log(train_recon_loss / len(train_loader.dataset)), epoch)
         writer.add_scalar('LogLoss/kld_train', np.log(train_kld_loss / len(train_loader.dataset)), epoch)
@@ -119,12 +125,22 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
         writer.add_scalar('LogLoss/kld_validation', np.log(test_kld_loss / len(test_loader.dataset)), epoch)
         writer.add_scalar('LogLoss/reg_latent_validation', np.log(test_reg_loss / len(train_loader.dataset)), epoch)
 
+        if early_stopping:
+            if test_loss == min(early_stopping_losses):
+                best = copy.deepcopy(net)
+                early_stopping_counter = 0
+            else:
+                early_stopping_counter += 1
+            if early_stopping_counter == early_stopping_limit:
+                torch.save(best.state_dict(), MODELS_ROOT + dataset + '_VAE_' + str(desc) + '_' + now + '.pt')
+                return
+
         # backup save
         if epoch % 50 == 0 and epoch != 0:
-            torch.save(net.state_dict(), MODELS_ROOT + dataset + '_VAE_' + str(desc) + '_' + now + '.pt')
+            torch.save(best.state_dict(), MODELS_ROOT + dataset + '_VAE_' + str(desc) + '_' + now + '.pt')
 
     # Save the model at current date and time
-    torch.save(net.state_dict(), MODELS_ROOT + dataset + '_VAE_' + str(desc) + '_' + now + '.pt')
+    torch.save(best.state_dict(), MODELS_ROOT + dataset + '_VAE_' + str(desc) + '_' + now + '.pt')
 
 
 def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight, power=0):

@@ -107,6 +107,7 @@ class ConvVAE(nn.Module):
         # encode
         self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=32 * net_size, kernel_size=3)
         self.relu1 = nn.ReLU()
+        self.batch_norm1 = nn.BatchNorm2d(num_features=32 * net_size)
 
         self.conv2 = nn.Conv2d(in_channels=32 * net_size, out_channels=16 * net_size, kernel_size=3)
         self.relu2 = nn.ReLU()
@@ -130,6 +131,7 @@ class ConvVAE(nn.Module):
 
         self.deconv1 = nn.ConvTranspose2d(in_channels=16 * net_size, out_channels=32 * net_size, kernel_size=3)
         self.relu3 = nn.ReLU()
+        self.batch_norm2 = nn.BatchNorm2d(num_features=32 * net_size)
 
         self.deconv2 = nn.ConvTranspose2d(in_channels=32 * net_size, out_channels=image_channels, kernel_size=3)
 
@@ -150,6 +152,7 @@ class ConvVAE(nn.Module):
     def encode(self, x, strength):
         x = self.conv1(x)
         x = self.relu1(x)
+        x = self.batch_norm1(x)
 
         x = self.conv2(x)
         x = self.relu2(x)
@@ -185,6 +188,7 @@ class ConvVAE(nn.Module):
 
         x = self.deconv1(x)
         x = self.relu3(x)
+        x = self.batch_norm2(x)
 
         x = self.deconv2(x)
 
