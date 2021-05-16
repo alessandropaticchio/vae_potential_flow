@@ -31,6 +31,7 @@ def train_ae(net, train_loader, test_loader, epochs, optimizer):
 
         print('Epoch: {} Average loss: {:.8f}'.format(epoch, train_loss / len(train_loader.dataset)))
         test_loss = test_ae(net, test_loader)
+        net.train()
 
         writer.add_scalar('Loss/train', train_loss / len(train_loader.dataset), epoch)
         writer.add_scalar('Loss/test', test_loss / len(train_loader.dataset), epoch)
@@ -61,7 +62,8 @@ def test_ae(net, test_loader):
     return test_loss
 
 
-def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., early_stopping=True, early_stopping_limit=15, dataset='MNIST',
+def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., early_stopping=True,
+              early_stopping_limit=15, dataset='MNIST', gmm=1,
               nn_type='conv', is_L1=False, power=0, desc='', reg_weight=0):
     now = str(datetime.now())
     writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + str(desc) + '_' + now))
@@ -89,7 +91,8 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
                                                                                              kl_weight=kl_weight,
                                                                                              reg_weight=reg_weight,
                                                                                              power=power,
-                                                                                             nn_type=nn_type)
+                                                                                             nn_type=nn_type,
+                                                                                             gmm=gmm)
             # Adding code for L1 Regularisation
             if is_L1:
 
@@ -112,7 +115,8 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
         print('Epoch: {} Average loss: {:.8f}'.format(epoch, train_loss / len(train_loader.dataset)))
 
         test_loss, test_recon_loss, test_kld_loss, test_reg_loss = test_vae(net, test_loader, recon_weight, kl_weight,
-                                                                            nn_type, reg_weight, power=power)
+                                                                            nn_type, reg_weight, power=power, gmm=gmm)
+        net.train()
 
         early_stopping_losses.append(test_loss)
 
@@ -143,7 +147,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
     torch.save(best.state_dict(), MODELS_ROOT + dataset + '_VAE_' + str(desc) + '_' + now + '.pt')
 
 
-def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight, power=0):
+def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight, gmm, power=0):
     net.eval()
     net = net.to(device)
     test_loss = 0.
@@ -166,7 +170,8 @@ def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight, pow
                                                                                                   kl_weight=kl_weight,
                                                                                                   nn_type=nn_type,
                                                                                                   reg_weight=reg_weight,
-                                                                                                  power=power)
+                                                                                                  power=power,
+                                                                                                  gmm=gmm)
             test_loss += batch_test_loss.item()
             recon_loss += batch_recon_loss.item()
             kld_loss += batch_kld_loss.item()
@@ -178,7 +183,7 @@ def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight, pow
 
 
 # return reconstruction error + KL divergence losses
-def loss_function_vae(recon_x, x, strength, mu, log_var, recon_weight, kl_weight, nn_type, reg_weight=0, power=0):
+def loss_function_vae(recon_x, x, strength, mu, log_var, recon_weight, kl_weight, nn_type, gmm, reg_weight=0, power=0):
     if nn_type == 'conv':
         if power > 1:
             recon_x = torch.pow(recon_x, power)
@@ -186,9 +191,26 @@ def loss_function_vae(recon_x, x, strength, mu, log_var, recon_weight, kl_weight
         recon_loss = F.mse_loss(recon_x, x, reduction='sum') * recon_weight
     else:
         recon_loss = F.mse_loss(recon_x, x.view(-1, 784), reduction='sum') * recon_weight
-    KLD = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp()) * kl_weight
+    if gmm == 1:
+        KLD = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp()) * kl_weight
+    else:
+        KLD = kld_gmm(mu, log_var, strength)
+        KLD = KLD * kl_weight
     reg_latent_space = reg_weight * F.mse_loss(strength, torch.norm(mu, dim=1).unsqueeze(1), reduction='sum')
     return recon_loss + KLD + reg_latent_space, recon_loss, KLD, reg_latent_space
+
+
+def kld_gmm(mu, log_var, strength):
+    latent_size = mu.shape[1]
+
+    # Generating prior mu of gaussians, standard deviation is fixed at 1
+    prior_mu = strength.repeat(1, latent_size)
+
+    kld = -1 - log_var + (mu - prior_mu) ** 2 + log_var.exp()
+
+    kld = 0.5 * kld.sum()
+
+    return kld
 
 
 def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., reg_weight=0,
@@ -235,6 +257,7 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
         test_loss, test_recon_loss, test_kld_loss = test_unet_vae(net=net, test_loader=test_loader,
                                                                   recon_weight=recon_weight, kl_weight=kl_weight,
                                                                   nn_type=nn_type, power=power)
+        net.train()
 
         writer.add_scalar('LogLoss/train', np.log(train_loss / len(train_loader.dataset)), epoch)
         writer.add_scalar('LogLoss/recon_train', np.log(train_recon_loss / len(train_loader.dataset)), epoch)
@@ -305,6 +328,7 @@ def train(net, train_loader, test_loader, epochs, optimizer):
 
         print('Epoch: {} Average loss: {:.8f}'.format(epoch, train_loss / len(train_loader.dataset)))
         test_loss = test(net, test_loader)
+        net.train()
 
         writer.add_scalar('Loss/train', train_loss / len(train_loader.dataset), epoch)
         writer.add_scalar('Loss/test', test_loss / len(train_loader.dataset), epoch)
