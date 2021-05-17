@@ -332,6 +332,7 @@ def train(net, train_loader, test_loader, epochs, optimizer, early_stopping=True
 
         print('Epoch: {} Average loss: {:.8f}'.format(epoch, train_loss / len(train_loader.dataset)))
         test_loss = test(net, test_loader)
+        early_stopping_losses.append(test_loss)
         net.train()
 
         writer.add_scalar('Loss/train', train_loss / len(train_loader.dataset), epoch)
