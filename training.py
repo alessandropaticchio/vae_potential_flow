@@ -336,7 +336,7 @@ def train(net, train_loader, test_loader, epochs, optimizer, early_stopping=True
         net.train()
 
         writer.add_scalar('Loss/train', train_loss / len(train_loader.dataset), epoch)
-        writer.add_scalar('Loss/test', test_loss / len(train_loader.dataset), epoch)
+        writer.add_scalar('Loss/test', test_loss / len(test_loader.dataset), epoch)
 
         if early_stopping:
             if test_loss == min(early_stopping_losses):
