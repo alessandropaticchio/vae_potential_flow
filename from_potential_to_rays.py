@@ -4,26 +4,26 @@ from constants import *
 import random
 import matplotlib.pyplot as plt
 
-potential_model_name = 'potential_VAE_[0.01, 0.3]_2021-05-02 06_1_35.402389.pt'
-rays_model_name = 'rays_VAE_[0.01, 0.3]_2021-05-02 06_17_51.133207.pt'
-mapper_model_name = 'Mapper_2021-05-02 06_23_12.374117.pt'
+potential_model_name = 'potential_VAE_[0.01, 0.3]_2021-05-17 09_15_22.767226.pt'
+rays_model_name = 'rays_VAE_[0.01, 0.3]_2021-05-17 09_20_17.433121.pt'
+mapper_model_name = 'Mapper_2021-05-17 09_51_19.799216.pt'
 potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
 mapper_model_path = MODELS_ROOT + mapper_model_name
-train = True
+train = False
 strengths = STRENGTHS
-net_size = 2
+net_size = 1
 
 power = 4
 
-potential_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_potential.pt')
-potential_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_potential.pt')
+potential_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_potential.pt')
+potential_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_potential.pt')
 
-rays_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_rays.pt')
-rays_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_rays.pt')
+rays_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_rays.pt')
+rays_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_rays.pt')
 
-strength_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_strength.pt')
-strength_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_strength.pt')
+strength_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_strength.pt')
+strength_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_strength.pt')
 
 potential_train_dataset, strength_train_dataset = generate_dataset_from_strength(potential_train_dataset_full,
                                                                                  strength_train_dataset_full,
@@ -37,16 +37,16 @@ rays_train_dataset, _ = generate_dataset_from_strength(rays_train_dataset_full, 
 rays_test_dataset, _ = generate_dataset_from_strength(rays_test_dataset_full, strength_test_dataset_full,
                                                       strengths)
 
-potential_vae = ConvVAETest(image_dim=POTENTIAL_IMAGE_SIZE, hidden_size=4 * 47 * 47,
-                            latent_size=POTENTIAL_LATENT_SIZE,
-                            image_channels=POTENTIAL_IMAGE_CHANNELS,
-                            net_size=net_size)
+potential_vae = ConvVAE(image_dim=POTENTIAL_IMAGE_SIZE, hidden_size=POTENTIAL_HIDDEN_SIZE,
+                        latent_size=POTENTIAL_LATENT_SIZE,
+                        image_channels=POTENTIAL_IMAGE_CHANNELS,
+                        net_size=net_size)
 potential_vae.load_state_dict(torch.load(potential_model_path, map_location=torch.device('cpu')))
 potential_vae.eval()
 
-rays_vae = ConvVAETest(image_dim=RAYS_IMAGE_SIZE, hidden_size=4 * 47 * 47, latent_size=RAYS_LATENT_SIZE,
-                       image_channels=RAYS_IMAGE_CHANNELS,
-                       net_size=net_size)
+rays_vae = ConvVAE(image_dim=RAYS_IMAGE_SIZE, hidden_size=RAYS_HIDDEN_SIZE, latent_size=RAYS_LATENT_SIZE,
+                   image_channels=RAYS_IMAGE_CHANNELS,
+                   net_size=net_size)
 rays_vae.load_state_dict(torch.load(rays_model_path, map_location=torch.device('cpu')))
 rays_vae.eval()
 
@@ -62,16 +62,18 @@ mapper.eval()
 if train:
     potential_dataset = potential_train_dataset
     rays_dataset = rays_train_dataset
+    strength_dataset = strength_train_dataset
 else:
     potential_dataset = potential_test_dataset
     rays_dataset = rays_test_dataset
+    strength_dataset = strength_test_dataset
 
 for i in range(1, 2):
     # Encoding
-    rand_sample_idx = random.randint(1, 159)
+    rand_sample_idx = random.randint(1, len(potential_dataset))
 
     pic_potential_sample = potential_dataset.data[rand_sample_idx].unsqueeze(0)
-    strength_potential_sample = strength_train_dataset.data[rand_sample_idx].unsqueeze(0)
+    strength_potential_sample = strength_dataset.data[rand_sample_idx].unsqueeze(0)
     potential_mean, potential_log_var = potential_vae.encode(pic_potential_sample, strength_potential_sample)
     potential_sample_encoded = torch.cat((potential_mean, potential_log_var), 1)
 
@@ -91,7 +93,7 @@ for i in range(1, 2):
     plt.figure(figsize=(10, 5))
     plt.subplot(1, 4, 1)
     plt.title('Original Potential \n strength = {:.2f} \n dataset idx = {}'.format(strength_potential_sample.item(),
-              rand_sample_idx))
+                                                                                   rand_sample_idx))
     plt.imshow(pic_potential_sample.squeeze(0).permute(1, 2, 0).detach().numpy())
 
     plt.subplot(1, 4, 2)

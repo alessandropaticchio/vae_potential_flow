@@ -8,10 +8,10 @@ import torch
 batch_size = 1
 strengths = STRENGTHS
 
-dataset = 'potential'
-model_name = 'potential_VAE_[0.01, 0.3]_2021-05-02 09_05_40.912392.pt'
+dataset = 'rays'
+model_name = 'rays_VAE_[0.01, 0.3]_2021-05-17 09_20_17.433121.pt'
 mapper_model_name = 'Mapper_2021-05-02 06_23_12.374117.pt'
-net_size = 2
+net_size = 1
 conditional = False
 mapping = False
 
@@ -30,15 +30,15 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=bat
 if dataset == 'rays':
     image_size = RAYS_IMAGE_SIZE
     image_channels = RAYS_IMAGE_CHANNELS
-    # hidden_size = RAYS_HIDDEN_SIZE
-    hidden_size = 4 * 47 * 47
+    hidden_size = RAYS_HIDDEN_SIZE
+    # hidden_size = 4 * 46 * 46
     latent_size = RAYS_LATENT_SIZE
     image_channels = RAYS_IMAGE_CHANNELS
 else:
     image_size = POTENTIAL_IMAGE_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
-    # hidden_size = POTENTIAL_HIDDEN_SIZE
-    hidden_size = 4 * 47 * 47
+    hidden_size = POTENTIAL_HIDDEN_SIZE
+    # hidden_size = 4 * 46 * 46
     latent_size = POTENTIAL_LATENT_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
 
@@ -47,8 +47,8 @@ h1 = RAYS_LATENT_SIZE * 2
 h2 = RAYS_LATENT_SIZE * 2
 h3 = RAYS_LATENT_SIZE * 2
 
-vae = ConvVAETest(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels,
-                  net_size=net_size, conditional=conditional)
+vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels,
+              net_size=net_size, conditional=conditional)
 
 vae.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 vae.eval()
@@ -61,7 +61,7 @@ if mapping:
 encodings = []
 encoded_strenghts = []
 
-max_samples = 999
+max_samples = 500
 
 for i, idx in enumerate(range(max_samples)):
     pic_sample = train_dataset[idx][0].unsqueeze(0).float()

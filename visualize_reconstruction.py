@@ -10,11 +10,11 @@ from torchvision import transforms
 batch_size = 1
 n_forwards = 10
 
-dataset = 'potential'
-model_name = 'potential_VAE_[0.01, 0.3]_2021-05-02 09_05_40.912392.pt'
+dataset = 'rays'
+model_name = 'rays_VAE_[0.01, 0.3]_2021-05-17 09_20_17.433121.pt'
 model_path = MODELS_ROOT + model_name
 conditional = False
-net_size = 2
+net_size = 1
 
 if dataset == 'potential':
     power = 1
@@ -23,34 +23,38 @@ else:
     power = 4
     transform = False
 
-train = True
+train = False
 strengths = STRENGTHS
 
 if dataset == 'rays':
     image_size = RAYS_IMAGE_SIZE
     image_channels = RAYS_IMAGE_CHANNELS
-    # hidden_size = RAYS_HIDDEN_SIZE
-    hidden_size = 4 * 47 * 47
+    hidden_size = RAYS_HIDDEN_SIZE
+    # hidden_size = 4 * 47 * 47
     latent_size = RAYS_LATENT_SIZE
     image_channels = RAYS_IMAGE_CHANNELS
 else:
     image_size = POTENTIAL_IMAGE_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
-    # hidden_size = POTENTIAL_HIDDEN_SIZE
-    hidden_size = 4 * 47 * 47
+    hidden_size = POTENTIAL_HIDDEN_SIZE
+    # hidden_size = 4 * 46 * 46
     latent_size = POTENTIAL_LATENT_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
 
-ae = ConvVAETest(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels,
-                 net_size=net_size, conditional=conditional)
+ae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels,
+             net_size=net_size, conditional=conditional)
+# from models import ConvPlainAE
+# ae = ConvPlainAE(image_channels=image_channels, net_size=net_size)
+# ae = ConvVAETest(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels,
+#                  net_size=net_size, conditional=conditional)
 ae.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 ae.eval()
 
-pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_' + dataset + '.pt')
-pics_test_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_' + dataset + '.pt')
+pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_' + dataset + '.pt')
+pics_test_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_' + dataset + '.pt')
 
-strength_train_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'training_strength.pt')
-strength_test_dataset = torch.load(DATA_ROOT + 'num=999_unscaled/loaded_data/' + 'test_strength.pt')
+strength_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_strength.pt')
+strength_test_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_strength.pt')
 
 pics_train_dataset, strength_train_dataset = generate_dataset_from_strength(pics_train_dataset, strength_train_dataset,
                                                                             strengths)
@@ -68,12 +72,13 @@ if train:
 else:
     loader = test_loader
 
-rand_sample_idx = random.randint(0, len(loader))
+rand_sample_idx = max(0, random.randint(0, len(loader)) - 1)
 rand_sample, rand_strength = next(itertools.islice(loader, rand_sample_idx, None))
 
 predicted_samples = []
 for i in range(n_forwards):
     forward = ae(rand_sample, rand_strength)[0]
+    # forward = ae(rand_sample)
     predicted_samples.append(forward)
 
 rand_sample_prime = torch.mean(torch.stack(predicted_samples), dim=0)
@@ -97,11 +102,11 @@ if transform:
 
     plt.subplot(1, 2, 1)
     plt.title('Original')
-    plt.imshow(rand_sample.squeeze(), cmap='gray', vmin=0, vmax=rand_strength)
+    plt.imshow(rand_sample.squeeze(), cmap='gray', vmin=0, vmax=1)
 
     plt.subplot(1, 2, 2)
     plt.title('Reconstruction')
-    plt.imshow(rand_sample_prime.squeeze().detach().numpy(), cmap='gray', vmin=0, vmax=rand_strength)
+    plt.imshow(rand_sample_prime.squeeze().detach().numpy(), cmap='gray', vmin=0, vmax=1)
 
 else:
     plt.figure()
