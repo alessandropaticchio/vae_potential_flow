@@ -345,15 +345,15 @@ def train(net, train_loader, test_loader, epochs, optimizer, early_stopping=True
             else:
                 early_stopping_counter += 1
             if early_stopping_counter == early_stopping_limit:
-                torch.save(best.state_dict(), MODELS_ROOT + '_Mapper_' + now + '.pt')
+                torch.save(best.state_dict(), MODELS_ROOT + 'Mapper_' + now + '.pt')
                 return
 
         # backup save
         if epoch % 50 == 0 and epoch != 0:
-            torch.save(best.state_dict(), MODELS_ROOT + '_Mapper_' + '_' + now + '.pt')
+            torch.save(best.state_dict(), MODELS_ROOT + 'Mapper_' + '_' + now + '.pt')
 
     # Save the model at current date and time
-    torch.save(best.state_dict(), MODELS_ROOT + '_Mapper_' + '_' + now + '.pt')
+    torch.save(best.state_dict(), MODELS_ROOT + 'Mapper_' + '_' + now + '.pt')
 
 
 def test(net, test_loader):
