@@ -305,12 +305,16 @@ def test_unet_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight
     return test_loss, recon_loss, kld_loss
 
 
-def train(net, train_loader, test_loader, epochs, optimizer):
+def train(net, train_loader, test_loader, epochs, optimizer, early_stopping=True,
+          early_stopping_limit=15):
     now = str(datetime.now())
     writer = SummaryWriter('runs/{}'.format('Mapper_' + now))
     net = net.to(device)
-    net.train_ae()
+    net.train()
     mse_loss = MSELoss()
+    early_stopping_losses = []
+    early_stopping_counter = 0
+    best = net
     for epoch in range(epochs):
         train_loss = 0.
         for batch_idx, (data, target, _) in enumerate(train_loader):
@@ -333,8 +337,22 @@ def train(net, train_loader, test_loader, epochs, optimizer):
         writer.add_scalar('Loss/train', train_loss / len(train_loader.dataset), epoch)
         writer.add_scalar('Loss/test', test_loss / len(train_loader.dataset), epoch)
 
+        if early_stopping:
+            if test_loss == min(early_stopping_losses):
+                best = copy.deepcopy(net)
+                early_stopping_counter = 0
+            else:
+                early_stopping_counter += 1
+            if early_stopping_counter == early_stopping_limit:
+                torch.save(best.state_dict(), MODELS_ROOT + '_Mapper_' + now + '.pt')
+                return
+
+        # backup save
+        if epoch % 50 == 0 and epoch != 0:
+            torch.save(best.state_dict(), MODELS_ROOT + '_Mapper_' + '_' + now + '.pt')
+
     # Save the model at current date and time
-    torch.save(net.state_dict(), MODELS_ROOT + 'Mapper_' + now + '.pt')
+    torch.save(best.state_dict(), MODELS_ROOT + '_Mapper_' + '_' + now + '.pt')
 
 
 def test(net, test_loader):
