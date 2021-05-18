@@ -10,7 +10,7 @@ import copy
 
 
 def train_ae(net, train_loader, test_loader, epochs, optimizer):
-    now = str(datetime.now())
+    now = str(datetime.now()).replace(':', '_')
     writer = SummaryWriter('runs/{}'.format('AE_' + now))
     net = net.to(device)
     net.train()
@@ -65,7 +65,7 @@ def test_ae(net, test_loader):
 def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., early_stopping=True,
               early_stopping_limit=15, dataset='MNIST', gmm=1,
               nn_type='conv', is_L1=False, power=0, desc='', reg_weight=0):
-    now = str(datetime.now())
+    now = str(datetime.now()).replace(':', '_')
     writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + str(desc) + '_' + now))
     net = net.to(device)
     net.train()
@@ -226,7 +226,7 @@ def kld_gmm(mu, log_var, strength):
 def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., reg_weight=0,
                    dataset='MNIST',
                    power=0, nn_type='conv', desc=''):
-    now = str(datetime.now())
+    now = str(datetime.now()).replace(':', '_')
     writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + desc + '_' + now))
     net = net.to(device)
     net.train_ae()
@@ -317,7 +317,7 @@ def test_unet_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight
 
 def train(net, train_loader, test_loader, epochs, optimizer, early_stopping=True,
           early_stopping_limit=15):
-    now = str(datetime.now())
+    now = str(datetime.now()).replace(':', '_')
     writer = SummaryWriter('runs/{}'.format('Mapper_' + now))
     net = net.to(device)
     net.train()
