@@ -113,20 +113,14 @@ class ConvVAETest(nn.Module):
         self.conditional = conditional
 
         # encode
-        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=64 * net_size, kernel_size=1)
+        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=32 * net_size, kernel_size=1)
         self.relu1 = nn.ReLU()
 
-        self.conv2 = nn.Conv2d(in_channels=64 * net_size, out_channels=32 * net_size, kernel_size=3)
+        self.conv2 = nn.Conv2d(in_channels=32 * net_size, out_channels=16 * net_size, kernel_size=3)
         self.relu2 = nn.ReLU()
 
-        self.conv3 = nn.Conv2d(in_channels=32 * net_size, out_channels=16 * net_size, kernel_size=3)
+        self.conv3 = nn.Conv2d(in_channels=16 * net_size, out_channels=8 * net_size, kernel_size=3)
         self.relu3 = nn.ReLU()
-
-        self.conv4 = nn.Conv2d(in_channels=16 * net_size, out_channels=8 * net_size, kernel_size=3)
-        self.relu4 = nn.ReLU()
-
-        self.conv5 = nn.Conv2d(in_channels=8 * net_size, out_channels=4 * net_size, kernel_size=3)
-        self.relu5 = nn.ReLU()
 
         self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
 
@@ -145,19 +139,14 @@ class ConvVAETest(nn.Module):
         # decode
         self.upsample1 = nn.Upsample(scale_factor=2)
 
-        self.deconv1 = nn.ConvTranspose2d(in_channels=4 * net_size, out_channels=8 * net_size, kernel_size=1)
+        self.deconv1 = nn.ConvTranspose2d(in_channels=8 * net_size, out_channels=16 * net_size, kernel_size=1)
         self.relu5 = nn.ReLU()
 
-        self.deconv2 = nn.ConvTranspose2d(in_channels=8 * net_size, out_channels=16 * net_size, kernel_size=3)
+        self.deconv2 = nn.ConvTranspose2d(in_channels=16 * net_size, out_channels=32 * net_size, kernel_size=3)
         self.relu6 = nn.ReLU()
 
-        self.deconv3 = nn.ConvTranspose2d(in_channels=16 * net_size, out_channels=32 * net_size, kernel_size=3)
+        self.deconv3 = nn.ConvTranspose2d(in_channels=32 * net_size, out_channels=image_channels, kernel_size=3)
         self.relu7 = nn.ReLU()
-
-        self.deconv4 = nn.ConvTranspose2d(in_channels=32 * net_size, out_channels=64 * net_size, kernel_size=3)
-        self.relu8 = nn.ReLU()
-
-        self.deconv5 = nn.ConvTranspose2d(in_channels=64 * net_size, out_channels=image_channels, kernel_size=3)
 
         self.output = nn.Sigmoid()
 
@@ -182,12 +171,6 @@ class ConvVAETest(nn.Module):
 
         x = self.conv3(x)
         x = self.relu3(x)
-
-        x = self.conv4(x)
-        x = self.relu4(x)
-
-        x = self.conv5(x)
-        x = self.relu5(x)
 
         x = self.maxpool1(x)
 
@@ -214,7 +197,7 @@ class ConvVAETest(nn.Module):
         x = self.fc(z)
 
         # Unflattening
-        x = x.view(x.size(0), 4 * self.net_size, 46, 46)
+        x = x.view(x.size(0), 8 * self.net_size, 48, 48)
 
         x = self.upsample1(x)
 
@@ -227,13 +210,7 @@ class ConvVAETest(nn.Module):
         x = self.deconv3(x)
         x = self.relu7(x)
 
-        x = self.deconv4(x)
-        x = self.relu8(x)
-
-        x = self.deconv5(x)
-
         x_prime = self.output(x)
-        # x_prime = 0.01 / (1 + torch.exp((-0.01 * x))) - 0.01/2
 
         return x_prime
 

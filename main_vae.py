@@ -35,20 +35,20 @@ test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch
 if dataset == 'rays':
     image_size = RAYS_IMAGE_SIZE
     image_channels = RAYS_IMAGE_CHANNELS
-    hidden_size = RAYS_HIDDEN_SIZE
-    # hidden_size = 4 * 46 * 46
+    # hidden_size = RAYS_HIDDEN_SIZE
+    hidden_size = 8 * 48 * 48
     latent_size = RAYS_LATENT_SIZE
     image_channels = RAYS_IMAGE_CHANNELS
 else:
     image_size = POTENTIAL_IMAGE_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
-    hidden_size = POTENTIAL_HIDDEN_SIZE
-    # hidden_size = 4 * 46 * 46
+    # hidden_size = POTENTIAL_HIDDEN_SIZE
+    hidden_size = 8 * 48 * 48
     latent_size = POTENTIAL_LATENT_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
 
-vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels,
-              net_size=1, conditional=conditional)
+vae = ConvVAETest(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels,
+                net_size=1, conditional=conditional)
 
 lr = 1e-3
 optimizer = optim.Adam(vae.parameters(), lr=lr, weight_decay=0)
