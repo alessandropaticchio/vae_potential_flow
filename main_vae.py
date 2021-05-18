@@ -67,4 +67,4 @@ reg_weight = 0.
 
 train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=epochs, optimizer=optimizer,
           recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset, nn_type=vae_type, is_L1=False, power=power,
-          desc=strengths, reg_weight=reg_weight, gmm=gmm, early_stopping=False)
+          desc=strengths, reg_weight=reg_weight, gmm=gmm, early_stopping=True)
