@@ -3,7 +3,7 @@ from models import Mapper
 from training import train
 import torch.optim as optim
 
-data_path = DATA_ROOT + 'num=999_unscaled/mapped/'
+data_path = DATA_ROOT + 'num=999_unzipped/mapped/'
 
 train_dataset = torch.load(data_path + 'training.pt')
 test_dataset = torch.load(data_path + 'test.pt')

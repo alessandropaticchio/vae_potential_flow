@@ -24,11 +24,6 @@ pics_train_dataset, strength_train_dataset = generate_dataset_from_strength(pics
 pics_test_dataset, strength_test_dataset = generate_dataset_from_strength(pics_test_dataset, strength_test_dataset,
                                                                           strengths)
 
-# TODO REMOVE THIS
-# pics_train_dataset = pics_train_dataset[:20, :, :, :]
-# pics_test_dataset = pics_test_dataset[:20, :, :, :]
-# strength_train_dataset = strength_train_dataset[:20]
-# strength_test_dataset = strength_test_dataset[:20]
 
 train_dataset = StrengthDataset(x=pics_train_dataset, d=strength_train_dataset)
 test_dataset = StrengthDataset(x=pics_test_dataset, d=strength_test_dataset)
@@ -67,7 +62,7 @@ else:
 # vae.apply(weights_init)
 
 recon_weight = 1.
-kl_weight = 10.
+kl_weight = 1.
 reg_weight = 0.
 
 train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=epochs, optimizer=optimizer,

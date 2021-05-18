@@ -123,11 +123,14 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
         writer.add_scalar('LogLoss/train', np.log(train_loss / len(train_loader.dataset)), epoch)
         writer.add_scalar('LogLoss/recon_train', np.log(train_recon_loss / len(train_loader.dataset)), epoch)
         writer.add_scalar('LogLoss/kld_train', np.log(train_kld_loss / len(train_loader.dataset)), epoch)
-        writer.add_scalar('LogLoss/reg_latent_train', np.log(train_reg_loss / len(train_loader.dataset)), epoch)
+
         writer.add_scalar('LogLoss/validation', np.log(test_loss / len(test_loader.dataset)), epoch)
         writer.add_scalar('LogLoss/recon_validation', np.log(test_recon_loss / len(test_loader.dataset)), epoch)
         writer.add_scalar('LogLoss/kld_validation', np.log(test_kld_loss / len(test_loader.dataset)), epoch)
-        writer.add_scalar('LogLoss/reg_latent_validation', np.log(test_reg_loss / len(train_loader.dataset)), epoch)
+
+        if reg_weight > 0:
+            writer.add_scalar('LogLoss/reg_latent_train', np.log(train_reg_loss / len(train_loader.dataset)), epoch)
+            writer.add_scalar('LogLoss/reg_latent_validation', np.log(test_reg_loss / len(train_loader.dataset)), epoch)
 
         if early_stopping:
             if test_loss == min(early_stopping_losses):
@@ -197,6 +200,13 @@ def loss_function_vae(recon_x, x, strength, mu, log_var, recon_weight, kl_weight
         KLD = kld_gmm(mu, log_var, strength)
         KLD = KLD * kl_weight
     reg_latent_space = reg_weight * F.mse_loss(strength, torch.norm(mu, dim=1).unsqueeze(1), reduction='sum')
+
+    # Average over number of batches
+    n_batches = recon_x.shape[0]
+    recon_loss = recon_loss * 1 / n_batches
+    KLD = KLD * 1 / n_batches
+    reg_latent_space = reg_latent_space * 1 / n_batches
+
     return recon_loss + KLD + reg_latent_space, recon_loss, KLD, reg_latent_space
 
 

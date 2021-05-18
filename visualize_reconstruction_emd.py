@@ -10,7 +10,7 @@ strengths = STRENGTHS
 net = 'emd'
 net_size = 2
 
-model_name = 'EMD_VAE__2021-04-25 15_02_31.537109.pt'
+model_name = 'EMD_VAE__2021-05-02 06_33_02.062099.pt'
 model_path = MODELS_ROOT + model_name
 
 power = 4
@@ -23,7 +23,7 @@ if net == 'emd':
     potential_image_size = POTENTIAL_IMAGE_SIZE
     potential_image_channels = POTENTIAL_IMAGE_CHANNELS
     # potential_hidden_size = POTENTIAL_HIDDEN_SIZE
-    potential_hidden_size = 4 * 47 * 47 * 2
+    potential_hidden_size = 4 * 47 * 47 * net_size
     potential_latent_size = POTENTIAL_LATENT_SIZE
     potential_image_channels = POTENTIAL_IMAGE_CHANNELS
 
