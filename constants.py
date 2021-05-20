@@ -10,7 +10,7 @@ else:
 MODELS_ROOT = './models/'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-STRENGTHS = [0.01, 0.1, 0.2, 0.05, 0.03, 0.3]
+STRENGTHS = [0.01, 0.1, 0.2, 0.05, 0.07, 0.03, 0.3]
 
 POTENTIAL_IMAGE_SIZE = 100
 POTENTIAL_IMAGE_CHANNELS = 3

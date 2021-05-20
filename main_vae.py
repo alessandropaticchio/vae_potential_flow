@@ -59,7 +59,7 @@ else:
     power = 4
 
 if transfer_learning:
-    model_name = 'potential_VAE_[0.01, 0.1, 0.2, 0.03, 0.3]_2021-05-20 09_45_10.022460.pt'
+    model_name = 'potential_VAE_[0.01, 0.1, 0.2, 0.05, 0.03, 0.3]_2021-05-20 09_49_42.241874.pt'
     model_path = MODELS_ROOT + model_name
     vae.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 
