@@ -210,15 +210,13 @@ def loss_function_vae(recon_x, x, strength, mu, log_var, recon_weight, kl_weight
     return recon_loss + KLD + reg_latent_space, recon_loss, KLD, reg_latent_space
 
 
-def kld_gmm(mu, log_var, strength, freebits=1):
+def kld_gmm(mu, log_var, strength):
     latent_size = mu.shape[1]
 
     # Generating prior mu of gaussians, standard deviation is fixed at 1
     prior_mu = strength.repeat(1, latent_size)
 
     kld = -1 - log_var + (mu - prior_mu) ** 2 + log_var.exp()
-
-    kld = F.softplus(kld - 2 * freebits) + 2 * freebits
 
     kld = 0.5 * kld.sum()
 
