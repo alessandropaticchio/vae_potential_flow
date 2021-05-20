@@ -12,6 +12,7 @@ dataset = 'potential'
 epochs = 200
 strengths = STRENGTHS
 gmm = len(STRENGTHS)
+transfer_learning = True
 
 pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_' + dataset + '.pt')
 pics_test_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_' + dataset + '.pt')
@@ -35,19 +36,19 @@ if dataset == 'rays':
     image_size = RAYS_IMAGE_SIZE
     image_channels = RAYS_IMAGE_CHANNELS
     hidden_size = RAYS_HIDDEN_SIZE
-    # hidden_size = 8 * 48 * 48
+    #hidden_size = 8 * 48 * 48
     latent_size = RAYS_LATENT_SIZE
     image_channels = RAYS_IMAGE_CHANNELS
 else:
     image_size = POTENTIAL_IMAGE_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
     hidden_size = POTENTIAL_HIDDEN_SIZE
-    # hidden_size = 8 * 48 * 48
+    #hidden_size = 8 * 48 * 48
     latent_size = POTENTIAL_LATENT_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
 
 vae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_size, image_channels=image_channels,
-              net_size=1, conditional=conditional)
+                  net_size=1, conditional=conditional)
 
 lr = 1e-3
 optimizer = optim.Adam(vae.parameters(), lr=lr, weight_decay=0)
@@ -56,6 +57,11 @@ if dataset == 'potential':
     power = 1
 else:
     power = 4
+
+if transfer_learning:
+    model_name = 'potential_VAE_[0.01, 0.3]_2021-05-20 09_35_31.307108.pt'
+    model_path = MODELS_ROOT + model_name
+    vae.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 
 recon_weight = 1.
 kl_weight = 4.
