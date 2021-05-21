@@ -4,12 +4,13 @@ from utils import StrengthDataset, generate_dataset_from_strength
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 import torch
+import random
 
 batch_size = 1
 strengths = STRENGTHS
 
 dataset = 'rays'
-model_name = 'rays_VAE_[0.01, 0.3]_2021-05-17 09_20_17.433121.pt'
+model_name = 'rays_VAE_[0.01, 0.1, 0.2, 0.05, 0.07, 0.09, 0.03, 0.3]_2021-05-20 17_33_43.337801.pt'
 mapper_model_name = 'Mapper_2021-05-02 06_23_12.374117.pt'
 net_size = 1
 conditional = False
@@ -31,14 +32,14 @@ if dataset == 'rays':
     image_size = RAYS_IMAGE_SIZE
     image_channels = RAYS_IMAGE_CHANNELS
     hidden_size = RAYS_HIDDEN_SIZE
-    # hidden_size = 4 * 46 * 46
+    # hidden_size = 8 * 48 * 48
     latent_size = RAYS_LATENT_SIZE
     image_channels = RAYS_IMAGE_CHANNELS
 else:
     image_size = POTENTIAL_IMAGE_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
     hidden_size = POTENTIAL_HIDDEN_SIZE
-    # hidden_size = 4 * 46 * 46
+    # hidden_size = 8 * 48 * 48
     latent_size = POTENTIAL_LATENT_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
 
@@ -61,9 +62,10 @@ if mapping:
 encodings = []
 encoded_strenghts = []
 
-max_samples = 500
+max_samples = 1000
 
-for i, idx in enumerate(range(max_samples)):
+for i in range(max_samples):
+    idx = random.randint(0, len(train_dataset) - 1)
     pic_sample = train_dataset[idx][0].unsqueeze(0).float()
     strength_sample = train_dataset[idx][1].unsqueeze(0)
     mean, log_var = vae.encode(pic_sample, strength_sample)
@@ -79,10 +81,11 @@ for i, idx in enumerate(range(max_samples)):
 
 encodings_embedded = TSNE(n_components=2).fit_transform(encodings)
 
+colors = [STRENGTHS_COLORS[round(strength.item(), 2)] for strength in encoded_strenghts]
+
 fig, ax = plt.subplots()
-scatter = ax.scatter(encodings_embedded[:, 0], encodings_embedded[:, 1], c=encoded_strenghts, cmap='Accent')
-legend = ax.legend(*scatter.legend_elements(),
-                   loc="best", title="Strengths")
+scatter = ax.scatter(encodings_embedded[:, 0], encodings_embedded[:, 1], c=encoded_strenghts, cmap='plasma')
+legend = ax.legend(*scatter.legend_elements(), loc="best", title="Strengths")
 ax.add_artist(legend)
 plt.title('T-SNE visualization of {} encodings'.format(dataset))
 plt.show()

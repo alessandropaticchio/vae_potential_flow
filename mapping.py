@@ -6,19 +6,20 @@ import torch
 conditional = False
 net_size = 1
 
-potential_model_name = 'potential_VAE_[0.01, 0.3]_2021-05-17 09_15_22.767226.pt'
-rays_model_name = 'rays_VAE_[0.01, 0.3]_2021-05-17 09_20_17.433121.pt'
+potential_model_name = 'potential_VAE_[0.01, 0.1, 0.2, 0.05, 0.07, 0.09, 0.03, 0.3]_2021-05-20 16_34_20.045217.pt'
+rays_model_name = 'rays_VAE_[0.01, 0.1, 0.2, 0.05, 0.07, 0.09, 0.03, 0.3]_2021-05-20 17_33_43.337801.pt'
 potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
 strengths = STRENGTHS
 
-potential_ae = ConvVAE(image_dim=POTENTIAL_IMAGE_SIZE, hidden_size=POTENTIAL_HIDDEN_SIZE, latent_size=POTENTIAL_LATENT_SIZE,
-                           image_channels=POTENTIAL_IMAGE_CHANNELS, net_size=net_size, conditional=conditional)
+potential_ae = ConvVAE(image_dim=POTENTIAL_IMAGE_SIZE, hidden_size=POTENTIAL_HIDDEN_SIZE,
+                       latent_size=POTENTIAL_LATENT_SIZE,
+                       image_channels=POTENTIAL_IMAGE_CHANNELS, net_size=net_size, conditional=conditional)
 potential_ae.load_state_dict(torch.load(potential_model_path, map_location=torch.device('cpu')))
 potential_ae.eval()
 
 rays_ae = ConvVAE(image_dim=RAYS_IMAGE_SIZE, hidden_size=RAYS_HIDDEN_SIZE, latent_size=RAYS_LATENT_SIZE,
-                      image_channels=RAYS_IMAGE_CHANNELS, net_size=net_size, conditional=conditional)
+                  image_channels=RAYS_IMAGE_CHANNELS, net_size=net_size, conditional=conditional)
 rays_ae.load_state_dict(torch.load(rays_model_path, map_location=torch.device('cpu')))
 rays_ae.eval()
 
@@ -79,8 +80,8 @@ encoded_train_set_y = encoded_train_set_y[1:]
 encoded_test_set_X = encoded_test_set_X[1:]
 encoded_test_set_y = encoded_test_set_y[1:]
 
-encoded_test_set = MappingDataset(x=encoded_test_set_X, y=encoded_test_set_y, d=strength_test_dataset)
 encoded_train_set = MappingDataset(x=encoded_train_set_X, y=encoded_train_set_y, d=strength_train_dataset)
+encoded_test_set = MappingDataset(x=encoded_test_set_X, y=encoded_test_set_y, d=strength_test_dataset)
 
 torch.save(encoded_train_set, DATA_ROOT + 'num=999_unzipped/mapped/training.pt')
 torch.save(encoded_test_set, DATA_ROOT + 'num=999_unzipped/mapped/test.pt')

@@ -11,7 +11,7 @@ batch_size = 1
 n_forwards = 10
 
 dataset = 'rays'
-model_name = 'rays_VAE_[0.01, 0.3]_2021-05-17 09_20_17.433121.pt'
+model_name = 'rays_VAE_[0.01, 0.03, 0.05, 0.1, 0.2, 0.07, 0.3]_2021-05-20 17_27_24.438039.pt'
 model_path = MODELS_ROOT + model_name
 conditional = False
 net_size = 1
@@ -30,14 +30,14 @@ if dataset == 'rays':
     image_size = RAYS_IMAGE_SIZE
     image_channels = RAYS_IMAGE_CHANNELS
     hidden_size = RAYS_HIDDEN_SIZE
-    # hidden_size = 4 * 47 * 47
+    # hidden_size = 8 * 48 * 48
     latent_size = RAYS_LATENT_SIZE
     image_channels = RAYS_IMAGE_CHANNELS
 else:
     image_size = POTENTIAL_IMAGE_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
     hidden_size = POTENTIAL_HIDDEN_SIZE
-    # hidden_size = 4 * 46 * 46
+    # hidden_size = 8 * 48 * 48
     latent_size = POTENTIAL_LATENT_SIZE
     image_channels = POTENTIAL_IMAGE_CHANNELS
 
@@ -119,12 +119,12 @@ else:
     plt.title('Reconstruction')
     plt.imshow(rand_sample_prime.squeeze().detach().permute(1, 2, 0).numpy(), cmap='gray')
 
-if dataset == 'rays':
-    plt.figure()
-    pixel_val = RAYS_IMAGE_SIZE // 5
-    plt.title('Projection along x = {}'.format(pixel_val))
-    plt.plot(range(0, image_size), rand_sample.squeeze()[0, :, pixel_val], label='Ground truth')
-    plt.plot(range(0, image_size), rand_sample_prime.squeeze().detach().numpy()[0, :, pixel_val], label='Predicted')
-    plt.legend(loc='best')
+# if dataset == 'rays':
+#     plt.figure()
+#     pixel_val = RAYS_IMAGE_SIZE // 5
+#     plt.title('Projection along x = {}'.format(pixel_val))
+#     plt.plot(range(0, image_size), rand_sample.squeeze()[0, :, pixel_val], label='Ground truth')
+#     plt.plot(range(0, image_size), rand_sample_prime.squeeze().detach().numpy()[0, :, pixel_val], label='Predicted')
+#     plt.legend(loc='best')
 
 plt.show()
