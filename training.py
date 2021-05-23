@@ -273,7 +273,7 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
                                                                   nn_type=nn_type, power=power, gmm=gmm)
         net.train()
         early_stopping_losses.append(test_loss)
-        
+
         if early_stopping:
             if test_loss == min(early_stopping_losses):
                 best = copy.deepcopy(net)
@@ -281,7 +281,7 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
             else:
                 early_stopping_counter += 1
             if early_stopping_counter == early_stopping_limit:
-                torch.save(best.state_dict(), MODELS_ROOT + 'Mapper_' + now + '.pt')
+                torch.save(best.state_dict(), MODELS_ROOT + 'EMD_' + now + '.pt')
                 return
 
         writer.add_scalar('LogLoss/train', np.log(train_loss / len(train_loader.dataset)), epoch)
@@ -293,10 +293,10 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
 
         # backup save
         if epoch % 50 == 0 and epoch != 0:
-            torch.save(best.state_dict(), MODELS_ROOT + 'Mapper_' + '_' + now + '.pt')
+            torch.save(best.state_dict(), MODELS_ROOT + 'EMD_' + '_' + now + '.pt')
 
     # Save the model at current date and time
-    torch.save(best.state_dict(), MODELS_ROOT + 'Mapper_' + '_' + now + '.pt')
+    torch.save(best.state_dict(), MODELS_ROOT + 'EMD_' + '_' + now + '.pt')
 
 
 def test_unet_vae(net, test_loader, recon_weight, kl_weight, nn_type, gmm=1, reg_weight=0, power=0):

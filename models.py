@@ -270,7 +270,7 @@ class PotentialMapperRaysNN(nn.Module):
         self.deconv1 = nn.ConvTranspose2d(in_channels=16 * net_size, out_channels=32 * net_size, kernel_size=3)
         self.relu3 = nn.ReLU()
 
-        self.deconv2 = nn.ConvTranspose2d(in_channels=32 * net_size, out_channels=image_channels, kernel_size=3)
+        self.deconv2 = nn.ConvTranspose2d(in_channels=32 * net_size, out_channels=rays_image_channels, kernel_size=3)
 
         self.output = nn.Sigmoid()
 
