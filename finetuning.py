@@ -8,6 +8,7 @@ net_size = 1
 batch_size = 32
 strengths = STRENGTHS
 power = 4
+epochs = 200
 gmm = len(STRENGTHS)
 
 potential_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_potential.pt')
@@ -118,5 +119,5 @@ optimizer = optim.Adam(emd.parameters(), lr=lr)
 recon_weight = 1.
 kl_weight = 4.
 
-train_unet_vae(net=emd, train_loader=train_loader, test_loader=test_loader, epochs=1, optimizer=optimizer, gmm=gmm,
+train_unet_vae(net=emd, train_loader=train_loader, test_loader=test_loader, epochs=epochs, optimizer=optimizer, gmm=gmm,
                recon_weight=recon_weight, kl_weight=kl_weight, dataset='EMD', nn_type='conv', power=power)
