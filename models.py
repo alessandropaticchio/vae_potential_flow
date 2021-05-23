@@ -316,10 +316,9 @@ class PotentialMapperRaysNN(nn.Module):
         x = self.upsample1(x)
 
         x = self.deconv1(x)
-        x = self.relu5(x)
+        x = self.relu3(x)
 
         x = self.deconv2(x)
-        x = self.relu6(x)
 
         x_prime = self.output(x)
 
