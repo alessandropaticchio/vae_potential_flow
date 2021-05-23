@@ -252,12 +252,6 @@ class PotentialMapperRaysNN(nn.Module):
         self.conv2 = nn.Conv2d(in_channels=32 * net_size, out_channels=16 * net_size, kernel_size=3)
         self.relu2 = nn.ReLU()
 
-        self.conv3 = nn.Conv2d(in_channels=16 * net_size, out_channels=8 * net_size, kernel_size=3)
-        self.relu3 = nn.ReLU()
-
-        self.conv4 = nn.Conv2d(in_channels=8 * net_size, out_channels=4 * net_size, kernel_size=3)
-        self.relu4 = nn.ReLU()
-
         self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
 
         self.encoder_mean = nn.Linear(self.potential_hidden_size, self.potential_latent_size)
@@ -278,11 +272,6 @@ class PotentialMapperRaysNN(nn.Module):
 
         self.deconv2 = nn.ConvTranspose2d(in_channels=8 * net_size, out_channels=16 * net_size, kernel_size=3)
         self.relu6 = nn.ReLU()
-
-        self.deconv3 = nn.ConvTranspose2d(in_channels=16 * net_size, out_channels=32 * net_size, kernel_size=3)
-        self.relu7 = nn.ReLU()
-
-        self.deconv4 = nn.ConvTranspose2d(in_channels=32 * net_size, out_channels=rays_image_channels, kernel_size=3)
 
         self.output = nn.Sigmoid()
 
@@ -307,12 +296,6 @@ class PotentialMapperRaysNN(nn.Module):
         x = self.conv2(x)
         x = self.relu2(x)
 
-        x = self.conv3(x)
-        x = self.relu3(x)
-
-        x = self.conv4(x)
-        x = self.relu4(x)
-
         x = self.maxpool1(x)
 
         # Flattening
@@ -329,7 +312,7 @@ class PotentialMapperRaysNN(nn.Module):
         x = self.fc(z)
 
         # Unflattening
-        x = x.view(x.size(0), 4 * self.net_size, 47, 47)
+        x = x.view(x.size(0), 16 * self.net_size, 48, 48)
 
         x = self.upsample1(x)
 
@@ -338,11 +321,6 @@ class PotentialMapperRaysNN(nn.Module):
 
         x = self.deconv2(x)
         x = self.relu6(x)
-
-        x = self.deconv3(x)
-        x = self.relu7(x)
-
-        x = self.deconv4(x)
 
         x_prime = self.output(x)
 
