@@ -272,7 +272,8 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
                                                                   recon_weight=recon_weight, kl_weight=kl_weight,
                                                                   nn_type=nn_type, power=power, gmm=gmm)
         net.train()
-
+        early_stopping_losses.append(test_loss)
+        
         if early_stopping:
             if test_loss == min(early_stopping_losses):
                 best = copy.deepcopy(net)
