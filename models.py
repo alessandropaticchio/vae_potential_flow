@@ -246,7 +246,7 @@ class PotentialMapperRaysNN(nn.Module):
         self.net_size = net_size
 
         # encode
-        self.conv1 = nn.Conv2d(in_channels=potential_image_channels, out_channels=32 * net_size, kernel_size=1)
+        self.conv1 = nn.Conv2d(in_channels=potential_image_channels, out_channels=32 * net_size, kernel_size=3)
         self.relu1 = nn.ReLU()
 
         self.conv2 = nn.Conv2d(in_channels=32 * net_size, out_channels=16 * net_size, kernel_size=3)
@@ -267,7 +267,7 @@ class PotentialMapperRaysNN(nn.Module):
         # decode
         self.upsample1 = nn.Upsample(scale_factor=2)
 
-        self.deconv1 = nn.ConvTranspose2d(in_channels=4 * net_size, out_channels=8 * net_size, kernel_size=1)
+        self.deconv1 = nn.ConvTranspose2d(in_channels=4 * net_size, out_channels=8 * net_size, kernel_size=3)
         self.relu5 = nn.ReLU()
 
         self.deconv2 = nn.ConvTranspose2d(in_channels=8 * net_size, out_channels=16 * net_size, kernel_size=3)
