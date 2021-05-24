@@ -293,10 +293,10 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
 
         # backup save
         if epoch % 50 == 0 and epoch != 0:
-            torch.save(best.state_dict(), MODELS_ROOT + 'EMD_' + '_' + now + '.pt')
+            torch.save(best.state_dict(), MODELS_ROOT + 'EMD_' + now + '.pt')
 
     # Save the model at current date and time
-    torch.save(best.state_dict(), MODELS_ROOT + 'EMD_' + '_' + now + '.pt')
+    torch.save(best.state_dict(), MODELS_ROOT + 'EMD_' + now + '.pt')
 
 
 def test_unet_vae(net, test_loader, recon_weight, kl_weight, nn_type, gmm=1, reg_weight=0, power=0):
