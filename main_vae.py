@@ -13,6 +13,7 @@ epochs = 200
 strengths = STRENGTHS
 gmm = len(STRENGTHS)
 transfer_learning = True
+kl_annealing = True
 
 pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_' + dataset + '.pt')
 pics_test_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_' + dataset + '.pt')
@@ -69,4 +70,4 @@ reg_weight = 0.
 
 train_vae(net=vae, train_loader=train_loader, test_loader=test_loader, epochs=epochs, optimizer=optimizer,
           recon_weight=recon_weight, kl_weight=kl_weight, dataset=dataset, nn_type=vae_type, is_L1=False, power=power,
-          desc=strengths, reg_weight=reg_weight, gmm=gmm, early_stopping=True)
+          desc=strengths, reg_weight=reg_weight, gmm=gmm, early_stopping=True, kl_annealing=kl_annealing)

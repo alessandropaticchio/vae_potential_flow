@@ -2,6 +2,7 @@ from constants import *
 from datetime import datetime
 from torch.nn import MSELoss
 from torch.utils.tensorboard import SummaryWriter
+from utils import frange_cycle_linear, frange_cycle_sigmoid
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
@@ -64,7 +65,7 @@ def test_ae(net, test_loader):
 
 def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., early_stopping=True,
               early_stopping_limit=15, dataset='MNIST', gmm=1,
-              nn_type='conv', is_L1=False, power=0, desc='', reg_weight=0):
+              nn_type='conv', is_L1=False, power=0, desc='', reg_weight=0, kl_annealing=False):
     now = str(datetime.now()).replace(':', '_')
     writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + str(desc) + '_' + now))
     net = net.to(device)
@@ -72,11 +73,19 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
     early_stopping_losses = []
     early_stopping_counter = 0
     best = net
+
+    if kl_annealing:
+        L = frange_cycle_linear(start=0.0, stop=1.0, n_epoch=epochs, n_cycle=4, ratio=0.7)
+
     for epoch in range(epochs):
         train_loss = 0.
         train_recon_loss = 0.
         train_kld_loss = 0.
         train_reg_loss = 0.
+
+        if kl_annealing:
+            kl_weight = L[epoch]
+
         for batch_idx, (data, strength) in enumerate(train_loader):
             data = data.to(device)
             strength = strength.to(device)
