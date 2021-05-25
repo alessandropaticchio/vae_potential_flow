@@ -40,16 +40,16 @@ class MappingDataset(Dataset):
 
 
 def generate_dataset_from_strength(pics_data, strengths_data, picked_strenghts):
-    indeces = []
+    indices = []
     for i, d in enumerate(strengths_data):
         if d in picked_strenghts:
-            indeces.append(i)
-    return pics_data[indeces], strengths_data[indeces]
+            indices.append(i)
+    return pics_data[indices], strengths_data[indices]
 
 
 # KL Annealing
 def frange_cycle_linear(start, stop, n_epoch, n_cycle=4, ratio=0.5):
-    L = np.ones(n_epoch)
+    L = np.full(n_epoch, stop)
     period = n_epoch / n_cycle
     step = (stop - start) / (period * ratio)  # linear schedule
 
@@ -64,7 +64,7 @@ def frange_cycle_linear(start, stop, n_epoch, n_cycle=4, ratio=0.5):
 
 
 def frange_cycle_sigmoid(start, stop, n_epoch, n_cycle=4, ratio=0.5):
-    L = np.ones(n_epoch)
+    L = np.full(n_epoch, stop)
     period = n_epoch / n_cycle
     step = (stop - start) / (period * ratio)  # step is in [0,1]
 
@@ -81,7 +81,7 @@ def frange_cycle_sigmoid(start, stop, n_epoch, n_cycle=4, ratio=0.5):
 
 
 if __name__ == '__main__':
-    L = frange_cycle_linear(0.0, 1.0, 200, n_cycle=4, ratio=0.5)
+    L = frange_cycle_linear(start=0.0, stop=4.0, n_epoch=200, n_cycle=1, ratio=0.5)
     import matplotlib.pyplot as plt
 
     plt.plot(range(len(L)), L)
