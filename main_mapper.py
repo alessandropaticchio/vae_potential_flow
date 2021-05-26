@@ -16,10 +16,12 @@ h0 = POTENTIAL_LATENT_SIZE * 2
 h1 = RAYS_LATENT_SIZE * 2
 h2 = RAYS_LATENT_SIZE * 2
 h3 = RAYS_LATENT_SIZE * 2
+h4 = RAYS_LATENT_SIZE * 2
+h5 = RAYS_LATENT_SIZE * 2
 
-mapper = Mapper(h_sizes=[h0, h1, h2, h3])
+mapper = Mapper(h_sizes=[h0, h1, h2, h3, h4, h5])
 
 lr = 1e-3
-optimizer = optim.Adam(mapper.parameters(), lr=lr)
+optimizer = optim.Adam(mapper.parameters(), lr=lr, weight_decay=0.001)
 
 train(net=mapper, train_loader=train_loader, test_loader=test_loader, epochs=1000, optimizer=optimizer)
