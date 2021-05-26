@@ -12,14 +12,9 @@ batch_size = 32
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
-h0 = POTENTIAL_LATENT_SIZE * 2
-h1 = RAYS_LATENT_SIZE * 2
-h2 = RAYS_LATENT_SIZE * 2
-h3 = RAYS_LATENT_SIZE * 2
-h4 = RAYS_LATENT_SIZE * 2
-h5 = RAYS_LATENT_SIZE * 2
+h_sizes = H_SIZES
 
-mapper = Mapper(h_sizes=[h0, h1, h2, h3, h4, h5])
+mapper = Mapper(h_sizes=h_sizes)
 
 lr = 1e-3
 optimizer = optim.Adam(mapper.parameters(), lr=lr, weight_decay=0.001)
