@@ -54,6 +54,10 @@ rays_image_channels = RAYS_IMAGE_CHANNELS
 
 h0 = POTENTIAL_LATENT_SIZE * 2
 h1 = RAYS_LATENT_SIZE * 2
+h2 = RAYS_LATENT_SIZE * 2
+h3 = RAYS_LATENT_SIZE * 2
+h4 = RAYS_LATENT_SIZE * 2
+h5 = RAYS_LATENT_SIZE * 2
 
 emd = PotentialMapperRaysNN(potential_image_channels=potential_image_channels,
                             rays_image_channels=rays_image_channels,
@@ -82,7 +86,7 @@ rays_vae = ConvVAE(image_dim=rays_image_size, hidden_size=rays_hidden_size, late
                        net_size=net_size)
 rays_vae.load_state_dict(torch.load(rays_model_path, map_location=torch.device('cpu')))
 
-mapper = Mapper(h_sizes=[h0, h1])
+mapper = Mapper(h_sizes=[h0, h1, h2, h3, h4, h5])
 mapper.load_state_dict(torch.load(mapper_model_path, map_location=torch.device('cpu')))
 
 # Initializing emd's encoder as potential encoder and decoder as rays decoder
