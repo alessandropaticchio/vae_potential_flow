@@ -6,8 +6,8 @@ import torch
 conditional = False
 net_size = 1
 
-potential_model_name = 'potential_VAE_[0.01, 0.1, 0.2, 0.05, 0.07, 0.09, 0.03, 0.3]_2021-05-20 16_34_20.045217.pt'
-rays_model_name = 'rays_VAE_[0.01, 0.1, 0.2, 0.05, 0.07, 0.09, 0.03, 0.3]_2021-05-20 17_33_43.337801.pt'
+potential_model_name = 'potential_VAE_[0.01, 0.1, 0.2, 0.05, 0.07, 0.03, 0.3]_2021-05-20 15_58_12.695847.pt'
+rays_model_name = 'rays_VAE_[0.01, 0.03, 0.05, 0.1, 0.2, 0.07, 0.3]_2021-05-20 17_27_24.438039.pt'
 potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
 strengths = STRENGTHS
