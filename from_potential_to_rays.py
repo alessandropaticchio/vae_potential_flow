@@ -4,9 +4,9 @@ from constants import *
 import random
 import matplotlib.pyplot as plt
 
-potential_model_name = 'potential_VAE_[0.01, 0.1, 0.2, 0.05, 0.07, 0.09, 0.03, 0.3]_2021-05-20 16_34_20.045217.pt'
+potential_model_name = 'potential_VAE_[0.01, 0.1, 0.2, 0.05, 0.07, 0.03, 0.3]_2021-05-20 15_58_12.695847.pt'
 rays_model_name = 'rays_VAE_[0.01, 0.03, 0.05, 0.1, 0.2, 0.07, 0.3]_2021-05-20 17_27_24.438039.pt'
-mapper_model_name = 'Mapper_2021-05-23 08_14_48.519351.pt'
+mapper_model_name = 'Mapper_2021-05-26 08_13_18.726053.pt'
 potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
 mapper_model_path = MODELS_ROOT + mapper_model_name
@@ -53,8 +53,12 @@ rays_vae.eval()
 
 h0 = POTENTIAL_LATENT_SIZE * 2
 h1 = RAYS_LATENT_SIZE * 2
+h2 = RAYS_LATENT_SIZE * 2
+h3 = RAYS_LATENT_SIZE * 2
+h4 = RAYS_LATENT_SIZE * 2
+h5 = RAYS_LATENT_SIZE * 2
 
-mapper = Mapper(h_sizes=[h0, h1])
+mapper = Mapper(h_sizes=[h0, h1, h2, h3, h4, h5])
 mapper.load_state_dict(torch.load(mapper_model_path, map_location=torch.device('cpu')))
 mapper.eval()
 
