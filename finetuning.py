@@ -52,7 +52,7 @@ rays_hidden_size = RAYS_HIDDEN_SIZE
 rays_latent_size = RAYS_LATENT_SIZE
 rays_image_channels = RAYS_IMAGE_CHANNELS
 
-mapper_layers = MAPPER_LAYERS
+h_sizes = H_SIZES
 
 emd = PotentialMapperRaysNN(potential_image_channels=potential_image_channels,
                             rays_image_channels=rays_image_channels,
@@ -60,7 +60,7 @@ emd = PotentialMapperRaysNN(potential_image_channels=potential_image_channels,
                             rays_hidden_size=rays_hidden_size,
                             potential_latent_size=potential_latent_size,
                             rays_latent_size=rays_latent_size,
-                            h_sizes=mapper_layers,
+                            h_sizes=h_sizes,
                             net_size=net_size)
 
 #  Load VAEs
@@ -81,7 +81,7 @@ rays_vae = ConvVAE(image_dim=rays_image_size, hidden_size=rays_hidden_size, late
                        net_size=net_size)
 rays_vae.load_state_dict(torch.load(rays_model_path, map_location=torch.device('cpu')))
 
-mapper = Mapper(h_sizes=mapper_layers)
+mapper = Mapper(h_sizes=h_sizes)
 mapper.load_state_dict(torch.load(mapper_model_path, map_location=torch.device('cpu')))
 
 # Initializing emd's encoder as potential encoder and decoder as rays decoder
@@ -102,7 +102,7 @@ emd.fc.weight = potential_vae.fc.weight
 emd.fc.bias = potential_vae.fc.bias
 
 # Mapper
-for i in mapper_layers:
+for i in range(len(h_sizes) - 1):
     emd.mapper_layers[i].weight = mapper.layers[i].weight
     emd.mapper_layers[i].bias = mapper.layers[i].bias
 

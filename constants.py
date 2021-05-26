@@ -31,7 +31,7 @@ H3 = RAYS_LATENT_SIZE * 2
 H4 = RAYS_LATENT_SIZE * 2
 H5 = RAYS_LATENT_SIZE * 2
 
-MAPPER_LAYERS = [H0,  H1,  H2,  H3,  H4,  H5]
+H_SIZES = [H0,  H1,  H2,  H3,  H4,  H5]
 
 
 COLORS = ['#ff5050', '#ff9966', '#99ff66', '#00cc66', '#9966ff', '#3366ff', '#cc3300', '#003300', '#666699', '#003366']
