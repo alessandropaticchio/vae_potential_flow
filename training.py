@@ -2,6 +2,7 @@ from constants import *
 from datetime import datetime
 from torch.nn import MSELoss
 from torch.utils.tensorboard import SummaryWriter
+from utils import frange_cycle_linear, frange_cycle_sigmoid
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
@@ -64,7 +65,7 @@ def test_ae(net, test_loader):
 
 def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., early_stopping=True,
               early_stopping_limit=15, dataset='MNIST', gmm=1,
-              nn_type='conv', is_L1=False, power=0, desc='', reg_weight=0):
+              nn_type='conv', is_L1=False, power=0, desc='', reg_weight=0, kl_annealing=False):
     now = str(datetime.now()).replace(':', '_')
     writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + str(desc) + '_' + now))
     net = net.to(device)
@@ -72,11 +73,19 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
     early_stopping_losses = []
     early_stopping_counter = 0
     best = net
+
+    if kl_annealing:
+        L = frange_cycle_linear(start=0.0, stop=1.0, n_epoch=epochs, n_cycle=4, ratio=0.7)
+
     for epoch in range(epochs):
         train_loss = 0.
         train_recon_loss = 0.
         train_kld_loss = 0.
         train_reg_loss = 0.
+
+        if kl_annealing:
+            kl_weight = L[epoch]
+
         for batch_idx, (data, strength) in enumerate(train_loader):
             data = data.to(device)
             strength = strength.to(device)
@@ -224,12 +233,15 @@ def kld_gmm(mu, log_var, strength):
 
 
 def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., reg_weight=0,
-                   dataset='MNIST',
+                   dataset='MNIST', gmm=1, early_stopping=True, early_stopping_limit=15,
                    power=0, nn_type='conv', desc=''):
     now = str(datetime.now()).replace(':', '_')
     writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + desc + '_' + now))
     net = net.to(device)
-    net.train_ae()
+    net.train()
+    early_stopping_losses = []
+    early_stopping_counter = 0
+    best = net
     for epoch in range(epochs):
         train_loss = 0.
         train_recon_loss = 0.
@@ -252,7 +264,8 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
                                                                                              kl_weight=kl_weight,
                                                                                              nn_type=nn_type,
                                                                                              reg_weight=reg_weight,
-                                                                                             power=power)
+                                                                                             power=power,
+                                                                                             gmm=gmm)
 
             batch_loss.backward()
             train_loss += batch_loss.item()
@@ -266,8 +279,19 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
 
         test_loss, test_recon_loss, test_kld_loss = test_unet_vae(net=net, test_loader=test_loader,
                                                                   recon_weight=recon_weight, kl_weight=kl_weight,
-                                                                  nn_type=nn_type, power=power)
+                                                                  nn_type=nn_type, power=power, gmm=gmm)
         net.train()
+        early_stopping_losses.append(test_loss)
+
+        if early_stopping:
+            if test_loss == min(early_stopping_losses):
+                best = copy.deepcopy(net)
+                early_stopping_counter = 0
+            else:
+                early_stopping_counter += 1
+            if early_stopping_counter == early_stopping_limit:
+                torch.save(best.state_dict(), MODELS_ROOT + 'EMD_' + now + '.pt')
+                return
 
         writer.add_scalar('LogLoss/train', np.log(train_loss / len(train_loader.dataset)), epoch)
         writer.add_scalar('LogLoss/recon_train', np.log(train_recon_loss / len(train_loader.dataset)), epoch)
@@ -276,11 +300,15 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
         writer.add_scalar('LogLoss/recon_validation', np.log(test_recon_loss / len(test_loader.dataset)), epoch)
         writer.add_scalar('LogLoss/kld_validation', np.log(test_kld_loss / len(test_loader.dataset)), epoch)
 
+        # backup save
+        if epoch % 50 == 0 and epoch != 0:
+            torch.save(best.state_dict(), MODELS_ROOT + 'EMD_' + now + '.pt')
+
     # Save the model at current date and time
-    torch.save(net.state_dict(), MODELS_ROOT + dataset + '_VAE_' + desc + '_' + now + '.pt')
+    torch.save(best.state_dict(), MODELS_ROOT + 'EMD_' + now + '.pt')
 
 
-def test_unet_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight=0, power=0):
+def test_unet_vae(net, test_loader, recon_weight, kl_weight, nn_type, gmm=1, reg_weight=0, power=0):
     net.eval()
     net = net.to(device)
     test_loss = 0.
@@ -304,7 +332,8 @@ def test_unet_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight
                                                                                                   kl_weight=kl_weight,
                                                                                                   nn_type=nn_type,
                                                                                                   reg_weight=reg_weight,
-                                                                                                  power=power)
+                                                                                                  power=power,
+                                                                                                  gmm=gmm)
             test_loss += batch_test_loss.item()
             recon_loss += batch_recon_loss.item()
             kld_loss += batch_kld_loss.item()

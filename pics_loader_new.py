@@ -12,7 +12,7 @@ downsample = True
 
 strenghts = STRENGTHS
 
-img_path = DATA_ROOT + '/num=999_unscaled/'
+img_path = DATA_ROOT + '/num=999_unzipped/'
 
 rays_train_set = torch.empty((1, RAYS_IMAGE_CHANNELS, RAYS_IMAGE_SIZE, RAYS_IMAGE_SIZE))
 rays_test_set = torch.empty((1, RAYS_IMAGE_CHANNELS, RAYS_IMAGE_SIZE, RAYS_IMAGE_SIZE))
