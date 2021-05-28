@@ -98,15 +98,15 @@ emd.encoder_mean.bias = potential_vae.encoder_mean.bias
 emd.encoder_logvar.weight = potential_vae.encoder_logvar.weight
 emd.encoder_logvar.bias = potential_vae.encoder_logvar.bias
 
-emd.fc.weight = potential_vae.fc.weight
-emd.fc.bias = potential_vae.fc.bias
-
 # Mapper
 for i in range(len(h_sizes) - 1):
     emd.mapper_layers[i].weight = mapper.layers[i].weight
     emd.mapper_layers[i].bias = mapper.layers[i].bias
 
 # Decoder
+emd.fc.weight = rays_vae.fc.weight
+emd.fc.bias = rays_vae.fc.bias
+
 emd.deconv1.weight = rays_vae.deconv1.weight
 emd.deconv1.bias = rays_vae.deconv1.bias
 

@@ -10,8 +10,8 @@ mapper_model_name = 'Mapper_2021-05-26 08_13_18.726053.pt'
 potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
 mapper_model_path = MODELS_ROOT + mapper_model_name
-train = False
 strengths = STRENGTHS
+train = True
 net_size = 1
 n_forwards = 10
 
@@ -51,14 +51,9 @@ rays_vae = ConvVAE(image_dim=RAYS_IMAGE_SIZE, hidden_size=RAYS_HIDDEN_SIZE, late
 rays_vae.load_state_dict(torch.load(rays_model_path, map_location=torch.device('cpu')))
 rays_vae.eval()
 
-h0 = POTENTIAL_LATENT_SIZE * 2
-h1 = RAYS_LATENT_SIZE * 2
-h2 = RAYS_LATENT_SIZE * 2
-h3 = RAYS_LATENT_SIZE * 2
-h4 = RAYS_LATENT_SIZE * 2
-h5 = RAYS_LATENT_SIZE * 2
+h_sies = H_SIZES
 
-mapper = Mapper(h_sizes=[h0, h1, h2, h3, h4, h5])
+mapper = Mapper(h_sizes=h_sies)
 mapper.load_state_dict(torch.load(mapper_model_path, map_location=torch.device('cpu')))
 mapper.eval()
 

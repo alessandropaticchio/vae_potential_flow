@@ -29,8 +29,7 @@ rays_hidden_size = RAYS_HIDDEN_SIZE
 rays_latent_size = RAYS_LATENT_SIZE
 rays_image_channels = RAYS_IMAGE_CHANNELS
 
-h0 = POTENTIAL_LATENT_SIZE * 2
-h1 = RAYS_LATENT_SIZE * 2
+h_sizes = H_SIZES
 
 vae = PotentialMapperRaysNN(potential_image_channels=potential_image_channels,
                             rays_image_channels=rays_image_channels,
@@ -38,7 +37,7 @@ vae = PotentialMapperRaysNN(potential_image_channels=potential_image_channels,
                             rays_hidden_size=rays_hidden_size,
                             potential_latent_size=potential_latent_size,
                             rays_latent_size=rays_latent_size,
-                            h_sizes=[h0, h1],
+                            h_sizes=h_sizes,
                             net_size=net_size)
 
 vae.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
