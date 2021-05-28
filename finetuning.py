@@ -66,7 +66,7 @@ emd = PotentialMapperRaysNN(potential_image_channels=potential_image_channels,
 #  Load VAEs
 potential_model_name = 'potential_VAE_[0.01, 0.1, 0.2, 0.05, 0.07, 0.03, 0.3]_2021-05-20 15_58_12.695847.pt'
 rays_model_name = 'rays_VAE_[0.01, 0.03, 0.05, 0.1, 0.2, 0.07, 0.3]_2021-05-20 17_27_24.438039.pt'
-mapper_model_name = 'Mapper_2021-05-26 08_13_18.726053.pt'
+mapper_model_name = 'Mapper_2021-05-23 08_14_48.519351.pt'
 potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
 mapper_model_path = MODELS_ROOT + mapper_model_name
