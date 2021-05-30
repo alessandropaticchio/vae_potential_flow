@@ -236,7 +236,7 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
                    dataset='MNIST', gmm=1, early_stopping=True, early_stopping_limit=15,
                    power=0, nn_type='conv', desc=''):
     now = str(datetime.now()).replace(':', '_')
-    writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + desc + '_' + now))
+    writer = SummaryWriter('runs/{}'.format(dataset + '_EMD_' + desc + '_' + now))
     net = net.to(device)
     net.train()
     early_stopping_losses = []

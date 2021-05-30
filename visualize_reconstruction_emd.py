@@ -10,7 +10,7 @@ strengths = STRENGTHS
 net = 'emd'
 net_size = 1
 train = True
-model_name = 'EMD_2021-05-23 09_52_23.587385.pt'
+model_name = 'EMD_prova.pt'
 model_path = MODELS_ROOT + model_name
 
 power = 4
