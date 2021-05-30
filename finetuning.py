@@ -10,6 +10,7 @@ strengths = STRENGTHS
 power = 4
 epochs = 200
 gmm = len(STRENGTHS)
+kl_annealing = True
 
 potential_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_potential.pt')
 potential_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_potential.pt')
@@ -115,4 +116,5 @@ recon_weight = 1.
 kl_weight = 4.
 
 train_unet_vae(net=emd, train_loader=train_loader, test_loader=test_loader, epochs=epochs, optimizer=optimizer, gmm=gmm,
-               recon_weight=recon_weight, kl_weight=kl_weight, dataset='EMD', nn_type='conv', power=power)
+               recon_weight=recon_weight, kl_weight=kl_weight, kl_annealing=kl_annealing, dataset='EMD', nn_type='conv',
+               power=power)
