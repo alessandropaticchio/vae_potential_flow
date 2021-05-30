@@ -108,9 +108,6 @@ emd_dict.update(mapper_model_dict)
 emd_dict.update(decoder_model_dict)
 emd.load_state_dict(emd_dict)
 
-torch.save(emd.state_dict(), MODELS_ROOT + 'EMD_prova' + '.pt')
-exit()
-
 lr = 1e-4
 optimizer = optim.Adam(emd.parameters(), lr=lr)
 
