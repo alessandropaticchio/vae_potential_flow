@@ -259,10 +259,10 @@ class PotentialMapperRaysNN(nn.Module):
         self.fc = nn.Linear(self.potential_latent_size, self.potential_hidden_size)
 
         # Mapper
-        self.mapper_layers = nn.ModuleList()
+        self.layers = nn.ModuleList()
 
         for k in range(len(h_sizes) - 1):
-            self.mapper_layers.append(nn.Linear(h_sizes[k], h_sizes[k + 1]))
+            self.layers.append(nn.Linear(h_sizes[k], h_sizes[k + 1]))
 
         # decode
         self.upsample1 = nn.Upsample(scale_factor=2)
@@ -325,8 +325,8 @@ class PotentialMapperRaysNN(nn.Module):
         return x_prime
 
     def mapping(self, x):
-        for i, layer in enumerate(self.mapper_layers):
-            if i != len(self.mapper_layers) - 1:
+        for i, layer in enumerate(self.layers):
+            if i != len(self.layers) - 1:
                 x = F.relu(layer(x))
             else:
                 x = layer(x)
