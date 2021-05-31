@@ -10,6 +10,8 @@ strengths = STRENGTHS
 power = 4
 epochs = 200
 gmm = len(STRENGTHS)
+kl_annealing = True
+skip_connections = True
 
 potential_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_potential.pt')
 potential_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_potential.pt')
@@ -48,7 +50,7 @@ potential_image_channels = POTENTIAL_IMAGE_CHANNELS
 rays_image_size = RAYS_IMAGE_SIZE
 rays_image_channels = RAYS_IMAGE_CHANNELS
 rays_hidden_size = RAYS_HIDDEN_SIZE
-# rays_hidden_size = 4 * 47 * 47
+#  rays_hidden_size = 4 * 47 * 47
 rays_latent_size = RAYS_LATENT_SIZE
 rays_image_channels = RAYS_IMAGE_CHANNELS
 
@@ -61,7 +63,8 @@ emd = PotentialMapperRaysNN(potential_image_channels=potential_image_channels,
                             potential_latent_size=potential_latent_size,
                             rays_latent_size=rays_latent_size,
                             h_sizes=h_sizes,
-                            net_size=net_size)
+                            net_size=net_size,
+                            skip_connections=skip_connections)
 
 #  Load VAEs
 potential_model_name = 'potential_VAE_[0.01, 0.1, 0.2, 0.05, 0.07, 0.03, 0.3]_2021-05-20 15_58_12.695847.pt'
@@ -72,46 +75,45 @@ rays_model_path = MODELS_ROOT + rays_model_name
 mapper_model_path = MODELS_ROOT + mapper_model_name
 
 potential_vae = ConvVAE(image_dim=potential_image_size, hidden_size=potential_hidden_size,
-                            latent_size=potential_latent_size, image_channels=potential_image_channels,
-                            net_size=net_size)
+                        latent_size=potential_latent_size, image_channels=potential_image_channels,
+                        net_size=net_size)
 potential_vae.load_state_dict(torch.load(potential_model_path, map_location=torch.device('cpu')))
 
 rays_vae = ConvVAE(image_dim=rays_image_size, hidden_size=rays_hidden_size, latent_size=rays_latent_size,
-                       image_channels=rays_image_channels,
-                       net_size=net_size)
+                   image_channels=rays_image_channels,
+                   net_size=net_size)
 rays_vae.load_state_dict(torch.load(rays_model_path, map_location=torch.device('cpu')))
 
 mapper = Mapper(h_sizes=h_sizes)
 mapper.load_state_dict(torch.load(mapper_model_path, map_location=torch.device('cpu')))
 
-# Initializing emd's encoder as potential encoder and decoder as rays decoder
-# Encoder
-emd.conv1.weight = potential_vae.conv1.weight
-emd.conv1.bias = potential_vae.conv1.bias
+emd_dict = emd.state_dict()
 
-emd.conv2.weight = potential_vae.conv2.weight
-emd.conv2.bias = potential_vae.conv2.bias
+potential_vae_dict = potential_vae.state_dict()
+encoder_keys = ['conv1.weight', 'conv1.bias',
+                'conv2.weight', 'conv2.bias',
+                'encoder_mean.weight', 'encoder_mean.bias',
+                'encoder_logvar.weight', 'encoder_logvar.bias']
+encoder_model_dict = {k: v for k, v in potential_vae_dict.items() if k in encoder_keys}
 
-emd.encoder_mean.weight = potential_vae.encoder_mean.weight
-emd.encoder_mean.bias = potential_vae.encoder_mean.bias
+mapper_dict = mapper.state_dict()
+mapper_keys = ['layers.0.weight', 'layers.0.bias']
+mapper_model_dict = {k: v for k, v in mapper_dict.items() if k in mapper_keys}
 
-emd.encoder_logvar.weight = potential_vae.encoder_logvar.weight
-emd.encoder_logvar.bias = potential_vae.encoder_logvar.bias
+rays_vae_dict = rays_vae.state_dict()
+decoder_keys = ['fc.weight', 'fc.bias',
+                'deconv1.weight', 'deconv1.bias',
+                'deconv2.weight', 'deconv2.bias']
+decoder_model_dict = {k: v for k, v in rays_vae_dict.items() if k in decoder_keys}
 
-# Mapper
-for i in range(len(h_sizes) - 1):
-    emd.mapper_layers[i].weight = mapper.layers[i].weight
-    emd.mapper_layers[i].bias = mapper.layers[i].bias
+emd_dict.update(encoder_model_dict)
+emd_dict.update(mapper_model_dict)
+emd_dict.update(decoder_model_dict)
+emd.load_state_dict(emd_dict)
 
-# Decoder
-emd.fc.weight = rays_vae.fc.weight
-emd.fc.bias = rays_vae.fc.bias
-
-emd.deconv1.weight = rays_vae.deconv1.weight
-emd.deconv1.bias = rays_vae.deconv1.bias
-
-emd.deconv2.weight = rays_vae.deconv2.weight
-emd.deconv2.bias = rays_vae.deconv2.bias
+# for param in emd.named_parameters():
+#     if param[0] in encoder_keys or param[0] in decoder_keys:
+#         param[1].requires_grad = False
 
 lr = 1e-4
 optimizer = optim.Adam(emd.parameters(), lr=lr)
@@ -120,4 +122,5 @@ recon_weight = 1.
 kl_weight = 4.
 
 train_unet_vae(net=emd, train_loader=train_loader, test_loader=test_loader, epochs=epochs, optimizer=optimizer, gmm=gmm,
-               recon_weight=recon_weight, kl_weight=kl_weight, dataset='EMD', nn_type='conv', power=power)
+               recon_weight=recon_weight, kl_weight=kl_weight, kl_annealing=kl_annealing, dataset='EMD', nn_type='conv',
+               power=power)

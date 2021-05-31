@@ -233,15 +233,19 @@ def kld_gmm(mu, log_var, strength):
 
 
 def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., reg_weight=0,
-                   dataset='MNIST', gmm=1, early_stopping=True, early_stopping_limit=15,
+                   dataset='MNIST', gmm=1, early_stopping=True, early_stopping_limit=15, kl_annealing=False,
                    power=0, nn_type='conv', desc=''):
     now = str(datetime.now()).replace(':', '_')
-    writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + desc + '_' + now))
+    writer = SummaryWriter('runs/{}'.format(dataset + desc + '_' + now))
     net = net.to(device)
     net.train()
     early_stopping_losses = []
     early_stopping_counter = 0
     best = net
+
+    if kl_annealing:
+        L = frange_cycle_linear(start=0.0, stop=4.0, n_epoch=epochs, n_cycle=1, ratio=0.1)
+
     for epoch in range(epochs):
         train_loss = 0.
         train_recon_loss = 0.
@@ -255,6 +259,9 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
             optimizer.zero_grad()
 
             recon_batch, mu, log_var = net(data)
+
+            if kl_annealing:
+                kl_weight = L[epoch]
 
             batch_loss, batch_recon_loss, batch_kld_loss, batch_reg_loss = loss_function_vae(recon_x=recon_batch,
                                                                                              x=targets,
