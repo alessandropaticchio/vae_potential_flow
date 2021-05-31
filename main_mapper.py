@@ -19,4 +19,4 @@ mapper = Mapper(h_sizes=h_sizes)
 lr = 1e-3
 optimizer = optim.Adam(mapper.parameters(), lr=lr, weight_decay=0.1)
 
-train(net=mapper, train_loader=train_loader, test_loader=test_loader, epochs=1000, optimizer=optimizer)
+train(net=mapper, train_loader=train_loader, test_loader=test_loader, epochs=1000, optimizer=optimizer, early_stopping=True)
