@@ -29,3 +29,5 @@ data/D=0.3 num=999/loaded_data/test_rays.pt
 data/D=0.3 num=999/loaded_data/training_rays.pt
 data/D=0.3 num=999/loaded_data/training_potential.pt
 *.pt
+*.zip
+*.rar
