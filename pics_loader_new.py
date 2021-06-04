@@ -6,13 +6,13 @@ from tqdm import tqdm
 import torch.nn.functional as F
 import numpy as np
 
-MAX_PICS = 999
+MAX_PICS = 2000
 
 downsample = True
 
 strenghts = STRENGTHS
 
-img_path = DATA_ROOT + '/num=999_unzipped/'
+img_path = DATA_ROOT + '/RP_images/'
 
 rays_train_set = torch.empty((1, RAYS_IMAGE_CHANNELS, RAYS_IMAGE_SIZE, RAYS_IMAGE_SIZE))
 rays_test_set = torch.empty((1, RAYS_IMAGE_CHANNELS, RAYS_IMAGE_SIZE, RAYS_IMAGE_SIZE))
@@ -38,7 +38,7 @@ for label in tqdm(os.listdir(img_path)):
             continue
     except:
         continue
-    path = img_path + label_name + '/' + label_name
+    path = img_path + '/' + label_name
     for i in tqdm(range(1, int(MAX_PICS) + 1), desc='Rays data...'):
         if i <= 9:
             i = '00' + str(i)

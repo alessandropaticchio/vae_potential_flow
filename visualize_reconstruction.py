@@ -119,6 +119,36 @@ else:
     plt.title('Reconstruction')
     plt.imshow(rand_sample_prime.squeeze().detach().permute(1, 2, 0).numpy(), cmap='gray')
 
+if dataset == 'rays':
+    plt.figure()
+
+    rand_sample_prime = transforms.Compose([
+        transforms.Grayscale(num_output_channels=1)
+    ])(rand_sample_prime.squeeze(0))
+
+    rand_sample = transforms.Compose([
+        transforms.Grayscale(num_output_channels=1)
+    ])(rand_sample.squeeze(0))
+
+    I_mean = torch.mean(rand_sample_prime, dim=1)
+    I_var = torch.var(rand_sample_prime, dim=1)
+
+    I_mean_real = torch.mean(rand_sample, dim=1)
+    I_var_real = torch.var(rand_sample, dim=1)
+
+    s = (I_var / I_mean) - 1
+    s_real = (I_var_real / I_mean_real) - 1
+
+    plt.title('Scintillation Index')
+    plt.plot(s.squeeze().detach().numpy(), label="reconstructed")
+    plt.plot(s_real.squeeze().detach().numpy(), label='original')
+
+    import matplotlib.patches as mpatches
+
+    blue_patch = mpatches.Patch(color='blue', label='Reconstructed')
+    orange_patch = mpatches.Patch(color='orange', label='Original')
+    plt.legend(handles=[blue_patch, orange_patch])
+
 # if dataset == 'rays':
 #     plt.figure()
 #     pixel_val = RAYS_IMAGE_SIZE // 5

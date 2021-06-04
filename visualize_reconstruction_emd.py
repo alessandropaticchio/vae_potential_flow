@@ -6,13 +6,13 @@ import random
 import torch
 
 batch_size = 1
-strengths = [0.01]
+strengths = STRENGTHS
 net = 'emd'
 net_size = 1
 train = True
-model_name = 'EMD_2021-06-02 09_19_12.155170.pt'
-skip_connections = False
+model_name = 'EMD_2021-06-02 11_31_53.343368.pt'
 model_path = MODELS_ROOT + model_name
+skip_connections = True
 
 power = 4
 
