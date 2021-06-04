@@ -10,8 +10,9 @@ strengths = STRENGTHS
 net = 'emd'
 net_size = 1
 train = True
-model_name = 'EMD_prova.pt'
+model_name = 'EMD_2021-06-02 11_31_53.343368.pt'
 model_path = MODELS_ROOT + model_name
+skip_connections = True
 
 power = 4
 
@@ -38,7 +39,8 @@ vae = PotentialMapperRaysNN(potential_image_channels=potential_image_channels,
                             potential_latent_size=potential_latent_size,
                             rays_latent_size=rays_latent_size,
                             h_sizes=h_sizes,
-                            net_size=net_size)
+                            net_size=net_size,
+                            skip_connections=skip_connections)
 
 vae.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 vae.eval()
