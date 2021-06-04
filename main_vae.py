@@ -12,14 +12,14 @@ dataset = 'potential'
 epochs = 200
 strengths = STRENGTHS
 gmm = len(STRENGTHS)
-transfer_learning = True
+transfer_learning = False
 kl_annealing = True
 
-pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_' + dataset + '.pt')
-pics_test_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_' + dataset + '.pt')
+pics_train_dataset = torch.load(DATA_ROOT + 'num=RP_images/loaded_data/' + 'training_' + dataset + '.pt')
+pics_test_dataset = torch.load(DATA_ROOT + 'num=RP_images/loaded_data/' + 'test_' + dataset + '.pt')
 
-strength_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_strength.pt')
-strength_test_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_strength.pt')
+strength_train_dataset = torch.load(DATA_ROOT + 'num=RP_images/loaded_data/' + 'training_strength.pt')
+strength_test_dataset = torch.load(DATA_ROOT + 'num=RP_images/loaded_data/' + 'test_strength.pt')
 
 pics_train_dataset, strength_train_dataset = generate_dataset_from_strength(pics_train_dataset, strength_train_dataset,
                                                                             strengths)

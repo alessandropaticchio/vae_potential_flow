@@ -6,6 +6,7 @@ import random
 import torch
 import itertools
 from torchvision import transforms
+import matplotlib.patches as mpatches
 
 batch_size = 1
 n_forwards = 10
@@ -142,8 +143,6 @@ if dataset == 'rays':
     plt.title('Scintillation Index')
     plt.plot(s.squeeze().detach().numpy(), label="reconstructed")
     plt.plot(s_real.squeeze().detach().numpy(), label='original')
-
-    import matplotlib.patches as mpatches
 
     blue_patch = mpatches.Patch(color='blue', label='Reconstructed')
     orange_patch = mpatches.Patch(color='orange', label='Original')
