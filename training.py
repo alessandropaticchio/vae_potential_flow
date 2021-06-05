@@ -75,7 +75,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
     best = net
 
     if kl_annealing:
-        L = frange_cycle_linear(start=0.0, stop=1.0, n_epoch=epochs, n_cycle=4, ratio=0.7)
+        L = frange_cycle_linear(start=0.0, stop=kl_weight, n_epoch=epochs, n_cycle=1, ratio=0.1)
 
     for epoch in range(epochs):
         train_loss = 0.
