@@ -39,7 +39,7 @@ for label in tqdm(os.listdir(img_path)):
     except:
         continue
     path = img_path + '/' + label_name
-    for i in tqdm(range(1, int(MAX_PICS) + 1), desc='Rays data...'):
+    for i in tqdm(range(1, int(MAX_PICS) + 1), desc='Rays data strength - ' + str(potential)):
         if i <= 9:
             i = '00' + str(i)
         elif 9 < i <= 99:
@@ -54,7 +54,7 @@ for label in tqdm(os.listdir(img_path)):
 
         rays_data_set = torch.cat((rays_data_set, image), 0)
 
-    for i in tqdm(range(1, int(MAX_PICS) + 1), desc='Potential data...'):
+    for i in tqdm(range(1, int(MAX_PICS) + 1), desc='Potential data strength - ' + str(potential)):
         if i <= 9:
             i = '00' + str(i)
         elif 9 < i <= 99:
@@ -63,7 +63,7 @@ for label in tqdm(os.listdir(img_path)):
             i = str(i)
         image = Image.open(path + '/ptnl_' + i + '.jpg')
         image = ToTensor()(image).unsqueeze(0)  # unsqueeze to add artificial first dimension
-        image = potential * image[:, :3, :, :]
+        # image = potential * image[:, :3, :, :]
         image = image[:, :3, :, :]
 
         if downsample:

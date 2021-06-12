@@ -11,8 +11,8 @@ import matplotlib.patches as mpatches
 batch_size = 1
 n_forwards = 10
 
-dataset = 'rays'
-model_name = 'rays_VAE_[0.01, 0.03, 0.05, 0.1, 0.2, 0.07, 0.3]_2021-05-20 17_27_24.438039.pt'
+dataset = 'potential'
+model_name = 'potential_VAE_[0.01, 0.03, 0.05, 0.07, 0.1, 0.2, 0.3]_2021-06-06 21_49_43.732777.pt'
 model_path = MODELS_ROOT + model_name
 conditional = False
 net_size = 1
@@ -51,11 +51,11 @@ ae = ConvVAE(image_dim=image_size, hidden_size=hidden_size, latent_size=latent_s
 ae.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 ae.eval()
 
-pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_' + dataset + '.pt')
-pics_test_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_' + dataset + '.pt')
+pics_train_dataset = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'training_' + dataset + '.pt')
+pics_test_dataset = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'test_' + dataset + '.pt')
 
-strength_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_strength.pt')
-strength_test_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_strength.pt')
+strength_train_dataset = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'training_strength.pt')
+strength_test_dataset = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'test_strength.pt')
 
 pics_train_dataset, strength_train_dataset = generate_dataset_from_strength(pics_train_dataset, strength_train_dataset,
                                                                             strengths)
@@ -83,7 +83,7 @@ for i in range(n_forwards):
     predicted_samples.append(forward)
 
 rand_sample_prime = torch.mean(torch.stack(predicted_samples), dim=0)
-rand_sample_prime = torch.pow(rand_sample_prime, power)
+# rand_sample_prime = torch.pow(rand_sample_prime, power)
 
 if transform:
 
