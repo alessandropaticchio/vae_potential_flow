@@ -28,10 +28,10 @@ pics_test_dataset, strength_test_dataset = generate_dataset_from_strength(pics_t
 
 
 # TODO REMOVE THIS
-pics_train_dataset = pics_train_dataset[:1000, :, :, :].unsqueeze(0)
-pics_test_dataset = pics_test_dataset[:1000, :, :, :].unsqueeze(0)
-strength_train_dataset = strength_train_dataset[:1000].unsqueeze(0)
-strength_test_dataset = strength_test_dataset[:1000].unsqueeze(0)
+pics_train_dataset = pics_train_dataset[:1000, :, :, :].squeeze(0)
+pics_test_dataset = pics_test_dataset[:1000, :, :, :].squeeze(0)
+strength_train_dataset = strength_train_dataset[:1000].squeeze(0)
+strength_test_dataset = strength_test_dataset[:1000].squeeze (0)
 
 train_dataset = StrengthDataset(x=pics_train_dataset, d=strength_train_dataset)
 test_dataset = StrengthDataset(x=pics_test_dataset, d=strength_test_dataset)
