@@ -153,7 +153,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
                 return
 
         # backup save
-        if epoch % 50 == 0 and epoch != 0:
+        if epoch % 1 == 0 and epoch != 0:
             torch.save(best.state_dict(), MODELS_ROOT + dataset + '_VAE_' + str(desc) + '_' + now + '.pt')
 
             # Adding embedding to tensorboard
@@ -164,6 +164,8 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
                 idx = random.randint(0, len(embedding_dataset) - 1)
                 pic_sample = embedding_dataset[idx][0].unsqueeze(0).float()
                 strength_sample = embedding_dataset[idx][1].unsqueeze(0)
+                pic_sample = pic_sample.to(device)
+                strength_sample = strength_sample.to(device)
                 mean, log_var = net.encode(pic_sample, strength_sample)
                 sample_encoded = torch.cat((mean, log_var), 0).flatten()
 
