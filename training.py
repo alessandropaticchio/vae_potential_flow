@@ -153,7 +153,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
                 return
 
         # backup save
-        if epoch % 1 == 0 and epoch != 0:
+        if epoch % 20 == 0 and epoch != 0:
             torch.save(best.state_dict(), MODELS_ROOT + dataset + '_VAE_' + str(desc) + '_' + now + '.pt')
 
             # Adding embedding to tensorboard
