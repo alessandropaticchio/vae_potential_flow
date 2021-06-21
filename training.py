@@ -8,6 +8,7 @@ import torch.nn.functional as F
 import torch.nn as nn
 import numpy as np
 import copy
+import random
 
 
 def train_ae(net, train_loader, test_loader, epochs, optimizer):
@@ -65,7 +66,7 @@ def test_ae(net, test_loader):
 
 def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., early_stopping=True,
               early_stopping_limit=15, dataset='MNIST', gmm=1,
-              nn_type='conv', is_L1=False, power=0, desc='', reg_weight=0, kl_annealing=False):
+              nn_type='conv', is_L1=False, power=0, desc='', reg_weight=0, kl_annealing=False, embedding_samples=300):
     now = str(datetime.now()).replace(':', '_')
     writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + str(desc) + '_' + now))
     net = net.to(device)
@@ -154,6 +155,26 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
         # backup save
         if epoch % 50 == 0 and epoch != 0:
             torch.save(best.state_dict(), MODELS_ROOT + dataset + '_VAE_' + str(desc) + '_' + now + '.pt')
+
+            # Adding embedding to tensorboard
+            embedding_dataset = train_loader.dataset
+            encodings = []
+            encoded_strenghts = []
+            for i in range(embedding_samples):
+                idx = random.randint(0, len(embedding_dataset) - 1)
+                pic_sample = embedding_dataset[idx][0].unsqueeze(0).float()
+                strength_sample = embedding_dataset[idx][1].unsqueeze(0)
+                mean, log_var = net.encode(pic_sample, strength_sample)
+                sample_encoded = torch.cat((mean, log_var), 0).flatten()
+
+                sample_encoded = sample_encoded.tolist()
+
+                encodings.append(sample_encoded)
+                encoded_strenghts.append(str(round(float(embedding_dataset[idx][1][0]), 2)))
+
+            tag = 'Latent space'
+            encodings = np.array(encodings)
+            writer.add_embedding(mat=encodings, metadata=encoded_strenghts, tag=tag)
 
     # Save the model at current date and time
     torch.save(best.state_dict(), MODELS_ROOT + dataset + '_VAE_' + str(desc) + '_' + now + '.pt')

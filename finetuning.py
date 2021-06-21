@@ -8,10 +8,10 @@ net_size = 1
 batch_size = 32
 strengths = STRENGTHS
 power = 4
-epochs = 200
+epochs = 30
 gmm = len(STRENGTHS)
-kl_annealing = True
-skip_connections = True
+kl_annealing = False
+skip_connections = False
 
 potential_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_potential.pt')
 potential_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_potential.pt')
@@ -69,7 +69,7 @@ emd = PotentialMapperRaysNN(potential_image_channels=potential_image_channels,
 #  Load VAEs
 potential_model_name = 'potential_VAE_[0.01, 0.1, 0.2, 0.05, 0.07, 0.03, 0.3]_2021-05-20 15_58_12.695847.pt'
 rays_model_name = 'rays_VAE_[0.01, 0.03, 0.05, 0.1, 0.2, 0.07, 0.3]_2021-05-20 17_27_24.438039.pt'
-mapper_model_name = 'Mapper_2021-05-23 08_14_48.519351.pt'
+mapper_model_name = 'Mapper_2021-06-02 08_08_49.940747.pt'
 potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
 mapper_model_path = MODELS_ROOT + mapper_model_name
@@ -115,11 +115,14 @@ emd.load_state_dict(emd_dict)
 #     if param[0] in encoder_keys or param[0] in decoder_keys:
 #         param[1].requires_grad = False
 
-lr = 1e-4
+lr = 1e-6
 optimizer = optim.Adam(emd.parameters(), lr=lr)
 
 recon_weight = 1.
 kl_weight = 4.
+
+torch.save(emd.state_dict(), MODELS_ROOT + 'EMD_' + 'prova' + '.pt')
+exit()
 
 train_unet_vae(net=emd, train_loader=train_loader, test_loader=test_loader, epochs=epochs, optimizer=optimizer, gmm=gmm,
                recon_weight=recon_weight, kl_weight=kl_weight, kl_annealing=kl_annealing, dataset='EMD', nn_type='conv',
