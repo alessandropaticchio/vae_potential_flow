@@ -8,19 +8,19 @@ net_size = 1
 batch_size = 32
 strengths = STRENGTHS
 power = 4
-epochs = 30
+epochs = 200
 gmm = len(STRENGTHS)
 kl_annealing = False
-skip_connections = False
+skip_connections = True
 
-potential_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_potential.pt')
-potential_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_potential.pt')
+potential_train_dataset_full = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'training_potential.pt')
+potential_test_dataset_full = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'test_potential.pt')
 
-rays_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_rays.pt')
-rays_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_rays.pt')
+rays_train_dataset_full = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'training_rays.pt')
+rays_test_dataset_full = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'test_rays.pt')
 
-strength_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_strength.pt')
-strength_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_strength.pt')
+strength_train_dataset_full = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'training_strength.pt')
+strength_test_dataset_full = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'test_strength.pt')
 
 potential_train_dataset, strength_train_dataset = generate_dataset_from_strength(potential_train_dataset_full,
                                                                                  strength_train_dataset_full,
@@ -67,8 +67,8 @@ emd = PotentialMapperRaysNN(potential_image_channels=potential_image_channels,
                             skip_connections=skip_connections)
 
 #  Load VAEs
-potential_model_name = 'potential_VAE_[0.01, 0.1, 0.2, 0.05, 0.07, 0.03, 0.3]_2021-05-20 15_58_12.695847.pt'
-rays_model_name = 'rays_VAE_[0.01, 0.03, 0.05, 0.1, 0.2, 0.07, 0.3]_2021-05-20 17_27_24.438039.pt'
+potential_model_name = 'potential_VAE_[0.01, 0.03, 0.05, 0.07, 0.1, 0.2, 0.3]_2021-06-21 12_44_44.098435.pt'
+rays_model_name = 'rays_VAE_[0.01, 0.03, 0.05, 0.07, 0.1, 0.2, 0.3]_2021-06-21 15_34_25.145588.pt'
 mapper_model_name = 'Mapper_2021-06-02 08_08_49.940747.pt'
 potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
@@ -97,7 +97,10 @@ encoder_keys = ['conv1.weight', 'conv1.bias',
 encoder_model_dict = {k: v for k, v in potential_vae_dict.items() if k in encoder_keys}
 
 mapper_dict = mapper.state_dict()
-mapper_keys = ['layers.0.weight', 'layers.0.bias']
+mapper_keys = []
+for i in range(len(h_sizes) - 1):
+    mapper_keys.append("layers." + str(i) + ".weight")
+    mapper_keys.append("layers." + str(i) + ".bias")
 mapper_model_dict = {k: v for k, v in mapper_dict.items() if k in mapper_keys}
 
 rays_vae_dict = rays_vae.state_dict()
@@ -120,9 +123,6 @@ optimizer = optim.Adam(emd.parameters(), lr=lr)
 
 recon_weight = 1.
 kl_weight = 4.
-
-torch.save(emd.state_dict(), MODELS_ROOT + 'EMD_' + 'prova' + '.pt')
-exit()
 
 train_unet_vae(net=emd, train_loader=train_loader, test_loader=test_loader, epochs=epochs, optimizer=optimizer, gmm=gmm,
                recon_weight=recon_weight, kl_weight=kl_weight, kl_annealing=kl_annealing, dataset='EMD', nn_type='conv',
