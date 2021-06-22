@@ -23,14 +23,14 @@ rays_ae = ConvVAE(image_dim=RAYS_IMAGE_SIZE, hidden_size=RAYS_HIDDEN_SIZE, laten
 rays_ae.load_state_dict(torch.load(rays_model_path, map_location=torch.device('cpu')))
 rays_ae.eval()
 
-potential_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_potential.pt')
-potential_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_potential.pt')
+potential_train_dataset_full = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'training_potential.pt')
+potential_test_dataset_full = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'test_potential.pt')
 
-rays_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_rays.pt')
-rays_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_rays.pt')
+rays_train_dataset_full = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'training_rays.pt')
+rays_test_dataset_full = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'test_rays.pt')
 
-strength_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_strength.pt')
-strength_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_strength.pt')
+strength_train_dataset_full = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'training_strength.pt')
+strength_test_dataset_full = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'test_strength.pt')
 
 potential_train_dataset, strength_train_dataset = generate_dataset_from_strength(potential_train_dataset_full,
                                                                                  strength_train_dataset_full,
@@ -83,5 +83,5 @@ encoded_test_set_y = encoded_test_set_y[1:]
 encoded_train_set = MappingDataset(x=encoded_train_set_X, y=encoded_train_set_y, d=strength_train_dataset)
 encoded_test_set = MappingDataset(x=encoded_test_set_X, y=encoded_test_set_y, d=strength_test_dataset)
 
-torch.save(encoded_train_set, DATA_ROOT + 'num=999_unzipped/mapped/training.pt')
-torch.save(encoded_test_set, DATA_ROOT + 'num=999_unzipped/mapped/test.pt')
+torch.save(encoded_train_set, DATA_ROOT + 'RP_images/mapped/training.pt')
+torch.save(encoded_test_set, DATA_ROOT + 'RP_images/mapped/test.pt')
