@@ -3,10 +3,12 @@ from utils import StrengthDataset, generate_dataset_from_strength
 from constants import *
 import random
 import matplotlib.pyplot as plt
+from torchvision import transforms
+import matplotlib.patches as mpatches
 
-potential_model_name = 'potential_VAE_[0.01, 0.1, 0.2, 0.05, 0.07, 0.03, 0.3]_2021-05-20 15_58_12.695847.pt'
-rays_model_name = 'rays_VAE_[0.01, 0.03, 0.05, 0.1, 0.2, 0.07, 0.3]_2021-05-20 17_27_24.438039.pt'
-mapper_model_name = 'Mapper_2021-05-26 08_13_18.726053.pt'
+potential_model_name = 'potential_VAE_[0.01, 0.03, 0.05, 0.07, 0.1, 0.2, 0.3]_2021-06-21 12_44_44.098435.pt'
+rays_model_name = 'rays_VAE_[0.01, 0.03, 0.05, 0.07, 0.1, 0.2, 0.3]_2021-06-21 15_34_25.145588.pt'
+mapper_model_name = 'Mapper_2021-06-22 08_42_00.775777.pt'
 potential_model_path = MODELS_ROOT + potential_model_name
 rays_model_path = MODELS_ROOT + rays_model_name
 mapper_model_path = MODELS_ROOT + mapper_model_name
@@ -17,14 +19,14 @@ n_forwards = 10
 
 power = 4
 
-potential_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_potential.pt')
-potential_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_potential.pt')
+potential_train_dataset_full = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'training_potential.pt')
+potential_test_dataset_full = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'test_potential.pt')
 
-rays_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_rays.pt')
-rays_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_rays.pt')
+rays_train_dataset_full = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'training_rays.pt')
+rays_test_dataset_full = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'test_rays.pt')
 
-strength_train_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_strength.pt')
-strength_test_dataset_full = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'test_strength.pt')
+strength_train_dataset_full = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'training_strength.pt')
+strength_test_dataset_full = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'test_strength.pt')
 
 potential_train_dataset, strength_train_dataset = generate_dataset_from_strength(potential_train_dataset_full,
                                                                                  strength_train_dataset_full,
@@ -113,5 +115,36 @@ plt.imshow(rays_sample_mapped.squeeze(0).permute(1, 2, 0).detach().numpy())
 plt.subplot(1, 4, 4)
 plt.title('VAE-Reconstructed Rays')
 plt.imshow(rays_sample_reconstructed.squeeze(0).permute(1, 2, 0).detach().numpy())
+
+# scintillation index
+plt.figure()
+
+
+rays_sample_mapped = transforms.Compose([
+    transforms.Grayscale(num_output_channels=1)
+])(rays_sample_mapped.squeeze(0))
+
+rand_sample = rays_dataset[rand_sample_idx]
+
+rand_sample = transforms.Compose([
+    transforms.Grayscale(num_output_channels=1)
+])(rand_sample.squeeze(0))
+
+I_mean = torch.mean(rays_sample_mapped, dim=1)
+I_var = torch.var(rays_sample_mapped, dim=1)
+
+I_mean_real = torch.mean(rand_sample, dim=1)
+I_var_real = torch.var(rand_sample, dim=1)
+
+s = (I_var / I_mean) - 1
+s_real = (I_var_real / I_mean_real) - 1
+
+plt.title('Scintillation Index')
+plt.plot(s.squeeze().detach().numpy(), label="reconstructed")
+plt.plot(s_real.squeeze().detach().numpy(), label='original')
+
+blue_patch = mpatches.Patch(color='blue', label='Reconstructed')
+orange_patch = mpatches.Patch(color='orange', label='Original')
+plt.legend(handles=[blue_patch, orange_patch])
 
 plt.show()
