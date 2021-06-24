@@ -3,6 +3,7 @@ from datetime import datetime
 from torch.nn import MSELoss
 from torch.utils.tensorboard import SummaryWriter
 from utils import frange_cycle_linear, frange_cycle_sigmoid
+from torchvision import transforms
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
@@ -177,6 +178,24 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
             tag = 'Latent space'
             encodings = np.array(encodings)
             writer.add_embedding(mat=encodings, metadata=encoded_strenghts, tag=tag)
+
+            # Plot image
+            pic_sample_prime = net(pic_sample)
+
+            pic_sample = transforms.Compose([
+                transforms.ToPILImage(),
+                transforms.Grayscale(num_output_channels=1),
+                transforms.ToTensor(),
+            ])(pic_sample.squeeze(0))
+
+            pic_sample_prime = transforms.Compose([
+                transforms.ToPILImage(),
+                transforms.Grayscale(num_output_channels=1),
+                transforms.ToTensor(),
+            ])(pic_sample_prime.squeeze(0))
+
+            writer.add_image('Sample image', pic_sample)
+            writer.add_image('Sample image reconstructed', pic_sample_prime)
 
     # Save the model at current date and time
     torch.save(best.state_dict(), MODELS_ROOT + dataset + '_VAE_' + str(desc) + '_' + now + '.pt')
