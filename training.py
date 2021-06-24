@@ -180,7 +180,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
             writer.add_embedding(mat=encodings, metadata=encoded_strenghts, tag=tag)
 
             # Plot image
-            pic_sample_prime = net(pic_sample, strength_sample)
+            pic_sample_prime, _, _ = net(pic_sample, strength_sample)
 
             pic_sample = transforms.Compose([
                 transforms.ToPILImage(),
