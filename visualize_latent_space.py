@@ -7,10 +7,9 @@ import torch
 import random
 
 batch_size = 1
-strengths = STRENGTHS
-
-dataset = 'rays'
-model_name = 'rays_VAE_[0.01, 0.1, 0.2, 0.05, 0.07, 0.09, 0.03, 0.3]_2021-05-20 17_33_43.337801.pt'
+strengths = [0.01, 0.03, 0.05, 0.07, 0.1, 0.2, 0.3]
+dataset = 'potential'
+model_name = 'potential_VAE_[0.01, 0.03, 0.05, 0.07, 0.1, 0.2, 0.3]_2021-06-24 15_34_11.213966.pt'
 mapper_model_name = 'Mapper_2021-05-02 06_23_12.374117.pt'
 net_size = 1
 conditional = False
@@ -19,8 +18,8 @@ mapping = False
 model_path = MODELS_ROOT + model_name
 mapper_model_path = MODELS_ROOT + mapper_model_name
 
-pics_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_' + dataset + '.pt')
-strength_train_dataset = torch.load(DATA_ROOT + 'num=999_unzipped/loaded_data/' + 'training_strength.pt')
+pics_train_dataset = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'training_' + dataset + '.pt')
+strength_train_dataset = torch.load(DATA_ROOT + 'RP_images/loaded_data/' + 'training_strength.pt')
 pics_train_dataset, strength_train_dataset = generate_dataset_from_strength(pics_train_dataset, strength_train_dataset,
                                                                             strengths)
 
