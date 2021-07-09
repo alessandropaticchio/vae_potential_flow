@@ -8,16 +8,16 @@ class ConvVAE(nn.Module):
         super(ConvVAE, self).__init__()
         self.image_channels = image_channels
         self.image_dim = image_dim
-        self.hidden_size = hidden_size * net_size
+        self.hidden_size = int(hidden_size * net_size)
         self.latent_size = latent_size
         self.net_size = net_size
         self.conditional = conditional
 
         # encode
-        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=32 * net_size, kernel_size=3)
+        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=int(32 * net_size), kernel_size=3)
         self.relu1 = nn.ReLU()
 
-        self.conv2 = nn.Conv2d(in_channels=32 * net_size, out_channels=16 * net_size, kernel_size=3)
+        self.conv2 = nn.Conv2d(in_channels=int(32 * net_size), out_channels=int(16 * net_size), kernel_size=3)
         self.relu2 = nn.ReLU()
 
         self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
@@ -37,10 +37,10 @@ class ConvVAE(nn.Module):
         # decode
         self.upsample1 = nn.Upsample(scale_factor=2)
 
-        self.deconv1 = nn.ConvTranspose2d(in_channels=16 * net_size, out_channels=32 * net_size, kernel_size=3)
+        self.deconv1 = nn.ConvTranspose2d(in_channels=int(16 * net_size), out_channels=int(32 * net_size), kernel_size=3)
         self.relu3 = nn.ReLU()
 
-        self.deconv2 = nn.ConvTranspose2d(in_channels=32 * net_size, out_channels=image_channels, kernel_size=3)
+        self.deconv2 = nn.ConvTranspose2d(in_channels=int(32 * net_size), out_channels=image_channels, kernel_size=3)
 
         self.output = nn.Sigmoid()
 
@@ -88,7 +88,7 @@ class ConvVAE(nn.Module):
         x = self.fc(z)
 
         # Unflattening
-        x = x.view(x.size(0), 16 * self.net_size, 48, 48)
+        x = x.view(x.size(0), int(16 * self.net_size), 48, 48)
 
         x = self.upsample1(x)
 
@@ -107,19 +107,19 @@ class ConvVAETest(nn.Module):
         super(ConvVAETest, self).__init__()
         self.image_channels = image_channels
         self.image_dim = image_dim
-        self.hidden_size = hidden_size * net_size
+        self.hidden_size = int(hidden_size * net_size)
         self.latent_size = latent_size
         self.net_size = net_size
         self.conditional = conditional
 
         # encode
-        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=32 * net_size, kernel_size=1)
+        self.conv1 = nn.Conv2d(in_channels=image_channels, out_channels=int(32 * net_size), kernel_size=3)
         self.relu1 = nn.ReLU()
 
-        self.conv2 = nn.Conv2d(in_channels=32 * net_size, out_channels=16 * net_size, kernel_size=3)
+        self.conv2 = nn.Conv2d(in_channels=int(32 * net_size), out_channels=int(16 * net_size), kernel_size=3)
         self.relu2 = nn.ReLU()
 
-        self.conv3 = nn.Conv2d(in_channels=16 * net_size, out_channels=8 * net_size, kernel_size=3)
+        self.conv3 = nn.Conv2d(in_channels=int(16 * net_size), out_channels=int(8 * net_size), kernel_size=3)
         self.relu3 = nn.ReLU()
 
         self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
@@ -139,13 +139,13 @@ class ConvVAETest(nn.Module):
         # decode
         self.upsample1 = nn.Upsample(scale_factor=2)
 
-        self.deconv1 = nn.ConvTranspose2d(in_channels=8 * net_size, out_channels=16 * net_size, kernel_size=1)
+        self.deconv1 = nn.ConvTranspose2d(in_channels=int(8 * net_size), out_channels=int(16 * net_size), kernel_size=3)
         self.relu5 = nn.ReLU()
 
-        self.deconv2 = nn.ConvTranspose2d(in_channels=16 * net_size, out_channels=32 * net_size, kernel_size=3)
+        self.deconv2 = nn.ConvTranspose2d(in_channels=int(16 * net_size), out_channels=int(32 * net_size), kernel_size=3)
         self.relu6 = nn.ReLU()
 
-        self.deconv3 = nn.ConvTranspose2d(in_channels=32 * net_size, out_channels=image_channels, kernel_size=3)
+        self.deconv3 = nn.ConvTranspose2d(in_channels=int(32 * net_size), out_channels=image_channels, kernel_size=3)
         self.relu7 = nn.ReLU()
 
         self.output = nn.Sigmoid()
@@ -197,7 +197,7 @@ class ConvVAETest(nn.Module):
         x = self.fc(z)
 
         # Unflattening
-        x = x.view(x.size(0), 8 * self.net_size, 48, 48)
+        x = x.view(x.size(0), int(8 * self.net_size), 47, 47)
 
         x = self.upsample1(x)
 
@@ -312,7 +312,7 @@ class PotentialMapperRaysNN(nn.Module):
         x = self.fc(z)
 
         # Unflattening
-        x = x.view(x.size(0), 16 * self.net_size, 48, 48)
+        x = x.view(x.size(0), int(16 * self.net_size), 48, 48)
 
         x = self.upsample1(x)
 
