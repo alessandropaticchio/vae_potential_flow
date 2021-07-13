@@ -247,10 +247,10 @@ class PotentialMapperRaysNN(nn.Module):
         self.skip_connections = skip_connections
 
         # encode
-        self.conv1 = nn.Conv2d(in_channels=potential_image_channels, out_channels=32 * net_size, kernel_size=3)
+        self.conv1 = nn.Conv2d(in_channels=potential_image_channels, out_channels=int(32 * net_size), kernel_size=3)
         self.relu1 = nn.ReLU()
 
-        self.conv2 = nn.Conv2d(in_channels=32 * net_size, out_channels=16 * net_size, kernel_size=3)
+        self.conv2 = nn.Conv2d(in_channels=int(32 * net_size), out_channels=int(16 * net_size), kernel_size=3)
         self.relu2 = nn.ReLU()
 
         self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
@@ -268,10 +268,10 @@ class PotentialMapperRaysNN(nn.Module):
         # decode
         self.upsample1 = nn.Upsample(scale_factor=2)
 
-        self.deconv1 = nn.ConvTranspose2d(in_channels=16 * net_size, out_channels=32 * net_size, kernel_size=3)
+        self.deconv1 = nn.ConvTranspose2d(in_channels=int(16 * net_size), out_channels=int(32 * net_size), kernel_size=3)
         self.relu3 = nn.ReLU()
 
-        self.deconv2 = nn.ConvTranspose2d(in_channels=32 * net_size, out_channels=rays_image_channels, kernel_size=3)
+        self.deconv2 = nn.ConvTranspose2d(in_channels=int(32 * net_size), out_channels=rays_image_channels, kernel_size=3)
 
         self.output = nn.Sigmoid()
 
