@@ -67,7 +67,8 @@ def test_ae(net, test_loader):
 
 def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., early_stopping=True,
               early_stopping_limit=15, dataset='MNIST', gmm=1,
-              nn_type='conv', is_L1=False, power=0, desc='', reg_weight=0, kl_annealing=False, embedding_samples=300):
+              nn_type='conv', is_L1=False, power=0, desc='', reg_weight=0, kl_annealing=False, embedding_samples=300,
+              kl_mode=None):
     now = str(datetime.now()).replace(':', '_')
     writer = SummaryWriter('runs/{}'.format(dataset + '_VAE_' + str(desc) + '_' + now))
     net = net.to(device)
@@ -103,7 +104,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
                                                                                              reg_weight=reg_weight,
                                                                                              power=power,
                                                                                              nn_type=nn_type,
-                                                                                             gmm=gmm)
+                                                                                             gmm=gmm, kl_mode=kl_mode)
             # Adding code for L1 Regularisation
             if is_L1:
 
@@ -126,7 +127,8 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
         print('Epoch: {} Average loss: {:.8f}'.format(epoch, train_loss / len(train_loader.dataset)))
 
         test_loss, test_recon_loss, test_kld_loss, test_reg_loss = test_vae(net, test_loader, recon_weight, kl_weight,
-                                                                            nn_type, reg_weight, power=power, gmm=gmm)
+                                                                            nn_type, reg_weight, power=power, gmm=gmm,
+                                                                            kl_mode=kl_mode)
         net.train()
 
         early_stopping_losses.append(test_loss)
@@ -201,7 +203,7 @@ def train_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1.
     torch.save(best.state_dict(), MODELS_ROOT + dataset + '_VAE_' + str(desc) + '_' + now + '.pt')
 
 
-def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight, gmm, power=0):
+def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight, gmm, power=0, kl_mode=None):
     net.eval()
     net = net.to(device)
     test_loss = 0.
@@ -225,7 +227,8 @@ def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight, gmm
                                                                                                   nn_type=nn_type,
                                                                                                   reg_weight=reg_weight,
                                                                                                   power=power,
-                                                                                                  gmm=gmm)
+                                                                                                  gmm=gmm,
+                                                                                                  kl_mode=kl_mode)
             test_loss += batch_test_loss.item()
             recon_loss += batch_recon_loss.item()
             kld_loss += batch_kld_loss.item()
@@ -237,7 +240,8 @@ def test_vae(net, test_loader, recon_weight, kl_weight, nn_type, reg_weight, gmm
 
 
 # return reconstruction error + KL divergence losses
-def loss_function_vae(recon_x, x, strength, mu, log_var, recon_weight, kl_weight, nn_type, gmm, reg_weight=0, power=0):
+def loss_function_vae(recon_x, x, strength, mu, log_var, recon_weight, kl_weight, nn_type, gmm, reg_weight=0, power=0,
+                      kl_mode=None):
     if nn_type == 'conv':
         if power > 1:
             recon_x = torch.pow(recon_x, power)
@@ -248,7 +252,7 @@ def loss_function_vae(recon_x, x, strength, mu, log_var, recon_weight, kl_weight
     if gmm == 1:
         KLD = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp()) * kl_weight
     else:
-        KLD = kld_gmm(mu, log_var, strength)
+        KLD = kld_gmm(mu, log_var, strength, mode=kl_mode)
         KLD = KLD * kl_weight
     reg_latent_space = reg_weight * F.mse_loss(strength, torch.norm(mu, dim=1).unsqueeze(1), reduction='sum')
 
@@ -261,13 +265,18 @@ def loss_function_vae(recon_x, x, strength, mu, log_var, recon_weight, kl_weight
     return recon_loss + KLD + reg_latent_space, recon_loss, KLD, reg_latent_space
 
 
-def kld_gmm(mu, log_var, strength):
+def kld_gmm(mu, log_var, strength, mode=None):
     latent_size = mu.shape[1]
 
     # Generating prior mu of gaussians, standard deviation is fixed at 1
-    prior_mu = strength.repeat(1, latent_size)
+    if mode is None:
+        prior_mu = strength.repeat(1, latent_size)
+    elif mode == 'log':
+        log_strength = torch.log(strength)
+        prior_mu = log_strength.repeat(1, latent_size)
 
     kld = -1 - log_var + (mu - prior_mu) ** 2 + log_var.exp()
+    # kld = -D - log_var + (mu - prior_mu) ** 2 + log_var.exp()
 
     kld = 0.5 * kld.sum()
 
@@ -276,7 +285,7 @@ def kld_gmm(mu, log_var, strength):
 
 def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weight=1., kl_weight=1., reg_weight=0,
                    dataset='MNIST', gmm=1, early_stopping=True, early_stopping_limit=15, kl_annealing=False,
-                   power=0, nn_type='conv', desc=''):
+                   power=0, nn_type='conv', desc='', kl_mode=None):
     now = str(datetime.now()).replace(':', '_')
     writer = SummaryWriter('runs/{}'.format(dataset + desc + '_' + now))
     net = net.to(device)
@@ -314,7 +323,7 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
                                                                                              nn_type=nn_type,
                                                                                              reg_weight=reg_weight,
                                                                                              power=power,
-                                                                                             gmm=gmm)
+                                                                                             gmm=gmm, kl_mode=kl_mode)
 
             batch_loss.backward()
             train_loss += batch_loss.item()
@@ -328,7 +337,8 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
 
         test_loss, test_recon_loss, test_kld_loss = test_unet_vae(net=net, test_loader=test_loader,
                                                                   recon_weight=recon_weight, kl_weight=kl_weight,
-                                                                  nn_type=nn_type, power=power, gmm=gmm)
+                                                                  nn_type=nn_type, power=power, gmm=gmm,
+                                                                  kl_mode=kl_mode)
         net.train()
         early_stopping_losses.append(test_loss)
 
@@ -357,7 +367,7 @@ def train_unet_vae(net, train_loader, test_loader, epochs, optimizer, recon_weig
     torch.save(best.state_dict(), MODELS_ROOT + 'EMD_' + now + '.pt')
 
 
-def test_unet_vae(net, test_loader, recon_weight, kl_weight, nn_type, gmm=1, reg_weight=0, power=0):
+def test_unet_vae(net, test_loader, recon_weight, kl_weight, nn_type, gmm=1, reg_weight=0, power=0, kl_mode=None):
     net.eval()
     net = net.to(device)
     test_loss = 0.
@@ -382,7 +392,8 @@ def test_unet_vae(net, test_loader, recon_weight, kl_weight, nn_type, gmm=1, reg
                                                                                                   nn_type=nn_type,
                                                                                                   reg_weight=reg_weight,
                                                                                                   power=power,
-                                                                                                  gmm=gmm)
+                                                                                                  gmm=gmm,
+                                                                                                  kl_mode=kl_mode)
             test_loss += batch_test_loss.item()
             recon_loss += batch_recon_loss.item()
             kld_loss += batch_kld_loss.item()
