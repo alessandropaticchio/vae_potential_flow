@@ -291,6 +291,9 @@ def kld_gmm(mu, log_var, strength, mode=None):
         prior_mu = torch.zeros(size=mu.shape)
         all_strengths = torch.unique(strength).sort()[0]
 
+        prior_mu.to(device)
+        all_strengths.to(device)
+
         for i, t in enumerate(prior_mu):
             for j, s in enumerate(all_strengths):
                 if s == strength[i]:
