@@ -268,15 +268,35 @@ def loss_function_vae(recon_x, x, strength, mu, log_var, recon_weight, kl_weight
 def kld_gmm(mu, log_var, strength, mode=None):
     latent_size = mu.shape[1]
 
-    # Generating prior mu of gaussians, standard deviation is fixed at 1
     if mode is None:
+        # Generating prior mu of gaussians, standard deviation is fixed at 1
         prior_mu = strength.repeat(1, latent_size)
+        kld = -1 - log_var + (mu - prior_mu) ** 2 + log_var.exp()
     elif mode == 'log':
         log_strength = torch.log(strength)
         prior_mu = log_strength.repeat(1, latent_size)
+        kld = -1 - log_var + (mu - prior_mu) ** 2 + log_var.exp()
+    elif mode == 'reciprocal':
+        reciprocal_strength = strength ** -1
+        prior_mu = reciprocal_strength.repeat(1, latent_size)
+        kld = -1 - log_var + (mu - prior_mu) ** 2 + log_var.exp()
+    elif mode == 'variances':
+        prior_variance = strength.repeat(1, latent_size)
+        inverse_prior_variance = 1 / prior_variance
+        log_sigma_strength = torch.log(strength).repeat(1, latent_size)
+        kld = log_sigma_strength - log_var + inverse_prior_variance * log_var.exp() + inverse_prior_variance * (
+                mu ** 2) - latent_size
+    elif mode == 'lambda_hot_encoding':
+        lam = 5.
+        prior_mu = torch.zeros(size=mu.shape)
+        all_strengths = torch.unique(strength).sort()[0]
 
-    kld = -1 - log_var + (mu - prior_mu) ** 2 + log_var.exp()
-    # kld = -D - log_var + (mu - prior_mu) ** 2 + log_var.exp()
+        for i, t in enumerate(prior_mu):
+            for j, s in enumerate(all_strengths):
+                if s == strength[i]:
+                    t[j] = lam
+
+        kld = -1 - log_var + (mu - prior_mu) ** 2 + log_var.exp()
 
     kld = 0.5 * kld.sum()
 
